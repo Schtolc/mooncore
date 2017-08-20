@@ -16,7 +16,7 @@ type Product struct {
 
 
 func ConnectDB() ( db *gorm.DB) {
-	db, err := gorm.Open("mysql", "patrik:qweqwe@/qwa")
+	db, err := gorm.Open("mysql", "root@/qwa")
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
