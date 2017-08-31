@@ -32,17 +32,4 @@ func PingDb (db *gorm.DB) echo.HandlerFunc {
 		})
 	}
 }
-func SaveUser (db *gorm.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		u := &models.User{
-			Name: c.FormValue("name"),
-			Age:  c.FormValue("age"),
-		}
-		db.Create(u)
-		return c.JSON(http.StatusOK, &Resp{
-			Code:    "200",
-			Message: u.Id,
-		})
-	}
-}
 

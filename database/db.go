@@ -1,10 +1,9 @@
-package db
-
-
+package database
 
 import(
 	 _ "github.com/go-sql-driver/mysql"
 	"mooncore/models"
+	"mooncore/cfg"
 	"github.com/jinzhu/gorm"
 	"log"
 )
@@ -13,7 +12,7 @@ import(
 func InitDB() (db *gorm.DB) {
 	config := cfg.GetBdConfig("db.conf")
 
-	db, err := gorm.Open(config.Dialect, cconfig.User + "@/" + config.Dbname)
+	db, err := gorm.Open(config.Dialect, config.User + "@/" + config.Dbname)
 	check_error(err)
 
 	err = db.DB().Ping()
@@ -21,21 +20,11 @@ func InitDB() (db *gorm.DB) {
 
 	db.DB().SetMaxOpenConns(10)
 	db.AutoMigrate(
-		&models.User{},
 		&models.Metric{},
 	)
 	return db
 }
 
-//
-//func create_db(name string) {
-//	db, err := gorm.Open("mysql", "root@/")
-//	check_error(err)
-//
-//	defer db.Close()
-//
-//	db.Exec("CREATE DATABASE IF NOT EXISTS " + name)
-//}
 
 func check_error(err error){
 	if err != nil {

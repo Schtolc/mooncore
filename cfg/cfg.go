@@ -4,6 +4,7 @@ import (
 	"log"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 )
 
 type AppConfig struct {
@@ -24,7 +25,9 @@ type BDConfig struct {
 }
 
 func getPath(file_name string) string {
-	return "/Users/v.suslova/src/mooncore/" + file_name
+	dir, err := os.Getwd()
+	check_err(err)
+	return dir + "/" + file_name
 }
 
 func GetAppConfig(config_name string) AppConfig {

@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"mooncore/cfg"
+	"mooncore/database"
 	"mooncore/handlers"
 	"mooncore/logger"
 )
@@ -21,7 +22,6 @@ func main() {
 
 	e.GET("/ping", handlers.Ping)
 	e.GET("/ping_db", handlers.PingDb(db))
-	e.POST("/create_user", handlers.SaveUser(db))
 
 	e.Logger.Fatal(e.Start(conf.Hostbase.Host + ":" + conf.Hostbase.Port))
 }
