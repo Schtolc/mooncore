@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type AppConfig struct {
+type Config struct {
 	Server struct {
 		Hostbase struct {
 			Port string `yaml:"port"`
@@ -25,11 +25,11 @@ type AppConfig struct {
 	}
 }
 
-func Get() AppConfig {
+func Get() Config {
 	content, err := ioutil.ReadFile("config.yaml")
 	check_err(err)
 
-	conf := AppConfig{}
+	conf := Config{}
 	err = yaml.Unmarshal([]byte(content), &conf)
 	check_err(err)
 
