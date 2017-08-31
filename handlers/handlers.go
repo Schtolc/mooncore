@@ -3,6 +3,8 @@ package handlers
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
+	"io/ioutil"
+	"log"
 	"mooncore/models"
 	"net/http"
 )
@@ -12,10 +14,12 @@ type Resp struct {
 	Message string `json:"message"`
 }
 
-func Ping(c echo.Context) error {
+func EchoPing(c echo.Context) error {
+	content, err := ioutil.ReadAll(c.Request().Body)
+	check_err(err)
 	return c.JSON(http.StatusOK, &Resp{
 		Code:    "200",
-		Message: "Hello, World!",
+		Message: string(content),
 	})
 }
 
@@ -30,5 +34,10 @@ func PingDb(db *gorm.DB) echo.HandlerFunc {
 			Code:    "200",
 			Message: m.Id,
 		})
+	}
+}
+func check_err(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }

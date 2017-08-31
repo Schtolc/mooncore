@@ -12,15 +12,15 @@ import (
 func main() {
 	e := echo.New()
 
-	conf := config.GetAppConfig("app.conf")
-	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Log.Access)))
+	conf := config.Get()
+	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Log.Access)))
 	e.Use(middleware.RequestID())
 
 	db := database.InitDB(conf)
 	defer db.Close()
 
-	e.GET("/ping", handlers.Ping)
+	e.POST("/ping", handlers.EchoPing)
 	e.GET("/ping_db", handlers.PingDb(db))
 
-	e.Logger.Fatal(e.Start(conf.Hostbase.Host + ":" + conf.Hostbase.Port))
+	e.Logger.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
 }
