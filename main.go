@@ -12,7 +12,7 @@ import (
 func main() {
 	e := echo.New()
 
-	conf := cfg.GetAppConfig("app.conf")
+	conf := config.GetAppConfig("app.conf")
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Log.Access)))
 	e.Use(middleware.RequestID())
 
