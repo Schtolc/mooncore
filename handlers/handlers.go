@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
-	"io/ioutil"
 	"log"
 	"mooncore/models"
 	"net/http"
@@ -14,14 +13,6 @@ type Resp struct {
 	Message string `json:"message"`
 }
 
-func EchoPing(c echo.Context) error {
-	content, err := ioutil.ReadAll(c.Request().Body)
-	check_err(err)
-	return c.JSON(http.StatusOK, &Resp{
-		Code:    "200",
-		Message: string(content),
-	})
-}
 func Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Resp{
 		Code:    "200",

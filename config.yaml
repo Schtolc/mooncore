@@ -9,4 +9,4 @@ database:
   password: "123"
   dbname: "moondb"
   dialect: "mysql"
-  max_open_connections: 10
+  max_open_conns: 10

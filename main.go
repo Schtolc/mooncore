@@ -19,7 +19,6 @@ func main() {
 	db := database.InitDB(conf)
 	defer db.Close()
 
-	e.POST("/echo", handlers.EchoPing)
 	e.GET("/ping", handlers.Ping)
 	e.GET("/ping_db", handlers.PingDb(db))
 

@@ -21,7 +21,7 @@ type Config struct {
 		Password     string `yaml:"password"`
 		Dbname       string `yaml:"dbname"`
 		Dialect      string `yaml:"dialect"`
-		MaxOpenConns int    `yaml:"max_open_connections"`
+		MaxOpenConns int    `yaml:"max_open_conns"`
 	}
 }
 
