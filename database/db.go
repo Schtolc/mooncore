@@ -9,7 +9,7 @@ import (
 )
 
 func InitDB(config cfg.AppConfig) (db *gorm.DB) {
-	db, err := gorm.Open(config.Dialect, config.User+"@/"+config.Dbname)
+	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	check_error(err)
 
 	err = db.DB().Ping()
