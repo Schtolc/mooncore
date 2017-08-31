@@ -26,7 +26,7 @@ type Config struct {
 }
 
 func Get() Config {
-	content, err := ioutil.ReadFile("config.yaml")
+	content, err := ioutil.ReadFile("config/config.yaml")
 	check_err(err)
 
 	conf := Config{}
