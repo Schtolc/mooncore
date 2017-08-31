@@ -13,11 +13,10 @@ func main() {
 	e := echo.New()
 
 	conf := cfg.GetAppConfig("app.conf")
-	e.Use(middleware.RequestID())
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Log.Access)))
+	e.Use(middleware.RequestID())
 
 	db := database.InitDB(conf)
-
 	defer db.Close()
 
 	e.GET("/ping", handlers.Ping)

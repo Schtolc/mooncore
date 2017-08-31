@@ -31,13 +31,13 @@ func getPath(file_name string) string {
 
 func GetAppConfig(config_name string) AppConfig {
 	conf_path := getPath(config_name)
-	conf := AppConfig{}
-
 	content, err := ioutil.ReadFile(conf_path)
 	check_err(err)
 
+	conf := AppConfig{}
 	err = yaml.Unmarshal([]byte(content), &conf)
 	check_err(err)
+
 	return conf
 }
 
