@@ -13,7 +13,7 @@ func Configure(filename string) middleware.LoggerConfig {
 	}
 	var config = middleware.LoggerConfig{
 		Skipper: middleware.DefaultSkipper,
-		Format:  "${host} ${method} ${uri} ${status}\n",
+		Format:  "${time} ${host} ${method} ${uri} ${status}\n",
 		Output:  logfile,
 	}
 	return config

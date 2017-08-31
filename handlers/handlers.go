@@ -22,6 +22,12 @@ func EchoPing(c echo.Context) error {
 		Message: string(content),
 	})
 }
+func Ping(c echo.Context) error {
+	return c.JSON(http.StatusOK, &Resp{
+		Code:    "200",
+		Message: "ECHO_PING",
+	})
+}
 
 func PingDb(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
