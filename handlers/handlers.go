@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/labstack/echo"
-	"net/http"
 	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo"
 	"mooncore/models"
+	"net/http"
 )
 
 type Resp struct {
@@ -12,14 +12,14 @@ type Resp struct {
 	Message string `json:"message"`
 }
 
-func Ping (c echo.Context) error {
+func Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Resp{
 		Code:    "200",
 		Message: "Hello, World!",
 	})
 }
 
-func PingDb (db *gorm.DB) echo.HandlerFunc {
+func PingDb(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		m := &models.Metric{
 			Path: c.Path(),
@@ -32,4 +32,3 @@ func PingDb (db *gorm.DB) echo.HandlerFunc {
 		})
 	}
 }
-

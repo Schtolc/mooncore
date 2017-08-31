@@ -1,18 +1,16 @@
 package models
 
 import (
-	"time"
-	"github.com/jinzhu/gorm"
 	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
+	"time"
 )
-
 
 type Metric struct {
 	Id   string
-	Path string 	`sql:"size:255;index"`
+	Path string `sql:"size:255;index"`
 	Time time.Time
 }
-
 
 func (m *Metric) BeforeCreate(scope *gorm.Scope) {
 	if m.Id == "" {
@@ -20,4 +18,3 @@ func (m *Metric) BeforeCreate(scope *gorm.Scope) {
 		scope.SetColumn("id", uuid)
 	}
 }
-

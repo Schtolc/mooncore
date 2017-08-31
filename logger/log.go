@@ -1,23 +1,20 @@
 package logger
 
-import(
+import (
 	"github.com/labstack/echo/middleware"
-	"os"
 	"log"
+	"os"
 )
 
-
 func Configure(filename string) middleware.LoggerConfig {
-	logfile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644 )
+	logfile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var config = middleware.LoggerConfig{
 		Skipper: middleware.DefaultSkipper,
-		Format: "${host} ${method} ${uri} ${status}\n",
+		Format:  "${host} ${method} ${uri} ${status}\n",
 		Output:  logfile,
 	}
 	return config
 }
-
-

@@ -16,7 +16,7 @@ func main() {
 	e.Use(middleware.RequestID())
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Log.Access)))
 
-	db := database.InitDB()
+	db := database.InitDB(conf)
 
 	defer db.Close()
 

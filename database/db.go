@@ -1,18 +1,15 @@
 package database
 
-import(
-	 _ "github.com/go-sql-driver/mysql"
-	"mooncore/models"
-	"mooncore/cfg"
+import (
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"log"
+	"mooncore/cfg"
+	"mooncore/models"
 )
 
-
-func InitDB() (db *gorm.DB) {
-	config := cfg.GetBdConfig("db.conf")
-
-	db, err := gorm.Open(config.Dialect, config.User + "@/" + config.Dbname)
+func InitDB(config cfg.AppConfig) (db *gorm.DB) {
+	db, err := gorm.Open(config.Dialect, config.User+"@/"+config.Dbname)
 	check_error(err)
 
 	err = db.DB().Ping()
@@ -25,8 +22,7 @@ func InitDB() (db *gorm.DB) {
 	return db
 }
 
-
-func check_error(err error){
+func check_error(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
