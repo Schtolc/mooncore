@@ -12,7 +12,7 @@ type AppConfig struct {
 			Port string `yaml:"port"`
 			Host string `yaml:"host"`
 		}
-		Log struct {
+		Logs struct {
 			Access string `yaml:"access"`
 		}
 	}
@@ -21,7 +21,7 @@ type AppConfig struct {
 		Password     string `yaml:"password"`
 		Dbname       string `yaml:"dbname"`
 		Dialect      string `yaml:"dialect"`
-		MaxOpenConns int    `yaml:"maxOpenConns"`
+		MaxOpenConns int    `yaml:"max_open_connections"`
 	}
 }
 

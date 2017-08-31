@@ -2,11 +2,11 @@ server:
   hostbase:
     port: "1323"
     host: "127.0.0.1"
-  log:
+  logs:
     access: "/var/log/mooncore/access_log"
 database:
   user: "root"
   password: "123"
   dbname: "moondb"
   dialect: "mysql"
-  maxOpenConns: 10
+  max_open_connections: 10

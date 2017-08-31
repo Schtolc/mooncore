@@ -13,7 +13,7 @@ func main() {
 	e := echo.New()
 
 	conf := config.Get()
-	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Log.Access)))
+	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Logs.Access)))
 	e.Use(middleware.RequestID())
 
 	db := database.InitDB(conf)
