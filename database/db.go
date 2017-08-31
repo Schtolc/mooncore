@@ -4,7 +4,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"log"
-	"mooncore/cfg"
+	"mooncore/config"
 	"mooncore/models"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"mooncore/cfg"
+	"mooncore/config"
 	"mooncore/database"
 	"mooncore/handlers"
 	"mooncore/logger"
