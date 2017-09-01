@@ -14,7 +14,6 @@ func main() {
 
 	conf := config.Get()
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Logs.Access)))
-	e.Use(middleware.RequestID())
 
 	db := database.Init(conf)
 	defer db.Close()

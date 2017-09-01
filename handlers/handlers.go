@@ -29,7 +29,7 @@ func PingDb(db *gorm.DB) echo.HandlerFunc {
 		db.Create(m)
 		return c.JSON(http.StatusOK, &Resp{
 			Code:    "200",
-			Message: m.Id,
+			Message: m.Path,
 		})
 	}
 }
