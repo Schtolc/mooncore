@@ -15,7 +15,7 @@ func Init(config config.Config) (db *gorm.DB) {
 	err = db.DB().Ping()
 	check_error(err)
 
-	db.DB().SetMaxOpenConns(10)
+	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Metric{},
 	)
