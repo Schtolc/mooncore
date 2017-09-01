@@ -16,7 +16,7 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Logs.Access)))
 	e.Use(middleware.RequestID())
 
-	db := database.InitDB(conf)
+	db := database.Init(conf)
 	defer db.Close()
 
 	e.GET("/ping", handlers.Ping)

@@ -8,7 +8,7 @@ import (
 	"mooncore/models"
 )
 
-func InitDB(config config.Config) (db *gorm.DB) {
+func Init(config config.Config) (db *gorm.DB) {
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	check_error(err)
 
