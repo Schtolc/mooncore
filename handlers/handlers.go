@@ -6,6 +6,7 @@ import (
 	"log"
 	"mooncore/models"
 	"net/http"
+	"strconv"
 )
 
 type Resp struct {
@@ -26,10 +27,16 @@ func PingDb(db *gorm.DB) echo.HandlerFunc {
 			Path: c.Path(),
 			Time: gorm.NowFunc(),
 		}
-		db.Create(m)
+		if dbc := db.Create(m); dbc.Error != nil {
+			log.Println(dbc.Error)
+			return c.JSON(http.StatusInternalServerError, &Resp{
+				Code:    "500",
+				Message: "InternalError",
+			})
+		}
 		return c.JSON(http.StatusOK, &Resp{
 			Code:    "200",
-			Message: m.Path,
+			Message: strconv.Itoa(m.Id),
 		})
 	}
 }
