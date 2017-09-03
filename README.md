@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/Schtolc/mooncore)](https://goreportcard.com/report/github.com/Schtolc/mooncore)
+[![Build Status](https://travis-ci.org/Schtolc/mooncore.svg?branch=master)](https://travis-ci.org/Schtolc/mooncore)[![Go Report Card](https://goreportcard.com/badge/github.com/Schtolc/mooncore)](https://goreportcard.com/report/github.com/Schtolc/mooncore)
 
 # Mooncore
 Backend for moon project written in go. Under heavy development atm.
@@ -34,7 +34,7 @@ If you pushing any changes, make sure that:
 4. All commits have "[MCORE-{ISSUE NUMBER}]" suffix
 
 ### Tools we use during development and in Travis
-1. go vet: `go vet .`
+1. go vet: `go vet ./...`
 2. [golint](https://github.com/golang/lint): `golint ./...`
 3. [gocyclo](https://github.com/fzipp/gocyclo): `gocyclo --over 10 .`
 4. gofmt: `gofmt -l . | wc -l | awk '{if ($1 != 0) print 1; else print 0}' | grep -v '1'`

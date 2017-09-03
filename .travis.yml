@@ -2,3 +2,11 @@ language: go
 
 go:
   - master
+
+before_install:
+  - go get -u github.com/golang/lint/golint
+  - go get github.com/fzipp/gocyclo
+  - go vet ./...
+  - gofmt -l . | wc -l | awk '{if ($1 != 0) print 1; else print 0}' | grep -v '1'
+  - golint ./...
+  - gocyclo --over 10 .
