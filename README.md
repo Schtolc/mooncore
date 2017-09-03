@@ -26,8 +26,13 @@ Backend for moon project written in go. Under heavy development atm.
 
 ### Development rules
 If you pushing any changes, make sure that:
-1. Travis is green
-2. Go report is A+
-3. All changes are directly related to an issue(!)
-4. Your changes response to all (if any) comments in the pull request
-5. All commits have "[MCORE-{ISSUE NUMBER}]" suffix
+1. Travis is green (see next section)
+2. All changes are directly related to an issue(!)
+3. Your changes response to all (if any) comments in the pull request
+4. All commits have "[MCORE-{ISSUE NUMBER}]" suffix
+
+### Tools we use during development and in Travis
+1. go vet: `go vet .`
+2. [golint](https://github.com/golang/lint): `golint ./...`
+3. [gocyclo](https://github.com/fzipp/gocyclo): `gocyclo --over 10 .`
+4. gofmt: `gofmt -l . | wc -l | awk '{if ($1 != 0) print 1; else print 0}' | grep -v '1'`
