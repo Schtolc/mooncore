@@ -11,7 +11,6 @@ import (
 
 func main() {
 	e := echo.New()
-
 	conf := config.Get()
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Logs.Access)))
 
