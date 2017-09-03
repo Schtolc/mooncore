@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"github.com/Schtolc/mooncore/models"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"log"
-	"mooncore/models"
 	"net/http"
 	"strconv"
 )

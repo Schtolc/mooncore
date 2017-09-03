@@ -1,11 +1,11 @@
 package database
 
 import (
+	"github.com/Schtolc/mooncore/config"
+	"github.com/Schtolc/mooncore/models"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"log"
-	"mooncore/config"
-	"mooncore/models"
 )
 
 func Init(config config.Config) (db *gorm.DB) {
