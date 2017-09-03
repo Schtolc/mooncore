@@ -34,7 +34,6 @@ If you pushing any changes, make sure that:
 4. All commits have "[MCORE-{ISSUE NUMBER}]" suffix
 
 ### Tools we use during development and in Travis
-1. go vet: `go vet ./...`
-2. [golint](https://github.com/golang/lint): `golint ./...`
-3. [gocyclo](https://github.com/fzipp/gocyclo): `gocyclo --over 10 .`
-4. gofmt: `gofmt -l . | wc -l | awk '{if ($1 != 0) print 1; else print 0}' | grep -v '1'`
+1. [golint](https://github.com/golang/lint): `golint ./...`
+2. [gocyclo](https://github.com/fzipp/gocyclo): `gocyclo --over 10 .`
+3. gofmt: `gofmt -l .`
