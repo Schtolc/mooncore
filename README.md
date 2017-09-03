@@ -4,7 +4,8 @@
 Backend for moon project written in go. Under heavy development atm.
 
 ### How to build project
-1. `go get -u github.com/Schtolc/mooncore`
+1. `mkdir -p $GOPATH/src/github.com/Schtolc`
+1. `git clone git@github.com:Schtolc/mooncore.git`
 2. `go build github.com/Schtolc/mooncore`
 
 ### How to launch project
