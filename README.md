@@ -10,9 +10,10 @@ Backend for moon project written in go. Under heavy development atm.
 ### How to launch project
 1. install & run mysql-server on default port
 2. specify mysql credentials in `config.yaml`
-3. `sudo mkdir /var/log/mooncore`
-4. `sudo chmod 777 /var/log/mooncore`
-5. `$GOPATH/src/github.com/Schtolc/mooncore/mooncore`
+3. `echo 'CREATE DATABASE IF NOT EXISTS moondb' | mysql -u root -p`
+4. `sudo mkdir /var/log/mooncore`
+5. `sudo chmod 777 /var/log/mooncore`
+6. `$GOPATH/src/github.com/Schtolc/mooncore/mooncore`
 
 ### How to deploy project
 1. TODO @Schtolc #4
