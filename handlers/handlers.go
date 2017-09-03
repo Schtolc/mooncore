@@ -9,11 +9,13 @@ import (
 	"strconv"
 )
 
+// Resp represents simple json response with code and message.
 type Resp struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
+// Ping is a simple handler for checking if server is up and running.
 func Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Resp{
 		Code:    "200",
@@ -21,6 +23,7 @@ func Ping(c echo.Context) error {
 	})
 }
 
+// PingDb is a simple handler for checking if database is up and running.
 func PingDb(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		m := &models.Metric{
@@ -36,12 +39,7 @@ func PingDb(db *gorm.DB) echo.HandlerFunc {
 		}
 		return c.JSON(http.StatusOK, &Resp{
 			Code:    "200",
-			Message: strconv.Itoa(m.Id),
+			Message: strconv.Itoa(m.ID),
 		})
-	}
-}
-func check_err(err error) {
-	if err != nil {
-		log.Fatal(err)
 	}
 }

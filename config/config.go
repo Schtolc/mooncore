@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// Config is in-code representation of config.yml.
 type Config struct {
 	Server struct {
 		Hostbase struct {
@@ -25,18 +26,19 @@ type Config struct {
 	}
 }
 
+// Get reads config.yml and return filled Config struct. If any error occurs program is terminated.
 func Get() Config {
-	content, err := ioutil.ReadFile("config.yaml")
-	check_err(err)
+	content, err := ioutil.ReadFile("config.yml")
+	checkErr(err)
 
 	conf := Config{}
 	err = yaml.Unmarshal([]byte(content), &conf)
-	check_err(err)
+	checkErr(err)
 
 	return conf
 }
 
-func check_err(err error) {
+func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Configure is a build-in middleware function responsible for access logs in echo framework.
 func Configure(filename string) middleware.LoggerConfig {
 	logfile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
