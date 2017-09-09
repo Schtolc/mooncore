@@ -6,13 +6,16 @@ import (
 	"github.com/Schtolc/mooncore/handlers"
 	"github.com/Schtolc/mooncore/logger"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	defer logger.CatchError()
 	e := echo.New()
 	conf := config.Get()
-	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Server.Logs.Access)))
+
+	logger.Init(conf)
+	e.Use(logger.Log(conf))
 
 	db := database.Init(conf)
 	defer db.Close()
@@ -20,5 +23,5 @@ func main() {
 	e.GET("/ping", handlers.Ping)
 	e.GET("/ping_db", handlers.PingDb(db))
 
-	e.Logger.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
+	log.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
 }

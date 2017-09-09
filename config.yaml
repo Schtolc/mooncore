@@ -2,11 +2,16 @@ server:
   hostbase:
     port: "1323"
     host: "127.0.0.1"
-  logs:
-    access: "/var/log/mooncore/access_log"
 database:
   user: "root"
   password: "123"
   dbname: "moondb"
   dialect: "mysql"
   max_open_conns: 10
+logs:
+  access: "/var/log/mooncore/access.log"
+  main: "/var/log/mooncore/main.log"
+  telegrambot:
+    chatname: "moon"
+    authtoken: "420611535:AAF47VsYsvblnJTlH77suVt321gP5pI1edY"
+    chatid: "-197805215"
