@@ -27,7 +27,7 @@ func openLogFile(filename string) (logfile *os.File) {
 	return
 }
 
-// Configure main logger params: [correct time, output and level]
+// Init main logger with params: [correct time, output and level]
 func Init(conf config.Config) {
 	logrus.SetFormatter(defaultFormatter)
 	logrus.SetLevel(logrus.InfoLevel)
@@ -35,7 +35,7 @@ func Init(conf config.Config) {
 	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
 }
 
-// Configure access logger params: [correct time, output, level, fields]
+// Log Access Configuring: [correct time, output, level, fields]
 func Log(conf config.Config) echo.MiddlewareFunc {
 	log := logrus.New()
 	log.Formatter = defaultFormatter
@@ -52,14 +52,14 @@ func Log(conf config.Config) echo.MiddlewareFunc {
 				"url":    req.URL,
 				"status": res.Status,
 			}).Info()
-			defer CatchError()
+			defer CatchPanic()
 			return h(c)
 		}
 	}
 }
 
-// Catch panic and log stack trace
-func CatchError() {
+// CatchPanic and log stack trace
+func CatchPanic() {
 	if e := recover(); e != nil {
 		logrus.Error(e)
 	}

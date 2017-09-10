@@ -23,5 +23,5 @@ func main() {
 	e.GET("/ping_db", handlers.PingDb(db))
 
 	log.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
-	defer logger.CatchError()
+	defer logger.CatchPanic()
 }
