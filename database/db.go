@@ -20,6 +20,13 @@ func Init(config config.Config) (db *gorm.DB) {
 	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Metric{},
+		&models.Address{},
+		&models.Photo{},
+		&models.User{},
+		&models.Master{},
+		&models.Service{},
+		&models.ManicureType{},
+		&models.ManicureMaterial{},
 	)
 	return db
 }
