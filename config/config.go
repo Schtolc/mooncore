@@ -15,7 +15,7 @@ type Config struct {
 	}
 	Database struct {
 		User         string `yaml:"user"`
-		Password     string `yaml:"password"`
+		Host         string `yaml:"host"`
 		Dbname       string `yaml:"dbname"`
 		Dialect      string `yaml:"dialect"`
 		MaxOpenConns int    `yaml:"max_open_conns"`

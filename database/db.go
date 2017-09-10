@@ -10,8 +10,9 @@ import (
 
 // Init database: open connection + migrate schema + set connection params
 func Init(config config.Config) (db *gorm.DB) {
-	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
+	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@tcp("+config.Database.Host+")/"+config.Database.Dbname)
 	if err != nil {
+
 		log.Fatal(err)
 	}
 
