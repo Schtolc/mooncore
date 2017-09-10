@@ -15,7 +15,7 @@ var (
 	defaultStackLevels = []logrus.Level{logrus.PanicLevel, logrus.FatalLevel, logrus.ErrorLevel}
 )
 
-// OpenLogFile
+// OpenLogFile for add; create if not exists
 func OpenLogFile(filename string) (logfile *os.File) {
 	logfile, err := os.OpenFile(filename, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
