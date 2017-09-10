@@ -23,7 +23,22 @@ func Init(config config.Config) (db *gorm.DB) {
 	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Metric{},
+		&models.Address{},
+		&models.Photo{},
+		&models.ManicureType{},
+		&models.ManicureMaterial{},
+		&models.User{},
+		&models.Master{},
+		&models.Service{},
 	)
+
+	db.Table("service_manicure_materials").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
+	db.Table("service_manicure_materials").AddForeignKey("manicure_material_id", "manicure_materials(id)", "CASCADE", "CASCADE")
+	db.Table("service_photos").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
+	db.Table("service_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+	db.Table("working_place_photos").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
+	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+
 	logrus.Info("migrate models")
 	return db
 }
