@@ -40,15 +40,16 @@ type Master struct {
 	Name               string
 	Address            Address
 	Photo              Photo
+	Service            []Service
 	WorkingPlacePhotos []Photo `gorm:"many2many:working_place_photos;"`
 }
 
 // Service model
 type Service struct {
 	ID                int
+	MasterID          int
 	Name              string
-	Master            Master
-	Descr             string `sql:"type:text"`
+	Description       string `sql:"type:text"`
 	ManicureType      ManicureType
 	ManicureMaterials []ManicureMaterial `gorm:"many2many:service_manicure_materials;"`
 	Photos            []Photo            `gorm:"many2many:service_photos;"`
@@ -62,9 +63,9 @@ type ManicureType struct {
 
 // ManicureMaterial model
 type ManicureMaterial struct {
-	ID       int
-	Firm     string
-	Palette  string
-	Descr    string    `sql:"type:text"`
-	Services []Service `gorm:"many2many:service_manicure_materials;"`
+	ID          int
+	Firm        string
+	Palette     string
+	Description string    `sql:"type:text"`
+	Services    []Service `gorm:"many2many:service_manicure_materials;"`
 }
