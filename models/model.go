@@ -11,20 +11,20 @@ type Metric struct {
 	Time time.Time
 }
 
-// Address is a model for addresses
+// Address model
 type Address struct {
 	ID  int
 	Lat float32
 	Lon float32
 }
 
-// Photo is a model for paths to photos
+// Photo model
 type Photo struct {
 	ID   int
 	Path string
 }
 
-// User is a model for store users
+// User model
 type User struct {
 	ID       int
 	Name     string
@@ -34,7 +34,7 @@ type User struct {
 	Photo    Photo
 }
 
-// Master is a model for store masters
+// Master model
 type Master struct {
 	ID                 int
 	Name               string
@@ -43,7 +43,7 @@ type Master struct {
 	WorkingPlacePhotos []Photo `gorm:"many2many:working_place_photos;"`
 }
 
-// Service is a model for store services
+// Service model
 type Service struct {
 	ID                int
 	Name              string
@@ -54,13 +54,13 @@ type Service struct {
 	Photos            []Photo            `gorm:"many2many:service_photos;"`
 }
 
-// ManicureType is a model for store types of manicure
+// ManicureType model
 type ManicureType struct {
 	ID   int
 	Name string
 }
 
-// ManicureMaterial is a model for store types of materials
+// ManicureMaterial model
 type ManicureMaterial struct {
 	ID       int
 	Firm     string
