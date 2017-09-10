@@ -26,7 +26,7 @@ type Config struct {
 	}
 }
 
-// Get yaml config
+// Get reads config.yml and return filled Config struct. If any error occurs program is terminated.
 func Get() (conf Config) {
 	content, err := ioutil.ReadFile("config.yml")
 	if err != nil {
