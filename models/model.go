@@ -26,12 +26,14 @@ type Photo struct {
 
 // User model
 type User struct {
-	ID       int
-	Name     string
-	Email    string
-	Password string
-	Address  Address
-	Photo    Photo
+	ID        int
+	Name      string
+	Email     string
+	Password  string
+	Address   Address
+	AddressID int `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Photo     Photo
+	PhotoID   int `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 }
 
 // Master model
@@ -39,9 +41,11 @@ type Master struct {
 	ID                 int
 	Name               string
 	Address            Address
+	AddressID          int `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
 	Photo              Photo
-	Service            []Service
-	WorkingPlacePhotos []Photo `gorm:"many2many:working_place_photos;"`
+	PhotoID            int       `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Service            []Service `gorm:"ForeignKey:MasterID"`
+	WorkingPlacePhotos []Photo   `gorm:"many2many:working_place_photos;"`
 }
 
 // Service model
@@ -51,6 +55,7 @@ type Service struct {
 	Name              string
 	Description       string `sql:"type:text"`
 	ManicureType      ManicureType
+	ManicureTypeID    int                `sql:"type:int, FOREIGN KEY (manicure_type_id) REFERENCES manicure_types(id)"`
 	ManicureMaterials []ManicureMaterial `gorm:"many2many:service_manicure_materials;"`
 	Photos            []Photo            `gorm:"many2many:service_photos;"`
 }

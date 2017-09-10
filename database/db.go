@@ -22,12 +22,18 @@ func Init(config config.Config) (db *gorm.DB) {
 		&models.Metric{},
 		&models.Address{},
 		&models.Photo{},
+		&models.ManicureType{},
+		&models.ManicureMaterial{},
 		&models.User{},
 		&models.Master{},
 		&models.Service{},
-		&models.ManicureType{},
-		&models.ManicureMaterial{},
 	)
+	db.Table("service_manicure_materials").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
+	db.Table("service_manicure_materials").AddForeignKey("manicure_material_id", "manicure_materials(id)", "CASCADE", "CASCADE")
+	db.Table("service_photos").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
+	db.Table("service_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+	db.Table("working_place_photos").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
+	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 	return db
 }
 
