@@ -19,9 +19,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Logs.Access)))
 	logfile := logger.OpenLogFile(conf.Logs.Main)
 
-	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stdout.Fd())); err != nil {
-		logrus.Fatal(err)
-	}
 	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stderr.Fd())); err != nil {
 		logrus.Fatal(err)
 	}

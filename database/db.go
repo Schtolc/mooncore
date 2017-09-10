@@ -14,7 +14,7 @@ func Init(config config.Config) (db *gorm.DB) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
+	logrus.Info("connected to database")
 	err = db.DB().Ping()
 	if err != nil {
 		logrus.Fatal(err)
@@ -24,5 +24,6 @@ func Init(config config.Config) (db *gorm.DB) {
 	db.AutoMigrate(
 		&models.Metric{},
 	)
+	logrus.Info("migrate models")
 	return db
 }
