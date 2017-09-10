@@ -39,6 +39,6 @@ func Init(config config.Config) (db *gorm.DB) {
 	db.Table("working_place_photos").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
 	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 
-	logrus.Info("migrate models")
+	logrus.Info("models migrated")
 	return db
 }

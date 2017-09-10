@@ -22,6 +22,9 @@ func main() {
 	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stderr.Fd())); err != nil {
 		logrus.Fatal(err)
 	}
+	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stdout.Fd())); err != nil {
+		logrus.Fatal(err)
+	}
 
 	db := database.Init(conf)
 	defer db.Close()
