@@ -3,11 +3,10 @@ server:
     port: "1323"
     host: "127.0.0.1"
 database:
-  user: "luna:luna54154167q"
+  user: "root"
   dbname: "moondb"
   dialect: "mysql"
   max_open_conns: 10
-  host: "151.248.117.129:3306"
 logs:
   access: "/var/log/mooncore/access.log"
   main: "/var/log/mooncore/main.log"

@@ -1,7 +1,7 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -16,7 +16,6 @@ type Config struct {
 	}
 	Database struct {
 		User         string `yaml:"user"`
-		Host         string `yaml:"host"`
 		Dbname       string `yaml:"dbname"`
 		Dialect      string `yaml:"dialect"`
 		MaxOpenConns int    `yaml:"max_open_conns"`
@@ -31,12 +30,12 @@ type Config struct {
 func Get() (conf Config) {
 	content, err := ioutil.ReadFile("config.yml")
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	conf = Config{}
 	err = yaml.Unmarshal([]byte(content), &conf)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	return
 }

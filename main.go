@@ -6,7 +6,7 @@ import (
 	"github.com/Schtolc/mooncore/handlers"
 	"github.com/Schtolc/mooncore/logger"
 	"github.com/labstack/echo"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -22,6 +22,6 @@ func main() {
 	e.GET("/ping", handlers.Ping)
 	e.GET("/ping_db", handlers.PingDb(db))
 
-	log.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
+	logrus.Fatal(e.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
 	defer logger.CatchPanic()
 }
