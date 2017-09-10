@@ -61,8 +61,6 @@ func Log(conf config.Config) echo.MiddlewareFunc {
 // Catch panic and log stack trace
 func CatchError() {
 	if e := recover(); e != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": e,
-		}).Error(string(debug.Stack()))
+		logrus.Error(e)
 	}
 }
