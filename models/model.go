@@ -65,6 +65,6 @@ type ManicureMaterial struct {
 	ID       int
 	Firm     string
 	Palette  string
-	Descr    string // TODO make unlimited
+	Descr    string    // TODO make unlimited
 	Services []Service `gorm:"many2many:service_manicure_materials;"`
 }
