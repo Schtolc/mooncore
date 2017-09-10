@@ -27,15 +27,15 @@ type Config struct {
 }
 
 // Get reads config.yml and return filled Config struct. If any error occurs program is terminated.
-func Get() (conf Config) {
+func Get() Config {
 	content, err := ioutil.ReadFile("config.yml")
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	conf = Config{}
+	conf := Config{}
 	err = yaml.Unmarshal([]byte(content), &conf)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	return
+	return conf
 }
