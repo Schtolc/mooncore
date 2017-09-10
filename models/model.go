@@ -48,7 +48,7 @@ type Service struct {
 	ID                int
 	Name              string
 	Master            Master
-	Descr             string // TODO make unlimited
+	Descr             string `sql:"type:text"`
 	ManicureType      ManicureType
 	ManicureMaterials []ManicureMaterial `gorm:"many2many:service_manicure_materials;"`
 	Photos            []Photo            `gorm:"many2many:service_photos;"`
@@ -65,6 +65,6 @@ type ManicureMaterial struct {
 	ID       int
 	Firm     string
 	Palette  string
-	Descr    string    // TODO make unlimited
+	Descr    string    `sql:"type:text"`
 	Services []Service `gorm:"many2many:service_manicure_materials;"`
 }
