@@ -14,6 +14,7 @@ var (
 		TimestampFormat: "2006-01-02 15:04:05",
 		FullTimestamp:   true,
 	}
+	defaultStackLevels = []logrus.Level{logrus.PanicLevel, logrus.FatalLevel, logrus.ErrorLevel}
 )
 
 func openLogFile(filename string) (logfile *os.File) {
@@ -31,7 +32,7 @@ func Init(conf config.Config) {
 	logrus.SetFormatter(defaultFormatter)
 	logrus.SetLevel(logrus.InfoLevel)
 	logrus.SetOutput(openLogFile(conf.Logs.Main))
-	logrus.AddHook(logrus_stack.StandardHook())
+	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
 }
 
 // Configure access logger params: [correct time, output, level, fields]
@@ -39,7 +40,7 @@ func Log(conf config.Config) echo.MiddlewareFunc {
 	log := logrus.New()
 	log.Formatter = defaultFormatter
 	log.Out = openLogFile(conf.Logs.Access)
-	log.AddHook(logrus_stack.StandardHook())
+	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
 
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
