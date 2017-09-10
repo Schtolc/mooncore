@@ -26,5 +26,3 @@ func Init(config config.Config) (db *gorm.DB) {
 	)
 	return db
 }
-
-

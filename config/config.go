@@ -22,8 +22,8 @@ type Config struct {
 		MaxOpenConns int    `yaml:"max_open_conns"`
 	}
 	Logs struct {
-		Access      string `yaml:"access"`
-		Main        string `yaml:"main"`
+		Access string `yaml:"access"`
+		Main   string `yaml:"main"`
 	}
 }
 
