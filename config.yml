@@ -3,9 +3,9 @@ server:
     port: "1323"
     host: "127.0.0.1"
   logs:
-    access: "/var/log/mooncore/access_log"
+    access: "/home/igor/access_log"
 database:
-  user: "root"
+  user: "moon"
   password: "123"
   dbname: "moondb"
   dialect: "mysql"
