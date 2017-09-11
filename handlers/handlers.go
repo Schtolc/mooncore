@@ -4,7 +4,7 @@ import (
 	"github.com/Schtolc/mooncore/models"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
@@ -31,7 +31,7 @@ func PingDb(db *gorm.DB) echo.HandlerFunc {
 			Time: gorm.NowFunc(),
 		}
 		if dbc := db.Create(m); dbc.Error != nil {
-			log.Println(dbc.Error)
+			logrus.Error(dbc.Error)
 			return c.JSON(http.StatusInternalServerError, &Resp{
 				Code:    "500",
 				Message: "InternalError",
