@@ -8,10 +8,10 @@ type User struct {
 	Password string `schema:"password"`
 }
 
+// IsEmpty check user struct for empty
 func (user *User) IsEmpty() bool {
 	if user == (&User{}) {
 		return true
-	} else {
-		return false
 	}
+	return false
 }

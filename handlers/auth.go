@@ -11,14 +11,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// JwtClaims - custom config for jwt
 type JwtClaims struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	jwt.StandardClaims
 }
 
+// SigningKey use for generation token
 var SigningKey = []byte("secret")
 
+// Register method for new users
 func (h *Handler) Register(c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
@@ -42,6 +45,7 @@ func (h *Handler) Register(c echo.Context) error {
 	})
 }
 
+// Login method give token to register user
 func (h *Handler) Login(c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
@@ -58,7 +62,7 @@ func (h *Handler) Login(c echo.Context) error {
 		}).Info("Unregistered user")
 		return c.JSON(http.StatusBadRequest, NeedRegistration)
 	}
-	tokenString, err := CreateJwtToken(dbUser)
+	tokenString, err := createJwtToken(dbUser)
 	if err != nil {
 		logrus.Error(err)
 		return c.JSON(http.StatusInternalServerError, InternalError)
@@ -70,6 +74,7 @@ func (h *Handler) Login(c echo.Context) error {
 	})
 }
 
+// CheckJwtToken for validation and existing in db
 func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		auth := c.Request().Header.Get("Authorization")[7:]
@@ -104,7 +109,7 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func CreateJwtToken(user *models.User) (tokenString string, err error) {
+func createJwtToken(user *models.User) (tokenString string, err error) {
 	claims := JwtClaims{
 		user.Name,
 		user.Password,
