@@ -8,7 +8,4 @@ type User struct {
 	Password string `schema:"password"`
 }
 
-// IsEmpty check user struct for empty
-func (u *User) IsEmpty() bool {
-	return u == &User{}
-}
+

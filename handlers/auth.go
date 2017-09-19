@@ -55,7 +55,7 @@ func (h *Handler) Login(c echo.Context) error {
 	dbUser := &models.User{}
 	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(dbUser)
 
-	if dbUser.IsEmpty() {
+	if dbUser == (&models.User{}) {
 		logrus.WithFields(logrus.Fields{
 			"Name":     userAttr.Name,
 			"Password": userAttr.Password,
@@ -94,7 +94,7 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 
 			dbUser := &models.User{}
 			h.DB.Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser)
-			if dbUser.IsEmpty() {
+			if dbUser == (&models.User{}) {
 				logrus.WithFields(logrus.Fields{
 					"Name":     claims.Name,
 					"Password": claims.Password,
