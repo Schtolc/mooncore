@@ -7,5 +7,3 @@ type User struct {
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
-
-
