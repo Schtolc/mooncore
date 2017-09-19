@@ -10,8 +10,5 @@ type User struct {
 
 // IsEmpty check user struct for empty
 func (user *User) IsEmpty() bool {
-	if user == (&User{}) {
-		return true
-	}
-	return false
+	return user == (&User{})
 }
