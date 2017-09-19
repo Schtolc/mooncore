@@ -102,10 +102,9 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 				return c.JSON(http.StatusBadRequest, NeedRegistration)
 			}
 			return next(c)
-		} else {
-			logrus.Warn("CheckJwtToken failed. Token is invalid: %v", token)
-			return c.JSON(http.StatusBadRequest, InvalidToken)
 		}
+		logrus.Warn("CheckJwtToken failed. Token is invalid: %v", token)
+		return c.JSON(http.StatusBadRequest, InvalidToken)
 	}
 }
 
