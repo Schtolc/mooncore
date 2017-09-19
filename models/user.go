@@ -9,6 +9,6 @@ type User struct {
 }
 
 // IsEmpty check user struct for empty
-func (user *User) IsEmpty() bool {
-	return user == (&User{})
+func (u *User) IsEmpty() bool {
+	return u == &User{}
 }
