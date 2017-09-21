@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"github.com/sirupsen/logrus"
@@ -26,8 +26,8 @@ type Config struct {
 	}
 }
 
-// Get reads config.yml and return filled Config struct. If any error occurs program is terminated.
-func Get() Config {
+// GetConfig reads config.yml and return filled Config struct. If any error occurs program is terminated.
+func GetConfig() Config {
 	content, err := ioutil.ReadFile("config.yml")
 	if err != nil {
 		logrus.Fatal(err)
