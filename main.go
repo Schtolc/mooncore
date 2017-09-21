@@ -1,11 +1,12 @@
 package main
 
 import (
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	conf := GetConfig()
+	conf := utils.GetConfig()
 	InitLogs(conf)
 
 	db := InitDatabase(conf)

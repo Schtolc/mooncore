@@ -2,13 +2,14 @@ package main
 
 import (
 	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
 	_ "github.com/go-sql-driver/mysql" // mysql driver for gorm.Open
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
 
 // InitDatabase opens db connection + migrates schema + sets connection params
-func InitDatabase(config Config) (db *gorm.DB) {
+func InitDatabase(config utils.Config) (db *gorm.DB) {
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	if err != nil {
 		logrus.Fatal(err)
