@@ -1,19 +1,20 @@
 package handlers
 
 var (
-	// InternalError response
-	InternalError = &Resp{
-		Code:    "500",
-		Message: "InternalError",
-	}
-	// NeedRegistration response
-	NeedRegistration = &Resp{
+	// needRegistration  response
+	needRegistration = &Resp{
 		Code:    "400",
 		Message: "You need to register",
 	}
-	// InvalidToken response
-	InvalidToken = &Resp{
-		Code:    "400",
+	//InvalidToken response
+	invalidToken = &Resp{
+		Code:    "Invalid Argument",
 		Message: "Token is invalid",
 	}
+	// InternalError response
+	internalError = &Resp{
+		Code:    "InternalError",
+		Message: "Internal Error",
+	}
+
 )

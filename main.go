@@ -15,10 +15,9 @@ import (
 func main() {
 	e := echo.New()
 	conf := config.Get()
-	// access log
+
 	e.Use(middleware.LoggerWithConfig(logger.Configure(conf.Logs.Access)))
 
-	// main log
 	mainLog := logger.OpenLogFile(conf.Logs.Main)
 	if err := syscall.Dup2(int(mainLog.Fd()), int(os.Stderr.Fd())); err != nil {
 		logrus.Fatal(err)
@@ -27,18 +26,14 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	// init database
 	db := database.Init(conf)
 	defer db.Close()
 
-	// init handlers
 	h := handlers.Init(db)
 
-	// handler without auth
-	e.POST("/v1/register", h.Register)
-	e.POST("/v1/login", h.Login)
+	e.POST("/v1/sign_up", h.SignUp)
+	e.POST("/v1/sign_in", h.SignIn)
 
-	// handler with auth
 	AuthGroup := e.Group("/v1")
 	jwtConfig := middleware.JWTConfig{
 		SigningMethod: "HS256",

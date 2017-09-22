@@ -24,6 +24,14 @@ type Photo struct {
 	Path string
 }
 
+// User model
+type User struct {
+	ID       int    `json:"-"`
+	Name     string `schema:"name"`
+	Email    string `schema:"email"`
+	Password string `schema:"password"`
+}
+
 // Client model
 type Client struct {
 	ID        int

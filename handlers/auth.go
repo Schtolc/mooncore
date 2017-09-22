@@ -11,6 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+
+// SigningKey use for generation token
+var SigningKey = []byte("secret")
+
+
 // JwtClaims - custom config for jwt
 type JwtClaims struct {
 	Name     string `json:"name"`
@@ -18,15 +23,14 @@ type JwtClaims struct {
 	jwt.StandardClaims
 }
 
-// SigningKey use for generation token
-var SigningKey = []byte("secret")
+func validate
 
-// Register method for new users
-func (h *Handler) Register(c echo.Context) error {
+// SignUp registers new users
+func (h *Handler) SignUp(c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
-		return c.JSON(http.StatusInternalServerError, InternalError)
+		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 	dbUser := &models.User{
 		Name:     userAttr.Name,
@@ -36,21 +40,18 @@ func (h *Handler) Register(c echo.Context) error {
 
 	if dbc := h.DB.Create(dbUser); dbc.Error != nil {
 		logrus.Error(dbc.Error)
-		return c.JSON(http.StatusInternalServerError, InternalError)
+		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON(http.StatusOK, &Resp{
-		Code:    "200",
-		Message: "You are registered. Welcome " + dbUser.Name,
-	})
+	return c.JSON(http.StatusOK, "")
 }
 
-// Login method give token to register user
-func (h *Handler) Login(c echo.Context) error {
+// SignIn users; return auth token
+func (h *Handler) SignIn(c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
-		return c.JSON(http.StatusInternalServerError, InternalError)
+		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 	dbUser := &models.User{}
 	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(dbUser)
@@ -60,21 +61,18 @@ func (h *Handler) Login(c echo.Context) error {
 			"Name":     userAttr.Name,
 			"Password": userAttr.Password,
 		}).Info("Unregistered user")
-		return c.JSON(http.StatusBadRequest, NeedRegistration)
+		return c.JSON(http.StatusBadRequest, needRegistration)
 	}
 	tokenString, err := createJwtToken(dbUser)
 	if err != nil {
 		logrus.Error(err)
-		return c.JSON(http.StatusInternalServerError, InternalError)
+		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON(http.StatusOK, &Resp{
-		Code:    "200",
-		Message: tokenString,
-	})
+	return c.JSON( http.StatusOK, tokenString )
 }
 
-// CheckJwtToken for validation and existing in db
+// CheckJwtToken verifies the validity of token
 func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		auth := c.Request().Header.Get("Authorization")[7:]
@@ -84,13 +82,13 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 		if err != nil {
 			logrus.Error(err)
-			return c.JSON(http.StatusInternalServerError, InternalError)
+			return c.JSON(http.StatusInternalServerError, internalError)
 		}
 		if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
 			logrus.WithFields(logrus.Fields{
 				"Name":      claims.Name,
 				"ExpiresAt": claims.StandardClaims.ExpiresAt,
-			}).Info("check jwt token")
+			}).Info("Token verification")
 
 			dbUser := &models.User{}
 			h.DB.Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser)
@@ -98,13 +96,13 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 				logrus.WithFields(logrus.Fields{
 					"Name":     claims.Name,
 					"Password": claims.Password,
-				}).Info("Unregistered user")
-				return c.JSON(http.StatusBadRequest, NeedRegistration)
+				}).Info("User was not found in the database when checking token")
+				return c.JSON(http.StatusBadRequest, needRegistration)
 			}
 			return next(c)
 		}
 		logrus.Warn("CheckJwtToken failed. Token is invalid: %v", token)
-		return c.JSON(http.StatusBadRequest, InvalidToken)
+		return c.JSON(http.StatusBadRequest, invalidToken)
 	}
 }
 

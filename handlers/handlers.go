@@ -43,13 +43,7 @@ func (h *Handler) PingDb(c echo.Context) error {
 	}
 	if dbc := h.DB.Create(m); dbc.Error != nil {
 		logrus.Error(dbc.Error)
-		return c.JSON(http.StatusInternalServerError, &Resp{
-			Code:    "500",
-			Message: "InternalError",
-		})
+		return c.JSON(http.StatusInternalServerError, internalError)
 	}
-	return c.JSON(http.StatusOK, &Resp{
-		Code:    "200",
-		Message: strconv.Itoa(m.ID),
-	})
+	return c.JSON(http.StatusOK, "Database pinged: " + strconv.Itoa(m.ID))
 }
