@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Gurpartap/logrus-stack"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -25,7 +26,7 @@ func openLogFile(filename string) *os.File {
 }
 
 // InitLogs sets logger format and hooks, redirects stdout and strerr to main logfile
-func InitLogs(config Config) {
+func InitLogs(config utils.Config) {
 	logrus.SetFormatter(defaultFormatter)
 	logrus.SetLevel(logrus.InfoLevel)
 	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
