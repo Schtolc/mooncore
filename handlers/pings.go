@@ -37,7 +37,7 @@ func (h *Handler) Ping(c echo.Context) error {
 
 // PingDb is a simple handler for checking if database is up and running.
 func (h *Handler) PingDb(c echo.Context) error {
-	m := &models.Metric{
+	m := &models.Mock{
 		Path: c.Path(),
 		Time: gorm.NowFunc(),
 	}

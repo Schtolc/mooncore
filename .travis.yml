@@ -3,10 +3,18 @@ language: go
 go:
   - master
 
+services:
+  - mysql
+
 script:
   - go get -u github.com/golang/lint/golint
   - go get github.com/fzipp/gocyclo
   - gofmt -l . | wc -l | awk '{if ($1 != 0) print "ERROR"; else print "OK"}' | grep -v 'ERROR'
   - golint -set_exit_status ./...
   - gocyclo --over 10 . | wc -l | awk '{if ($1 != 0) print "ERROR"; else print "OK"}' | grep -v 'ERROR'
+  - go build
+  - sudo mkdir -p /var/log/mooncore
+  - sudo chmod 777 /var/log/mooncore
+  - echo 'CREATE DATABASE IF NOT EXISTS moondb' | mysql -u root
+  - ./mooncore &
   - go test -v ./...

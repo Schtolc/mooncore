@@ -1,10 +1,12 @@
-package logger
+package main
 
 import (
 	"github.com/Gurpartap/logrus-stack"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"os"
+	"syscall"
 )
 
 var (
@@ -15,28 +17,36 @@ var (
 	defaultStackLevels = []logrus.Level{logrus.PanicLevel, logrus.FatalLevel, logrus.ErrorLevel}
 )
 
-// OpenLogFile for add; create if not exists
-func OpenLogFile(filename string) (logfile *os.File) {
+func openLogFile(filename string) *os.File {
 	logfile, err := os.OpenFile(filename, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	return
+	return logfile
 }
 
-// Init main logger with params: [correct time, output and level]
-func init() {
+// InitLogs sets logger format and hooks, redirects stdout and strerr to main logfile
+func InitLogs(config utils.Config) {
 	logrus.SetFormatter(defaultFormatter)
 	logrus.SetLevel(logrus.InfoLevel)
 	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
+
+	logfile := openLogFile(config.Logs.Main)
+
+	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stderr.Fd())); err != nil {
+		logrus.Fatal(err)
+	}
+	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stdout.Fd())); err != nil {
+		logrus.Fatal(err)
+	}
 }
 
-// Configure Access Log
-func Configure(filename string) middleware.LoggerConfig {
+// GetAccessConfig returns config for access logs used in echo middleware
+func GetAccessConfig(filename string) middleware.LoggerConfig {
 	var config = middleware.LoggerConfig{
 		Skipper: middleware.DefaultSkipper,
 		Format:  "${time_rfc3339} ${host} ${method} ${uri} ${status}\n",
-		Output:  OpenLogFile(filename),
+		Output:  openLogFile(filename),
 	}
 	return config
 }

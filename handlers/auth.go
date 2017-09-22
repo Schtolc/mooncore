@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/sirupsen/logrus"
+	"github.com/labstack/echo/middleware"
 )
 
 
@@ -22,9 +23,14 @@ type JwtClaims struct {
 	Password string `json:"password"`
 	jwt.StandardClaims
 }
-
-func validate
-
+// GetJwtConfig return configuration for jwt registration
+func GetJwtConfig() middleware.JWTConfig {
+	return middleware.JWTConfig{
+		SigningMethod: "HS256",
+		Claims:        &JwtClaims{},
+		SigningKey:    SigningKey,
+	}
+}
 // SignUp registers new users
 func (h *Handler) SignUp(c echo.Context) error {
 	userAttr := models.User{}
