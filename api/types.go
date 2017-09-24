@@ -1,10 +1,13 @@
 package api
 
 import (
+	"github.com/Schtolc/mooncore/database"
+	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 )
 
-var AddressType = graphql.NewObject(graphql.ObjectConfig{
+// AddressObject is a graphql object for address
+var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Address",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -19,7 +22,8 @@ var AddressType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-var PhotoType = graphql.NewObject(graphql.ObjectConfig{
+// PhotoObject is a graphql object for photo
+var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Photo",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -31,7 +35,8 @@ var PhotoType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-var UserType = graphql.NewObject(graphql.ObjectConfig{
+// UserObject is a graphql object for user
+var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "User",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -44,10 +49,20 @@ var UserType = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.String,
 		},
 		"address": &graphql.Field{
-			Type: AddressType,
+			Type: AddressObject,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				address := models.Address{}
+				database.GetInstance().First(&address, p.Source.(models.User).AddressID)
+				return address, nil
+			},
 		},
 		"photo": &graphql.Field{
-			Type: PhotoType,
+			Type: PhotoObject,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				photo := models.Photo{}
+				database.GetInstance().First(&photo, p.Source.(models.User).PhotoID)
+				return photo, nil
+			},
 		},
 	},
 })

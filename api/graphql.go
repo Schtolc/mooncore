@@ -6,7 +6,6 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"log"
-	"strconv"
 )
 
 func getRootMutation(db *gorm.DB) *graphql.Object {
@@ -14,40 +13,31 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 		Name: "RootMutation",
 		Fields: graphql.Fields{
 			"createAddress": &graphql.Field{
-				Type:        AddressType,
+				Type:        AddressObject,
 				Description: "Create new address",
 				Args: graphql.FieldConfigArgument{
 					"lat": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.String),
+						Type: graphql.NewNonNull(graphql.Float),
 					},
 					"lon": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.String),
+						Type: graphql.NewNonNull(graphql.Float),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					slat, _ := params.Args["lat"].(string)
-					slon, _ := params.Args["lon"].(string)
-
-					lat, _ := strconv.ParseFloat(slat, 32)
-					lon, _ := strconv.ParseFloat(slon, 32)
-
-					println(slat, slon)
-
 					address := &models.Address{
-						Lat: float32(lat),
-						Lon: float32(lon),
+						Lat: params.Args["lat"].(float64),
+						Lon: params.Args["lon"].(float64),
 					}
 					if dbc := db.Create(address); dbc.Error != nil {
 						log.Println(dbc.Error)
-						return models.Address{}, dbc.Error
+						return nil, dbc.Error
 					}
 					return address, nil
 				},
 			},
 
 			"createPhoto": &graphql.Field{
-				Type:        PhotoType,
+				Type:        PhotoObject,
 				Description: "Create new photo",
 				Args: graphql.FieldConfigArgument{
 					"path": &graphql.ArgumentConfig{
@@ -55,22 +45,19 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					path, _ := params.Args["path"].(string)
-
 					photo := &models.Photo{
-						Path: path,
+						Path: params.Args["path"].(string),
 					}
 					if dbc := db.Create(photo); dbc.Error != nil {
 						log.Println(dbc.Error)
-						return models.Address{}, dbc.Error
+						return nil, dbc.Error
 					}
 					return photo, nil
 				},
 			},
 
 			"createUser": &graphql.Field{
-				Type:        UserType,
+				Type:        UserObject,
 				Description: "Create new user",
 				Args: graphql.FieldConfigArgument{
 					"name": &graphql.ArgumentConfig{
@@ -83,34 +70,24 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						Type: graphql.NewNonNull(graphql.String),
 					},
 					"address_id": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.String),
+						Type: graphql.NewNonNull(graphql.Int),
 					},
 					"photo_id": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.String),
+						Type: graphql.NewNonNull(graphql.Int),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					name, _ := params.Args["name"].(string)
-					password, _ := params.Args["password"].(string)
-					email, _ := params.Args["email"].(string)
-					saddress_id, _ := params.Args["address_id"].(string)
-					sphoto_id, _ := params.Args["photo_id"].(string)
-
-					address_id, _ := strconv.ParseInt(saddress_id, 10, 32)
-					photo_id, _ := strconv.ParseInt(sphoto_id, 10, 32)
-
 					user := &models.User{
-						Name:      name,
-						Email:     email,
-						Password:  password,
-						AddressID: int(address_id),
-						PhotoID:   int(photo_id),
+						Name:      params.Args["name"].(string),
+						Email:     params.Args["email"].(string),
+						Password:  params.Args["password"].(string),
+						AddressID: params.Args["address_id"].(int),
+						PhotoID:   params.Args["photo_id"].(int),
 					}
 
 					if dbc := db.Create(user); dbc.Error != nil {
 						log.Println(dbc.Error)
-						return models.Address{}, dbc.Error
+						return nil, dbc.Error
 					}
 					return user, nil
 				},
@@ -124,77 +101,77 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 		Name: "RootQuery",
 		Fields: graphql.Fields{
 			"address": &graphql.Field{
-				Type:        AddressType,
+				Type:        AddressObject,
 				Description: "Get single address",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
+						Type: graphql.NewNonNull(graphql.Int),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					idQuery, _ := params.Args["id"].(int)
-
 					address := models.Address{}
-					db.First(&address, idQuery)
+					db.First(&address, params.Args["id"].(int))
 
 					return address, nil
 				},
 			},
 
 			"addressList": &graphql.Field{
-				Type:        graphql.NewList(AddressType),
+				Type:        graphql.NewList(AddressObject),
 				Description: "List of address",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					var addresses []models.Address
 					db.Find(&addresses)
-
-					fmt.Println(addresses)
 					return addresses, nil
 				},
 			},
 
 			"photo": &graphql.Field{
-				Type:        PhotoType,
+				Type:        PhotoObject,
 				Description: "Get single photo",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
+						Type: graphql.NewNonNull(graphql.Int),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					idQuery, _ := params.Args["id"].(int)
-
 					photo := models.Photo{}
-					db.First(&photo, idQuery)
+					db.First(&photo, params.Args["id"].(int))
 
 					return photo, nil
 				},
 			},
 
 			"user": &graphql.Field{
-				Type:        UserType,
+				Type:        UserObject,
 				Description: "Get single user",
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
+						Type: graphql.NewNonNull(graphql.Int),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-					idQuery, _ := params.Args["id"].(int)
-
 					user := models.User{}
-					db.First(&user, idQuery)
+					db.First(&user, params.Args["id"].(int))
 
 					return user, nil
+				},
+			},
+
+			"usersList": &graphql.Field{
+				Type:        graphql.NewList(UserObject),
+				Description: "List of users",
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					var users []models.User
+					db.Find(&users)
+					return users, nil
 				},
 			},
 		},
 	})
 }
 
+//CreateSchema returns graphql schema
 func CreateSchema(db *gorm.DB) graphql.Schema {
 	schema, _ := graphql.NewSchema(graphql.SchemaConfig{
 		Query:    getRootQuery(db),
@@ -203,6 +180,7 @@ func CreateSchema(db *gorm.DB) graphql.Schema {
 	return schema
 }
 
+// ExecuteQuery executes graphql query
 func ExecuteQuery(query string, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,

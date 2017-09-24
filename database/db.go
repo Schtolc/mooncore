@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"github.com/Schtolc/mooncore/models"
@@ -8,8 +8,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var instance *gorm.DB
+
 // InitDatabase opens db connection + migrates schema + sets connection params
-func InitDatabase(config utils.Config) (db *gorm.DB) {
+func InitDatabase(config utils.Config) *gorm.DB {
+	if instance != nil {
+		return instance
+	}
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	if err != nil {
 		logrus.Fatal(err)
@@ -40,5 +45,12 @@ func InitDatabase(config utils.Config) (db *gorm.DB) {
 	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 
 	logrus.Info("models migrated")
+
+	instance = db
 	return db
+}
+
+// GetInstance returns database instance
+func GetInstance() *gorm.DB {
+	return instance
 }

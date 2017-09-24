@@ -3,8 +3,8 @@ package models
 // Address model
 type Address struct {
 	ID  int     `json:"id"`
-	Lat float32 `json:"lat"`
-	Lon float32 `json:"lon"`
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
 }
 
 // Photo model
