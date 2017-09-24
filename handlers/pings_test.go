@@ -11,7 +11,6 @@ import (
 var (
 	conf      = utils.GetConfig()
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-
 )
 
 func TestPing(t *testing.T) {
@@ -29,4 +28,3 @@ func TestPingDb(t *testing.T) {
 		Expect().
 		Status(http.StatusOK).JSON().Object().ContainsKey("message").NotEmpty()
 }
-

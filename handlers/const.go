@@ -17,5 +17,4 @@ var (
 		Code:    "UserAlreadyExists",
 		Message: "User already exists in database",
 	}
-
 )

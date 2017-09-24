@@ -1,16 +1,15 @@
 package handlers
 
 import (
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
-	"net/http"
-	"time"
 	"encoding/json"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/sirupsen/logrus"
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"time"
 )
-
 
 // SigningKey use for generation token
 var SigningKey = []byte("secret")
@@ -32,7 +31,7 @@ func GetJwtConfig() middleware.JWTConfig {
 }
 
 // SignUp registers new users
-func (h *Handler) SignUp (c echo.Context) error {
+func (h *Handler) SignUp(c echo.Context) error {
 	userAttr := &models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
@@ -40,7 +39,8 @@ func (h *Handler) SignUp (c echo.Context) error {
 	}
 
 	user := &models.User{}
-	if h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(user); *user != (models.User{}) {
+	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(user)
+	if *user != (models.User{}) {
 		logrus.WithFields(logrus.Fields{
 			"Name":     userAttr.Name,
 			"Password": userAttr.Password,
@@ -61,7 +61,7 @@ func (h *Handler) SignUp (c echo.Context) error {
 }
 
 // SignIn users; return auth token
-func (h *Handler) SignIn (c echo.Context) error {
+func (h *Handler) SignIn(c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
@@ -83,10 +83,11 @@ func (h *Handler) SignIn (c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON( http.StatusOK, map[string]string{
-	       "token": tokenString,
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": tokenString,
 	})
 }
+
 // SignOut remove user from our database
 func (h *Handler) SignOut(c echo.Context) error {
 	userAttr := models.User{}
@@ -95,9 +96,8 @@ func (h *Handler) SignOut(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).Delete(&models.User{})
-	return c.String( http.StatusOK, "")
+	return c.String(http.StatusOK, "")
 }
-
 
 // CheckJwtToken verifies the validity of token
 func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {

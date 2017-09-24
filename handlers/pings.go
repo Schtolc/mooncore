@@ -43,8 +43,7 @@ func (h *Handler) PingDb(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 	return c.JSON(http.StatusOK, &Resp{
-		Code: "Database Pinged",
+		Code:    "Database Pinged",
 		Message: strconv.Itoa(m.ID),
 	})
 }
-
