@@ -10,7 +10,7 @@ var (
 		Message: "Token is invalid",
 	}
 	internalError = &Resp{
-		Code:    "400",
+		Code:    "500",
 		Message: "Internal Error",
 	}
 	userAlreadyExists = &Resp{
