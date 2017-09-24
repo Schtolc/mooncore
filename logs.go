@@ -9,14 +9,6 @@ import (
 	"syscall"
 )
 
-var (
-	defaultFormatter = &logrus.TextFormatter{
-		TimestampFormat: "2006-01-02 15:04:05",
-		FullTimestamp:   true,
-	}
-	defaultStackLevels = []logrus.Level{logrus.PanicLevel, logrus.FatalLevel, logrus.ErrorLevel}
-)
-
 func openLogFile(filename string) *os.File {
 	logfile, err := os.OpenFile(filename, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -27,9 +19,8 @@ func openLogFile(filename string) *os.File {
 
 // InitLogs sets logger format and hooks, redirects stdout and strerr to main logfile
 func InitLogs(config utils.Config) {
-	logrus.SetFormatter(defaultFormatter)
-	logrus.SetLevel(logrus.InfoLevel)
-	logrus.AddHook(logrus_stack.NewHook(defaultStackLevels, defaultStackLevels))
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.AddHook(logrus_stack.StandardHook())
 
 	logfile := openLogFile(config.Logs.Main)
 
