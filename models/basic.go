@@ -16,9 +16,9 @@ type Photo struct {
 // User model
 type User struct {
 	ID       int    `json:"-"`
-	Name     string `schema:"name"`
-	Email    string `schema:"email"`
-	Password string `schema:"password"`
+	Name     string `gorm:"not null;unique; column:name"`
+	Email    string `gorm:"not null;unique; column:email"`
+	Password string `gorm:"not null;unique; column:password"`
 }
 
 // Client model

@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"time"
-
 	"encoding/json"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/sirupsen/logrus"
@@ -16,13 +15,13 @@ import (
 // SigningKey use for generation token
 var SigningKey = []byte("secret")
 
-
 // JwtClaims - custom config for jwt
 type JwtClaims struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	jwt.StandardClaims
 }
+
 // GetJwtConfig return configuration for jwt registration
 func GetJwtConfig() middleware.JWTConfig {
 	return middleware.JWTConfig{
@@ -31,29 +30,38 @@ func GetJwtConfig() middleware.JWTConfig {
 		SigningKey:    SigningKey,
 	}
 }
+
 // SignUp registers new users
-func (h *Handler) SignUp(c echo.Context) error {
-	userAttr := models.User{}
+func (h *Handler) SignUp (c echo.Context) error {
+	userAttr := &models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
-	dbUser := &models.User{
+
+	user := &models.User{}
+	if h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(user); *user != (models.User{}) {
+		logrus.WithFields(logrus.Fields{
+			"Name":     userAttr.Name,
+			"Password": userAttr.Password,
+		}).Info("User already exists")
+		return c.JSON(http.StatusBadRequest, userAlreadyExists)
+	}
+
+	if dbc := h.DB.Create(&models.User{
 		Name:     userAttr.Name,
 		Email:    userAttr.Email,
 		Password: userAttr.Password,
-	}
-
-	if dbc := h.DB.Create(dbUser); dbc.Error != nil {
+	}); dbc.Error != nil {
 		logrus.Error(dbc.Error)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON(http.StatusOK, "")
+	return c.String(http.StatusOK, "")
 }
 
 // SignIn users; return auth token
-func (h *Handler) SignIn(c echo.Context) error {
+func (h *Handler) SignIn (c echo.Context) error {
 	userAttr := models.User{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
@@ -61,28 +69,40 @@ func (h *Handler) SignIn(c echo.Context) error {
 	}
 	dbUser := &models.User{}
 	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(dbUser)
-
-	if dbUser == (&models.User{}) {
+	if *dbUser == (models.User{}) {
 		logrus.WithFields(logrus.Fields{
 			"Name":     userAttr.Name,
 			"Password": userAttr.Password,
 		}).Info("Unregistered user")
 		return c.JSON(http.StatusBadRequest, needRegistration)
 	}
+
 	tokenString, err := createJwtToken(dbUser)
 	if err != nil {
 		logrus.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON( http.StatusOK, tokenString )
+	return c.JSON( http.StatusOK, map[string]string{
+	       "token": tokenString,
+	})
 }
+// SignOut remove user from our database
+func (h *Handler) SignOut(c echo.Context) error {
+	userAttr := models.User{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
+		logrus.Error(err)
+		return c.JSON(http.StatusInternalServerError, internalError)
+	}
+	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).Delete(&models.User{})
+	return c.String( http.StatusOK, "")
+}
+
 
 // CheckJwtToken verifies the validity of token
 func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		auth := c.Request().Header.Get("Authorization")[7:]
-
 		token, err := jwt.ParseWithClaims(auth, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return SigningKey, nil
 		})
@@ -97,8 +117,7 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 			}).Info("Token verification")
 
 			dbUser := &models.User{}
-			h.DB.Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser)
-			if dbUser == (&models.User{}) {
+			if h.DB.Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser); *dbUser == (models.User{}) {
 				logrus.WithFields(logrus.Fields{
 					"Name":     claims.Name,
 					"Password": claims.Password,

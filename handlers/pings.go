@@ -29,7 +29,7 @@ func Init(db *gorm.DB) *Handler {
 
 // Ping is a simple handler for checking if server is up and running.
 func (h *Handler) Ping(c echo.Context) error {
-	return c.JSON(http.StatusOK, "ECHO_PING")
+	return c.String(http.StatusOK, "ECHO_PING")
 }
 
 // PingDb is a simple handler for checking if database is up and running.
@@ -42,5 +42,9 @@ func (h *Handler) PingDb(c echo.Context) error {
 		logrus.Error(dbc.Error)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
-	return c.JSON(http.StatusOK, "Database pinged: " + strconv.Itoa(m.ID))
+	return c.JSON(http.StatusOK, &Resp{
+		Code: "Database Pinged",
+		Message: strconv.Itoa(m.ID),
+	})
 }
+
