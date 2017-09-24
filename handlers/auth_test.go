@@ -18,7 +18,10 @@ var (
 
 func TestSignUp(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
-	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).Text().Empty()
+	m := map[string]string{
+		"Code": "200",
+	}
+	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(m)
 
 }
 
@@ -30,5 +33,8 @@ func TestSignIn(t *testing.T) {
 
 func TestSignOut(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
-	e.POST("/sign_out").WithHeader("Authorization", "Bearer "+token).WithJSON(testUser).Expect().Status(http.StatusOK).Text().Empty()
+	m := map[string]string{
+		"Code": "200",
+	}
+	e.POST("/sign_out").WithHeader("Authorization", "Bearer "+token).WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(m)
 }

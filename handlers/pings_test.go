@@ -17,7 +17,7 @@ func TestPing(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
 
 	ping := &Resp{
-		Code: "200",
+		Code:    "200",
 		Message: "ECHO_PING",
 	}
 	e.GET("/ping").

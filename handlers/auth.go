@@ -57,7 +57,9 @@ func (h *Handler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, map[string]string{
+		"Code": "200",
+	})
 }
 
 // SignIn users; return auth token
@@ -84,7 +86,7 @@ func (h *Handler) SignIn(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{
-		"Code": "200",
+		"Code":  "200",
 		"Token": tokenString,
 	})
 }
@@ -97,7 +99,9 @@ func (h *Handler) SignOut(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).Delete(&models.User{})
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, map[string]string{
+		"Code": "200",
+	})
 }
 
 // CheckJwtToken verifies the validity of token
