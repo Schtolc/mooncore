@@ -15,16 +15,16 @@ func InitServer(config utils.Config, db *gorm.DB) (e *echo.Echo) {
 
 	h := handlers.Init(db)
 
-	server.POST("/v1/sign_up", h.SignUp)
-	server.POST("/v1/sign_in", h.SignIn)
+	server.POST("/sign_up", h.SignUp)
+	server.POST("/sign_in", h.SignIn)
 
-	server.GET("/v1/ping", h.Ping)
-	server.GET("/v1/ping_db", h.PingDb)
+	server.GET("/ping", h.Ping)
+	server.GET("/ping_db", h.PingDb)
 
-	AuthGroup := server.Group("/v1")
+	AuthGroup := server.Group("/")
 	AuthGroup.Use(middleware.JWTWithConfig(handlers.GetJwtConfig()))
 	AuthGroup.Use(h.CheckJwtToken)
-	AuthGroup.POST("/sign_out", h.SignOut)
+	AuthGroup.POST("sign_out", h.SignOut)
 
 	return server
 }

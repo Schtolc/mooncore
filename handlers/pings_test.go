@@ -16,15 +16,20 @@ var (
 func TestPing(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
 
-	e.GET("/v1/ping").
+	ping := &Resp{
+		Code: "200",
+		Message: "ECHO_PING",
+	}
+	e.GET("/ping").
 		Expect().
-		Status(http.StatusOK).Text().Equal("ECHO_PING")
+		Status(http.StatusOK).JSON().Object().Equal(ping)
 }
 
 func TestPingDb(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
 
-	e.GET("/v1/ping_db").
+	m := e.GET("/ping_db").
 		Expect().
 		Status(http.StatusOK).JSON().Object().ContainsKey("message").NotEmpty()
+	m.Value("code").Equal("200")
 }
