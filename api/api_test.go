@@ -1,16 +1,16 @@
 package api
 
 import (
-	"github.com/Schtolc/mooncore/utils"
-	"net/url"
-	"net/http"
-	"testing"
-	"github.com/gavv/httpexpect"
+	"fmt"
 	"github.com/Schtolc/mooncore/database"
 	"github.com/Schtolc/mooncore/models"
-	"math/rand"
-	"fmt"
+	"github.com/Schtolc/mooncore/utils"
+	"github.com/gavv/httpexpect"
 	"math"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"testing"
 )
 
 var (
@@ -152,10 +152,10 @@ func TestCreateUser(t *testing.T) {
 	name := randString()
 	password := randString()
 	email := randString()
-	addressId := address.ID
-	photoId := photo.ID
+	addressID := address.ID
+	photoID := photo.ID
 
-	query := fmt.Sprintf("mutation{createUser(name:\"%s\", password:\"%s\", email:\"%s\", address_id:%d, photo_id:%d){id}}", name, password, email, addressId, photoId)
+	query := fmt.Sprintf("mutation{createUser(name:\"%s\", password:\"%s\", email:\"%s\", address_id:%d, photo_id:%d){id}}", name, password, email, addressID, photoID)
 
 	id := e.GET("/graphql").
 		WithQuery("query", query).Expect().
@@ -167,7 +167,7 @@ func TestCreateUser(t *testing.T) {
 	user := models.User{}
 	db.First(&user, int(id))
 
-	if name != user.Name || password != user.Password || email != user.Email || addressId != user.AddressID || photoId != user.PhotoID {
+	if name != user.Name || password != user.Password || email != user.Email || addressID != user.AddressID || photoID != user.PhotoID {
 		t.Fail()
 	}
 
