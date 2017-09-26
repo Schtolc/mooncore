@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"github.com/Schtolc/mooncore/database"
@@ -52,7 +52,7 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				address := models.Address{}
-				database.GetInstance().First(&address, p.Source.(models.User).AddressID)
+				database.Instance().First(&address, p.Source.(models.User).AddressID)
 				return address, nil
 			},
 		},
@@ -60,7 +60,7 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				photo := models.Photo{}
-				database.GetInstance().First(&photo, p.Source.(models.User).PhotoID)
+				database.Instance().First(&photo, p.Source.(models.User).PhotoID)
 				return photo, nil
 			},
 		},

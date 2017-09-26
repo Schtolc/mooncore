@@ -1,10 +1,10 @@
-package api
+package handlers
 
 import (
 	"fmt"
+	"github.com/Schtolc/mooncore/config"
 	"github.com/Schtolc/mooncore/database"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/Schtolc/mooncore/utils"
 	"github.com/gavv/httpexpect"
 	"math"
 	"math/rand"
@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	conf      = utils.GetConfig()
+	conf      = config.Instance()
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-	db        = database.InitDatabase(conf)
+	db        = database.Instance()
 )
 
 func randString() string {
@@ -36,10 +36,13 @@ func TestCreateAddress(t *testing.T) {
 
 	query := fmt.Sprintf("mutation{createAddress(lat:%f,lon:%f){id}}", lat, lon)
 
-	id := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	id := root.Object().Value("body").
 		Object().Value("createAddress").
 		Object().Value("id").Number().Raw()
 
@@ -60,25 +63,34 @@ func TestGetAddress(t *testing.T) {
 		Lat: rand.Float64(),
 		Lon: rand.Float64(),
 	}
-
 	db.Create(&address)
 
 	query := fmt.Sprintf("{address(id:%d){lat, lon}}", address.ID)
 
-	obj := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	obj := root.Object().Value("body").
 		Object().Value("address")
 
-	lat := obj.Object().Value("lat").Raw()
-	lon := obj.Object().Value("lon").Raw()
+	lat := obj.Object().Value("lat").Number().Raw()
+	lon := obj.Object().Value("lon").Number().Raw()
 
-	if lat != address.Lat || lon != address.Lon {
+	if math.Abs(address.Lat-lat) > 1 || math.Abs(address.Lon-lon) > 1 {
 		t.Fail()
 	}
 
 	db.Delete(&address)
+
+	root = e.GET("/graphql").
+		WithQuery("query", query).Expect().
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("body").NotNull()
 }
 
 func TestCreatePhoto(t *testing.T) {
@@ -88,10 +100,13 @@ func TestCreatePhoto(t *testing.T) {
 
 	query := fmt.Sprintf("mutation{createPhoto(path:\"%s\"){id}}", path)
 
-	id := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	id := root.Object().Value("body").
 		Object().Value("createPhoto").
 		Object().Value("id").Number().Raw()
 
@@ -111,24 +126,33 @@ func TestGetPhoto(t *testing.T) {
 	photo := &models.Photo{
 		Path: randString(),
 	}
-
 	db.Create(&photo)
 
 	query := fmt.Sprintf("{photo(id:%d){path}}", photo.ID)
 
-	obj := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	root = root.Object().Value("body").
 		Object().Value("photo")
 
-	path := obj.Object().Value("path").Raw()
+	path := root.Object().Value("path").Raw()
 
 	if path != photo.Path {
 		t.Fail()
 	}
 
 	db.Delete(&photo)
+
+	root = e.GET("/graphql").
+		WithQuery("query", query).Expect().
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("body").NotNull()
 }
 
 func TestCreateUser(t *testing.T) {
@@ -138,16 +162,13 @@ func TestCreateUser(t *testing.T) {
 		Lat: rand.Float64(),
 		Lon: rand.Float64(),
 	}
-
-	db.Create(&address) // create test address
+	db.Create(&address)
 
 	path := randString()
-
 	photo := &models.Photo{
 		Path: path,
 	}
-
-	db.Create(&photo) // create test photo
+	db.Create(&photo)
 
 	name := randString()
 	password := randString()
@@ -155,12 +176,19 @@ func TestCreateUser(t *testing.T) {
 	addressID := address.ID
 	photoID := photo.ID
 
-	query := fmt.Sprintf("mutation{createUser(name:\"%s\", password:\"%s\", email:\"%s\", address_id:%d, photo_id:%d){id}}", name, password, email, addressID, photoID)
+	query := fmt.Sprintf("mutation{createUser(name:\"%s\", "+
+		"password:\"%s\", "+
+		"email:\"%s\", "+
+		"address_id:%d, "+
+		"photo_id:%d){id}}", name, password, email, addressID, photoID)
 
-	id := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	id := root.Object().Value("body").
 		Object().Value("createUser").
 		Object().Value("id").Number().Raw()
 
@@ -183,16 +211,13 @@ func TestGetUser(t *testing.T) {
 		Lat: rand.Float64(),
 		Lon: rand.Float64(),
 	}
-
-	db.Create(&address) // create test address
+	db.Create(&address)
 
 	path := randString()
-
 	photo := &models.Photo{
 		Path: path,
 	}
-
-	db.Create(&photo) // create test photo
+	db.Create(&photo)
 
 	user := models.User{
 		Name:      randString(),
@@ -202,22 +227,32 @@ func TestGetUser(t *testing.T) {
 		PhotoID:   photo.ID,
 	}
 
-	db.Create(&user) // create test user
+	db.Create(&user)
 
 	query := fmt.Sprintf("{user(id:%d){name, email, address{id}, photo{id}}}", user.ID)
 
-	userRoot := e.GET("/graphql").
+	root := e.GET("/graphql").
 		WithQuery("query", query).Expect().
-		Status(http.StatusOK).JSON().
-		Object().Value("data").
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(OK)
+
+	root = root.Object().Value("body").
 		Object().Value("user")
 
-	userRoot.Object().Value("name").Equal(user.Name)
-	userRoot.Object().Value("email").Equal(user.Email)
-	userRoot.Object().Value("address").Object().Value("id").Equal(user.AddressID)
-	userRoot.Object().Value("photo").Object().Value("id").Equal(user.PhotoID)
+	root.Object().Value("name").Equal(user.Name)
+	root.Object().Value("email").Equal(user.Email)
+	root.Object().Value("address").Object().Value("id").Equal(user.AddressID)
+	root.Object().Value("photo").Object().Value("id").Equal(user.PhotoID)
 
 	db.Delete(&user)
 	db.Delete(&photo)
 	db.Delete(&address)
+
+	root = e.GET("/graphql").
+		WithQuery("query", query).Expect().
+		Status(http.StatusOK).JSON()
+
+	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("body").NotNull()
 }

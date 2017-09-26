@@ -1,20 +1,15 @@
 package database
 
 import (
+	"github.com/Schtolc/mooncore/config"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/Schtolc/mooncore/utils"
 	_ "github.com/go-sql-driver/mysql" // mysql driver for gorm.Open
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
+	"sync"
 )
 
-var instance *gorm.DB
-
-// InitDatabase opens db connection + migrates schema + sets connection params
-func InitDatabase(config utils.Config) *gorm.DB {
-	if instance != nil {
-		return instance
-	}
+func initDatabase(config config.Config) *gorm.DB {
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	if err != nil {
 		logrus.Fatal(err)
@@ -45,12 +40,21 @@ func InitDatabase(config utils.Config) *gorm.DB {
 	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 
 	logrus.Info("models migrated")
-
-	instance = db
 	return db
 }
 
-// GetInstance returns database instance
-func GetInstance() *gorm.DB {
+var instance *gorm.DB
+var mutex = &sync.Mutex{}
+
+// Instance returns database instance
+func Instance() *gorm.DB {
+	if instance != nil {
+		return instance
+	}
+	mutex.Lock()
+	defer mutex.Unlock()
+	if instance == nil {
+		instance = initDatabase(config.Instance())
+	}
 	return instance
 }

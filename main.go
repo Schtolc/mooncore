@@ -1,16 +1,16 @@
 package main
 
 import (
+	"github.com/Schtolc/mooncore/config"
 	"github.com/Schtolc/mooncore/database"
-	"github.com/Schtolc/mooncore/utils"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	conf := utils.GetConfig()
+	conf := config.Instance()
 	InitLogs(conf)
 
-	db := database.InitDatabase(conf)
+	db := database.Instance()
 	defer db.Close()
 
 	server := InitServer(conf, db)

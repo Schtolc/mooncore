@@ -63,3 +63,9 @@ type ManicureMaterial struct {
 	Description string    `sql:"type:text" json:"description"`
 	Services    []Service `gorm:"many2many:service_manicure_materials;"`
 }
+
+// Response model
+type Response struct {
+	Code int         `json:"code"`
+	Body interface{} `json:"body"`
+}

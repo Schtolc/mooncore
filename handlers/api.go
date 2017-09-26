@@ -1,11 +1,13 @@
-package api
+package handlers
 
 import (
-	"fmt"
+	"github.com/Schtolc/mooncore/database"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"log"
+	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
 func getRootMutation(db *gorm.DB) *graphql.Object {
@@ -29,7 +31,7 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						Lon: params.Args["lon"].(float64),
 					}
 					if dbc := db.Create(address); dbc.Error != nil {
-						log.Println(dbc.Error)
+						logrus.Println(dbc.Error)
 						return nil, dbc.Error
 					}
 					return address, nil
@@ -49,7 +51,7 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						Path: params.Args["path"].(string),
 					}
 					if dbc := db.Create(photo); dbc.Error != nil {
-						log.Println(dbc.Error)
+						logrus.Println(dbc.Error)
 						return nil, dbc.Error
 					}
 					return photo, nil
@@ -86,7 +88,7 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 					}
 
 					if dbc := db.Create(user); dbc.Error != nil {
-						log.Println(dbc.Error)
+						logrus.Println(dbc.Error)
 						return nil, dbc.Error
 					}
 					return user, nil
@@ -110,8 +112,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					address := models.Address{}
-					db.First(&address, params.Args["id"].(int))
-
+					if dbc := db.First(&address, params.Args["id"].(int)); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
 					return address, nil
 				},
 			},
@@ -121,7 +125,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				Description: "List of address",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					var addresses []models.Address
-					db.Find(&addresses)
+					if dbc := db.Find(&addresses); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
 					return addresses, nil
 				},
 			},
@@ -136,8 +143,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					photo := models.Photo{}
-					db.First(&photo, params.Args["id"].(int))
-
+					if dbc := db.First(&photo, params.Args["id"].(int)); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
 					return photo, nil
 				},
 			},
@@ -152,8 +161,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					user := models.User{}
-					db.First(&user, params.Args["id"].(int))
-
+					if dbc := db.First(&user, params.Args["id"].(int)); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
 					return user, nil
 				},
 			},
@@ -163,7 +174,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				Description: "List of users",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					var users []models.User
-					db.Find(&users)
+					if dbc := db.Find(&users); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
 					return users, nil
 				},
 			},
@@ -171,23 +185,38 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 	})
 }
 
-//CreateSchema returns graphql schema
-func CreateSchema(db *gorm.DB) graphql.Schema {
-	schema, _ := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    getRootQuery(db),
-		Mutation: getRootMutation(db),
+var schema *graphql.Schema
+
+func createSchema() graphql.Schema {
+	if schema != nil {
+		return *schema
+	}
+	_schema, _ := graphql.NewSchema(graphql.SchemaConfig{
+		Query:    getRootQuery(database.Instance()),
+		Mutation: getRootMutation(database.Instance()),
 	})
-	return schema
+	schema = &_schema
+	return *schema
 }
 
-// ExecuteQuery executes graphql query
-func ExecuteQuery(query string, schema graphql.Schema) *graphql.Result {
+func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
 		RequestString: query,
 	})
-	if len(result.Errors) > 0 {
-		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
-	}
 	return result
+}
+
+// API GraphQL handler
+func API(c echo.Context) error {
+	result := executeQuery(c.QueryParams().Get("query"), createSchema())
+	response := models.Response{}
+	if len(result.Errors) > 0 {
+		response.Code = ERROR
+		response.Body = result.Errors
+	} else {
+		response.Code = OK
+		response.Body = result.Data
+	}
+	return c.JSON(http.StatusOK, response)
 }
