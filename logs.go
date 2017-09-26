@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"os"
-	//"syscall"
+	"syscall"
 )
 
 func openLogFile(filename string) *os.File {
@@ -22,14 +22,14 @@ func InitLogs(config config.Config) {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.AddHook(logrus_stack.StandardHook())
 
-	//logfile := openLogFile(config.Logs.Main)
+	logfile := openLogFile(config.Logs.Main)
 
-	//if err := syscall.Dup2(int(logfile.Fd()), int(os.Stderr.Fd())); err != nil {
-	//	logrus.Fatal(err)
-	//}
-	//if err := syscall.Dup2(int(logfile.Fd()), int(os.Stdout.Fd())); err != nil {
-	//	logrus.Fatal(err)
-	//}
+	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stderr.Fd())); err != nil {
+		logrus.Fatal(err)
+	}
+	if err := syscall.Dup2(int(logfile.Fd()), int(os.Stdout.Fd())); err != nil {
+		logrus.Fatal(err)
+	}
 }
 
 // GetAccessConfig returns config for access logs used in echo middleware
