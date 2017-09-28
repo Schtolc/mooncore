@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/Schtolc/mooncore/database"
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
+	"github.com/sirupsen/logrus"
 )
 
 // AddressObject is a graphql object for address
@@ -52,7 +53,11 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				address := models.Address{}
-				database.Instance().First(&address, p.Source.(models.User).AddressID)
+				if dbc := dependencies.DBInstance().First(&address, p.Source.(models.User).AddressID); dbc.Error != nil {
+					logrus.Println(dbc.Error)
+					return nil, dbc.Error
+				}
+
 				return address, nil
 			},
 		},
@@ -60,7 +65,10 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				photo := models.Photo{}
-				database.Instance().First(&photo, p.Source.(models.User).PhotoID)
+				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.User).AddressID); dbc.Error != nil {
+					logrus.Println(dbc.Error)
+					return nil, dbc.Error
+				}
 				return photo, nil
 			},
 		},

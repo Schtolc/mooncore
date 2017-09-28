@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"github.com/gavv/httpexpect"
 	"net/http"
 	"testing"
 )
 
 func TestPing(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	resp := Resp{Code: "200", Message: "ECHO_PING"}
 	e.GET("/ping").
@@ -17,7 +16,7 @@ func TestPing(t *testing.T) {
 }
 
 func TestPingDb(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	e.GET("/ping_db").
 		Expect().

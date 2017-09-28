@@ -1,4 +1,4 @@
-package config
+package dependencies
 
 import (
 	"github.com/sirupsen/logrus"
@@ -37,32 +37,31 @@ type Config struct {
 	}
 }
 
-var instance *Config
-var mutex = &sync.Mutex{}
+var configInstance *Config
+var configMutex = &sync.Mutex{}
 
-func getConfig() Config {
+func getConfig() *Config {
 	content, err := ioutil.ReadFile(filepath.Join(projectRoot, "config.yml"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	conf := Config{}
-	err = yaml.Unmarshal([]byte(content), &conf)
+	conf := &Config{}
+	err = yaml.Unmarshal([]byte(content), conf)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	return conf
 }
 
-// Instance returns config instance
-func Instance() Config {
-	if instance != nil {
-		return *instance
+// ConfigInstance returns config instance
+func ConfigInstance() *Config {
+	if configInstance != nil {
+		return configInstance
 	}
-	mutex.Lock()
-	defer mutex.Unlock()
-	if instance == nil {
-		var _instance = getConfig()
-		instance = &_instance
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	if configInstance == nil {
+		configInstance = getConfig()
 	}
-	return *instance
+	return configInstance
 }

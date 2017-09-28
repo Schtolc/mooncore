@@ -1,7 +1,6 @@
-package database
+package dependencies
 
 import (
-	"github.com/Schtolc/mooncore/config"
 	"github.com/Schtolc/mooncore/models"
 	_ "github.com/go-sql-driver/mysql" // mysql driver for gorm.Open
 	"github.com/jinzhu/gorm"
@@ -9,7 +8,7 @@ import (
 	"sync"
 )
 
-func initDatabase(config config.Config) *gorm.DB {
+func initDatabase(config *Config) *gorm.DB {
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	if err != nil {
 		logrus.Fatal(err)
@@ -43,18 +42,18 @@ func initDatabase(config config.Config) *gorm.DB {
 	return db
 }
 
-var instance *gorm.DB
-var mutex = &sync.Mutex{}
+var dbInstance *gorm.DB
+var dbMutex = &sync.Mutex{}
 
-// Instance returns database instance
-func Instance() *gorm.DB {
-	if instance != nil {
-		return instance
+// DBInstance returns database instance
+func DBInstance() *gorm.DB {
+	if dbInstance != nil {
+		return dbInstance
 	}
-	mutex.Lock()
-	defer mutex.Unlock()
-	if instance == nil {
-		instance = initDatabase(config.Instance())
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+	if dbInstance == nil {
+		dbInstance = initDatabase(ConfigInstance())
 	}
-	return instance
+	return dbInstance
 }

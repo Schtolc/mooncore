@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/Schtolc/mooncore/database"
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
@@ -192,8 +192,8 @@ func createSchema() graphql.Schema {
 		return *schema
 	}
 	_schema, _ := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    getRootQuery(database.Instance()),
-		Mutation: getRootMutation(database.Instance()),
+		Query:    getRootQuery(dependencies.DBInstance()),
+		Mutation: getRootMutation(dependencies.DBInstance()),
 	})
 	schema = &_schema
 	return *schema
@@ -210,9 +210,9 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 // API GraphQL handler
 func API(c echo.Context) error {
 	result := executeQuery(c.QueryParams().Get("query"), createSchema())
-	response := models.Response{}
+	response := Response{}
 	if len(result.Errors) > 0 {
-		response.Code = ERROR
+		response.Code = NotFound
 		response.Body = result.Errors
 	} else {
 		response.Code = OK

@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/Schtolc/mooncore/config"
-	"github.com/Schtolc/mooncore/database"
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/gavv/httpexpect"
-	"math"
+	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -14,10 +13,18 @@ import (
 )
 
 var (
-	conf      = config.Instance()
+	conf      = dependencies.ConfigInstance()
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-	db        = database.Instance()
+	db        = dependencies.DBInstance()
 )
+
+func expect(t *testing.T) *httpexpect.Expect {
+	return httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  localhost.String(),
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: nil,
+	})
+}
 
 func randString() string {
 	var result string
@@ -28,8 +35,25 @@ func randString() string {
 	return result
 }
 
+func createAddress(t *testing.T) *models.Address {
+	address := &models.Address{
+		Lat: rand.Float64(),
+		Lon: rand.Float64(),
+	}
+	assert.Nil(t, db.Create(&address).Error, "address was not created")
+	return address
+}
+
+func createPhoto(t *testing.T) *models.Photo {
+	photo := &models.Photo{
+		Path: randString(),
+	}
+	assert.Nil(t, db.Create(&photo).Error, "photo was not created")
+	return photo
+}
+
 func TestCreateAddress(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	lat := rand.Float64()
 	lon := rand.Float64()
@@ -47,23 +71,18 @@ func TestCreateAddress(t *testing.T) {
 		Object().Value("id").Number().Raw()
 
 	address := models.Address{}
-	db.First(&address, int(id))
 
-	if math.Abs(address.Lat-lat) > 1 || math.Abs(address.Lon-lon) > 1 {
-		t.Fail()
-	}
+	assert.Nil(t, db.First(&address, int(id)).Error, "address was not created")
+	assert.Equal(t, int(address.Lat), int(lat), "created lat doesn't equal to returned")
+	assert.Equal(t, int(address.Lon), int(lon), "created lon doesn't equal to returned")
 
 	db.Delete(&address)
 }
 
 func TestGetAddress(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
-	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
-	}
-	db.Create(&address)
+	address := createAddress(t)
 
 	query := fmt.Sprintf("{address(id:%d){lat, lon}}", address.ID)
 
@@ -79,9 +98,8 @@ func TestGetAddress(t *testing.T) {
 	lat := obj.Object().Value("lat").Number().Raw()
 	lon := obj.Object().Value("lon").Number().Raw()
 
-	if math.Abs(address.Lat-lat) > 1 || math.Abs(address.Lon-lon) > 1 {
-		t.Fail()
-	}
+	assert.Equal(t, int(address.Lat), int(lat), "created lat doesn't equal to returned")
+	assert.Equal(t, int(address.Lon), int(lon), "created lon doesn't equal to returned")
 
 	db.Delete(&address)
 
@@ -89,12 +107,12 @@ func TestGetAddress(t *testing.T) {
 		WithQuery("query", query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("code").Number().Equal(NotFound)
 	root.Object().Value("body").NotNull()
 }
 
 func TestCreatePhoto(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	path := randString()
 
@@ -111,22 +129,17 @@ func TestCreatePhoto(t *testing.T) {
 		Object().Value("id").Number().Raw()
 
 	photo := models.Photo{}
-	db.First(&photo, int(id))
 
-	if photo.Path != path {
-		t.Fail()
-	}
+	assert.Nil(t, db.First(&photo, int(id)).Error, "address was not created")
+	assert.Equal(t, photo.Path, path, "created path doesn't equal to returned")
 
 	db.Delete(&photo)
 }
 
 func TestGetPhoto(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
-	photo := &models.Photo{
-		Path: randString(),
-	}
-	db.Create(&photo)
+	photo := createPhoto(t)
 
 	query := fmt.Sprintf("{photo(id:%d){path}}", photo.ID)
 
@@ -141,9 +154,7 @@ func TestGetPhoto(t *testing.T) {
 
 	path := root.Object().Value("path").Raw()
 
-	if path != photo.Path {
-		t.Fail()
-	}
+	assert.Equal(t, photo.Path, path, "created path doesn't equal to returned")
 
 	db.Delete(&photo)
 
@@ -151,24 +162,15 @@ func TestGetPhoto(t *testing.T) {
 		WithQuery("query", query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("code").Number().Equal(NotFound)
 	root.Object().Value("body").NotNull()
 }
 
 func TestCreateUser(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
-	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
-	}
-	db.Create(&address)
-
-	path := randString()
-	photo := &models.Photo{
-		Path: path,
-	}
-	db.Create(&photo)
+	address := createAddress(t)
+	photo := createPhoto(t)
 
 	name := randString()
 	password := randString()
@@ -193,11 +195,14 @@ func TestCreateUser(t *testing.T) {
 		Object().Value("id").Number().Raw()
 
 	user := models.User{}
-	db.First(&user, int(id))
 
-	if name != user.Name || password != user.Password || email != user.Email || addressID != user.AddressID || photoID != user.PhotoID {
-		t.Fail()
-	}
+	assert.Nil(t, db.First(&user, int(id)).Error, "user was not created")
+
+	assert.Equal(t, user.Name, name, "created name doesn't equal to returned")
+	assert.Equal(t, user.Password, password, "created password doesn't equal to returned")
+	assert.Equal(t, user.Email, email, "created email doesn't equal to returned")
+	assert.Equal(t, user.AddressID, addressID, "created addressID doesn't equal to returned")
+	assert.Equal(t, user.PhotoID, photoID, "created photoID doesn't equal to returned")
 
 	db.Delete(&user)
 	db.Delete(&photo)
@@ -205,19 +210,10 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
-	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
-	}
-	db.Create(&address)
-
-	path := randString()
-	photo := &models.Photo{
-		Path: path,
-	}
-	db.Create(&photo)
+	address := createAddress(t)
+	photo := createPhoto(t)
 
 	user := models.User{
 		Name:      randString(),
@@ -227,7 +223,7 @@ func TestGetUser(t *testing.T) {
 		PhotoID:   photo.ID,
 	}
 
-	db.Create(&user)
+	assert.Nil(t, db.Create(&user).Error, "user was not created")
 
 	query := fmt.Sprintf("{user(id:%d){name, email, address{id}, photo{id}}}", user.ID)
 
@@ -253,6 +249,6 @@ func TestGetUser(t *testing.T) {
 		WithQuery("query", query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(ERROR)
+	root.Object().Value("code").Number().Equal(NotFound)
 	root.Object().Value("body").NotNull()
 }

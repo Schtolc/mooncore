@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Schtolc/mooncore/config"
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/handlers"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
@@ -9,7 +9,7 @@ import (
 )
 
 // InitServer inits echo server: sets access logs and handlers
-func InitServer(config config.Config, db *gorm.DB) (e *echo.Echo) {
+func InitServer(config *dependencies.Config, db *gorm.DB) (e *echo.Echo) {
 	server := echo.New()
 	server.Use(middleware.LoggerWithConfig(GetAccessConfig(config.Logs.Access)))
 
