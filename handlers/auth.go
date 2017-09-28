@@ -9,46 +9,43 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+	"github.com/Schtolc/mooncore/dependencies"
 )
 
-// SigningKey use for generation token
-var SigningKey = []byte("secret")
 
-// JwtClaims - custom config for jwt
-type JwtClaims struct {
+type jwtClaims struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	jwt.StandardClaims
 }
 
+var signingKey = []byte("secret")
+
 // GetJwtConfig return configuration for jwt registration
 func GetJwtConfig() middleware.JWTConfig {
 	return middleware.JWTConfig{
 		SigningMethod: "HS256",
-		Claims:        &JwtClaims{},
-		SigningKey:    SigningKey,
+		Claims:        &jwtClaims{},
+		SigningKey:    signingKey,
 	}
 }
 
 // SignUp registers new users
-func (h *Handler) SignUp(c echo.Context) error {
-	userAttr := &models.User{}
+func SignUp(c echo.Context) error {
+	userAttr := &models.UserAuth{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
-
-	user := &models.User{}
-	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(user)
-	if *user != (models.User{}) {
-		logrus.WithFields(logrus.Fields{
-			"Name":     userAttr.Name,
-			"Password": userAttr.Password,
-		}).Info("User already exists")
+	// check body with wrong fields
+	user := &models.UserAuth{}
+	dependencies.DBInstance().Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(user)
+	if *user != (models.UserAuth{}) {
+		logrus.Info("User already exists: %s", userAttr.Name)
 		return c.JSON(http.StatusBadRequest, userAlreadyExists)
 	}
 
-	if dbc := h.DB.Create(&models.User{
+	if dbc := dependencies.DBInstance().Create(&models.UserAuth{
 		Name:     userAttr.Name,
 		Email:    userAttr.Email,
 		Password: userAttr.Password,
@@ -57,25 +54,22 @@ func (h *Handler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"Code": "200",
+	return c.JSON(http.StatusOK, &Response{
+		Code: OK,
 	})
 }
 
 // SignIn users; return auth token
-func (h *Handler) SignIn(c echo.Context) error {
-	userAttr := models.User{}
+func SignIn(c echo.Context) error {
+	userAttr := models.UserAuth{}
 	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
 		logrus.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
-	dbUser := &models.User{}
-	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(dbUser)
-	if *dbUser == (models.User{}) {
-		logrus.WithFields(logrus.Fields{
-			"Name":     userAttr.Name,
-			"Password": userAttr.Password,
-		}).Info("Unregistered user")
+	dbUser := &models.UserAuth{}
+	dependencies.DBInstance().Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).First(dbUser)
+	if *dbUser == (models.UserAuth{}) {
+		logrus.Info("Unregistered user: %s", userAttr.Name)
 		return c.JSON(http.StatusBadRequest, needRegistration)
 	}
 
@@ -85,48 +79,30 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalError)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"Code":  "200",
-		"Token": tokenString,
-	})
-}
-
-// SignOut remove user from our database
-func (h *Handler) SignOut(c echo.Context) error {
-	userAttr := models.User{}
-	if err := json.NewDecoder(c.Request().Body).Decode(&userAttr); err != nil {
-		logrus.Error(err)
-		return c.JSON(http.StatusInternalServerError, internalError)
-	}
-	h.DB.Where("name = ? AND password = ?", userAttr.Name, userAttr.Password).Delete(&models.User{})
-	return c.JSON(http.StatusOK, map[string]string{
-		"Code": "200",
+	return c.JSON(http.StatusOK, &Response{
+		Code: OK,
+		Body: tokenString,
 	})
 }
 
 // CheckJwtToken verifies the validity of token
-func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
+func CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		auth := c.Request().Header.Get("Authorization")[7:]
-		token, err := jwt.ParseWithClaims(auth, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
-			return SigningKey, nil
+		token, err := jwt.ParseWithClaims(auth, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return signingKey, nil
 		})
 		if err != nil {
 			logrus.Error(err)
 			return c.JSON(http.StatusInternalServerError, internalError)
 		}
-		if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
-			logrus.WithFields(logrus.Fields{
-				"Name":      claims.Name,
-				"ExpiresAt": claims.StandardClaims.ExpiresAt,
-			}).Info("Token verification")
+		if claims, ok := token.Claims.(*jwtClaims); ok && token.Valid {
+			logrus.Info("Token verification: %s %s", claims.Name, claims.StandardClaims.ExpiresAt)
 
-			dbUser := &models.User{}
-			if h.DB.Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser); *dbUser == (models.User{}) {
-				logrus.WithFields(logrus.Fields{
-					"Name":     claims.Name,
-					"Password": claims.Password,
-				}).Info("User was not found in the database when checking token")
+			dbUser := &models.UserAuth{}
+			dependencies.DBInstance().Where("name = ? AND password = ?", claims.Name, claims.Password).First(dbUser)
+			if *dbUser == (models.UserAuth{}) {
+				logrus.Info("User was not found in the database when checking token: %s", claims.Name)
 				return c.JSON(http.StatusBadRequest, needRegistration)
 			}
 			return next(c)
@@ -136,8 +112,8 @@ func (h *Handler) CheckJwtToken(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func createJwtToken(user *models.User) (tokenString string, err error) {
-	claims := JwtClaims{
+func createJwtToken(user *models.UserAuth) (tokenString string, err error) {
+	claims := &jwtClaims{
 		user.Name,
 		user.Password,
 		jwt.StandardClaims{
@@ -146,7 +122,7 @@ func createJwtToken(user *models.User) (tokenString string, err error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	if tokenString, err = token.SignedString(SigningKey); err != nil {
+	if tokenString, err = token.SignedString(signingKey); err != nil {
 		return "", err
 	}
 	return tokenString, nil

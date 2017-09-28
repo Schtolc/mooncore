@@ -1,4 +1,4 @@
-package utils
+package dependencies
 
 import (
 	"github.com/sirupsen/logrus"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
+	"sync"
 )
 
 var (
@@ -23,6 +24,9 @@ type Config struct {
 			Port string `yaml:"port"`
 			Host string `yaml:"host"`
 		}
+		Auth struct {
+			Lifetime int `yaml:"lifetime"`
+		}
 	}
 	Database struct {
 		User         string `yaml:"user"`
@@ -36,16 +40,31 @@ type Config struct {
 	}
 }
 
-// GetConfig reads config.yml and return filled Config struct. If any error occurs program is terminated.
-func GetConfig() Config {
+var configInstance *Config
+var configMutex = &sync.Mutex{}
+
+func getConfig() *Config {
 	content, err := ioutil.ReadFile(filepath.Join(projectRoot, "config.yml"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	conf := Config{}
-	err = yaml.Unmarshal([]byte(content), &conf)
+	conf := &Config{}
+	err = yaml.Unmarshal([]byte(content), conf)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	return conf
+}
+
+// ConfigInstance returns config instance
+func ConfigInstance() *Config {
+	if configInstance != nil {
+		return configInstance
+	}
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	if configInstance == nil {
+		configInstance = getConfig()
+	}
+	return configInstance
 }

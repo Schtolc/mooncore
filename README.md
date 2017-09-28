@@ -17,7 +17,16 @@ Backend for moon project written in go. Under heavy development atm.
 6. `$GOPATH/src/github.com/Schtolc/mooncore/mooncore`
 
 ### How to deploy project
-1. TODO @Schtolc #4
+1. `go get github.com/Schtolc/mooncore`
+2. `/root/go/bin/mooncore &`
+
+### How to look after running app
+1. Grep logs with yajl:
+```
+$ brew install yajl
+$ sudo apt-get install yajl-tools
+$ grep "fatal" /var/log/mooncore/main.log | json_formatter -s
+```
 
 ### How to develop project
 1. Submit an issue
@@ -37,3 +46,4 @@ If you pushing any changes, make sure that:
 1. [golint](https://github.com/golang/lint): `golint ./...`
 2. [gocyclo](https://github.com/fzipp/gocyclo): `gocyclo --over 10 .`
 3. gofmt: `gofmt -l .`
+4. gotest: `go test -v ./...` (make sure app is running)

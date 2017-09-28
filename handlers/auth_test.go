@@ -24,8 +24,9 @@ var (
 
 func TestSignUp(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
+	resp := &Response{ Code: OK }
 
-	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(emptyMessage)
+	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(resp)
 	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(userAlreadyExists)
 	e.POST("/sign_up").WithText("unexpected request body").Expect().Status(http.StatusOK).JSON().Object().Equal(internalError)
 

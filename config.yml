@@ -2,6 +2,8 @@ server:
   hostbase:
     port: "1323"
     host: "127.0.0.1"
+  auth:
+    lifetime: 72
 database:
   user: "root"
   dbname: "moondb"
