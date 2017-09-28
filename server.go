@@ -24,7 +24,7 @@ func InitServer(config utils.Config, db *gorm.DB) (e *echo.Echo) {
 	AuthGroup := server.Group("/")
 	AuthGroup.Use(middleware.JWTWithConfig(handlers.GetJwtConfig()))
 	AuthGroup.Use(h.CheckJwtToken)
-	AuthGroup.POST("sign_out", h.SignOut)
+	AuthGroup.POST("auth_ping", h.PingAuth)
 
 	return server
 }

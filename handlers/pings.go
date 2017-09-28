@@ -35,6 +35,13 @@ func (h *Handler) Ping(c echo.Context) error {
 	})
 }
 
+func (h *Handler) PingAuth (c echo.Context) error {
+	return c.JSON(http.StatusOK, &Resp{
+		Code:    "200",
+		Message: "ECHO_AUTH_PING",
+	})
+}
+
 // PingDb is a simple handler for checking if database is up and running.
 func (h *Handler) PingDb(c echo.Context) error {
 	m := &models.Mock{

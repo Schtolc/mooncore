@@ -17,4 +17,11 @@ var (
 		Code:    "400",
 		Message: "User already exists in database",
 	}
+	requireFields = &Resp{
+		Code:    "400",
+		Message: "require parameters for method",
+	}
+	emptyMessage = &map[string]string{
+		"Code": "200",
+	}
 )
