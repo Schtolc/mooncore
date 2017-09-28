@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Gurpartap/logrus-stack"
-	"github.com/Schtolc/mooncore/utils"
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -18,7 +18,7 @@ func openLogFile(filename string) *os.File {
 }
 
 // InitLogs sets logger format and hooks, redirects stdout and strerr to main logfile
-func InitLogs(config utils.Config) {
+func InitLogs(config *dependencies.Config) {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.AddHook(logrus_stack.StandardHook())
 
@@ -34,10 +34,10 @@ func InitLogs(config utils.Config) {
 
 // GetAccessConfig returns config for access logs used in echo middleware
 func GetAccessConfig(filename string) middleware.LoggerConfig {
-	var config = middleware.LoggerConfig{
+	var parameters = middleware.LoggerConfig{
 		Skipper: middleware.DefaultSkipper,
 		Format:  "${time_rfc3339} ${host} ${method} ${uri} ${status}\n",
 		Output:  openLogFile(filename),
 	}
-	return config
+	return parameters
 }

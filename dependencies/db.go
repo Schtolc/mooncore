@@ -1,15 +1,14 @@
-package main
+package dependencies
 
 import (
 	"github.com/Schtolc/mooncore/models"
-	"github.com/Schtolc/mooncore/utils"
 	_ "github.com/go-sql-driver/mysql" // mysql driver for gorm.Open
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
+	"sync"
 )
 
-// InitDatabase opens db connection + migrates schema + sets connection params
-func InitDatabase(config utils.Config) (db *gorm.DB) {
+func initDatabase(config *Config) *gorm.DB {
 	db, err := gorm.Open(config.Database.Dialect, config.Database.User+"@/"+config.Database.Dbname)
 	if err != nil {
 		logrus.Fatal(err)
@@ -41,4 +40,20 @@ func InitDatabase(config utils.Config) (db *gorm.DB) {
 
 	logrus.Info("models migrated")
 	return db
+}
+
+var dbInstance *gorm.DB
+var dbMutex = &sync.Mutex{}
+
+// DBInstance returns database instance
+func DBInstance() *gorm.DB {
+	if dbInstance != nil {
+		return dbInstance
+	}
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+	if dbInstance == nil {
+		dbInstance = initDatabase(ConfigInstance())
+	}
+	return dbInstance
 }
