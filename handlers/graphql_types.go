@@ -131,7 +131,7 @@ var SignObject =  graphql.NewObject(graphql.ObjectConfig{
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				photo := models.Photo{}
 				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.Sign).PhotoID); dbc.Error != nil {
-					logrus.Println(dbc.Error)
+					logrus.Error(dbc.Error)
 					return nil, dbc.Error
 				}
 				return photo, nil
@@ -169,21 +169,20 @@ var  UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 		"address": &graphql.Field{
 			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				address := models.Address{}
-				if dbc := dependencies.DBInstance().First(&address, p.Source.(models.UserDetails).AddressID); dbc.Error != nil {
-					logrus.Println(dbc.Error)
+				address := &models.Address{}
+				if dbc := dependencies.DBInstance().First(address, p.Source.(*models.UserDetails).AddressID); dbc.Error != nil {
+					logrus.Error(dbc.Error)
 					return nil, dbc.Error
 				}
-
 				return address, nil
 			},
 		},
 		"avatar": &graphql.Field{
 			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				photo := models.Photo{}
-				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.UserDetails).AddressID); dbc.Error != nil {
-					logrus.Println(dbc.Error)
+				photo := &models.Photo{}
+				if dbc := dependencies.DBInstance().First(photo, p.Source.(*models.UserDetails).PhotoID); dbc.Error != nil {
+					logrus.Error(dbc.Error)
 					return nil, dbc.Error
 				}
 				return photo, nil
@@ -192,12 +191,7 @@ var  UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 		"photos": &graphql.Field{
 			Type: graphql.NewList(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				photos := []models.Photo{}
-				if dbc := dependencies.DBInstance().Find(&photos); dbc.Error != nil {
-					logrus.Println(dbc.Error)
-					return nil, dbc.Error
-				}
-				return photos, nil
+				return p.Source.(*models.UserDetails).Photos, nil
 			},
 		},
 		"user_id":&graphql.Field{
@@ -210,12 +204,6 @@ var  UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.NewList( SignObject ),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				return p.Source.(*models.UserDetails).Signs, nil
-				//signs := []models.Sign{}
-				//if dbc := dependencies.DBInstance().Find(&signs); dbc.Error != nil {
-				//	logrus.Error(dbc.Error)
-				//	return nil, dbc.Error
-				//}
-				//return signs , nil
 			},
 		},
 		"services": &graphql.Field{

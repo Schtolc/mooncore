@@ -19,7 +19,17 @@ import (
 var (
 	conf      = dependencies.ConfigInstance()
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-	//db        = dependencies.DBInstance()
+	testUser = &models.User{
+		Email : "newEmail",
+		Password: "passPass",
+		Role: 0,
+	}
+	testUserDetails = &models.UserDetails{
+		UserID: 1,
+		Name: "aptrik",
+		AddressID: 1,
+		PhotoID:1,
+	}
 )
 
 type graphQLQuery struct {
@@ -41,38 +51,13 @@ func expect(t *testing.T) *httpexpect.Expect {
 	})
 }
 
-//func randString() string {
-//	var result string
-//	l := rand.Int() % 50
-//	for i := 0; i < l; i++ {
-//		result += string(rand.Int()%('z'-'a') + 'a')
-//	}
-//	return result
-//}
-//
-//func createAddress(t *testing.T) *models.Address {
-//	address := &models.Address{
-//		Lat: rand.Float64(),
-//		Lon: rand.Float64(),
-//	}
-//	assert.Nil(t, db.Create(&address).Error, "address was not created")
-//	return address
-//}
-//
-//func createPhoto(t *testing.T) *models.Photo {
-//	photo := &models.Photo{
-//		Path: randString(),
-//	}
-//	assert.Nil(t, db.Create(&photo).Error, "photo was not created")
-//	return photo
-//}
 
-func graphQLBody(query string, a ...interface{}) []byte {
-	body, _ := json.Marshal(graphQLQuery{
-		fmt.Sprintf(query, a...),
-	})
-	return body
-}
+// normal
+// bad param - no such value
+// bad param - invalid value
+// without param
+
+
 
 func TestCreateAddress (t *testing.T) {
 	e := expect(t)
@@ -93,7 +78,7 @@ func TestCreateAddress (t *testing.T) {
 
 	resp.Keys().ContainsOnly("code", "body")
 
-	resp.Value("code").Number().Equal(OK)
+	resp.Value("code").Number().Equal(http.StatusOK)
 
 	body := resp.Value("body").Object().Value("createAddress")
 	body.Object().Value("lat").Equal(address.Lat)
@@ -189,20 +174,20 @@ func TestCreatePhotoWithNotExistingTags(t *testing.T) {
 	e := expect(t)
 
 	path := "random_path"
-	tags := []int{1000,2000}
-	reqParams  := fmt.Sprintf("path:\"%s\", tags:[%d,%d]",path, tags[0], tags[1])
+	tags := []int{1000, 2000}
+	reqParams := fmt.Sprintf("path:\"%s\", tags:[%d,%d]", path, tags[0], tags[1])
 	respParams := "path, tags{id, name}"
-	query := fmt.Sprintf("mutation{createPhoto(%s){%s}}",reqParams, respParams)
-	resp := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	query := graphQLBody("mutation{createPhoto(%s){%s}}", reqParams, respParams)
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 
 	resp.Keys().ContainsOnly("code", "body")
 	resp.Value("code").Number().Equal(http.StatusNotFound)
 	resp.Value("body").Array().First().Object().Value("message").Equal("No such tags")
-
 }
-func TestCreatePhotoWithBadTags(t *testing.T) {
+
+func TestCreatePhotoWithBadParamsTags(t *testing.T) {
 	e := expect(t)
 
 	path := "random_path"
@@ -223,18 +208,160 @@ func TestCreatePhotoWithBadTags(t *testing.T) {
 
 	resp.Value("code").Number().Equal(http.StatusNotFound)
 	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
-
 }
+
+func TestCreatePhotoWithoutTags(t *testing.T) {
+	e := expect(t)
+
+	path := "random_path"
+
+	reqParams  := fmt.Sprintf("path:\"%s\"",path)
+	respParams := "path, tags{id, name}"
+	query := graphQLBody("mutation{createPhoto(%s){%s}}",reqParams, respParams)
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Field \"createPhoto\" argument \"tags\" of type \"[Int]!\" is required but not provided."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+}
+
+
+
 
 func TestCreateSign(t *testing.T) {
 	e := expect(t)
 
 	signs := []int{1,2}
-	id := 1
-	reqParams  := fmt.Sprintf("id:%d, signs:[%d, %d]",id, signs[0],signs[1])
-	respParams := "id, signs{id, name, path, description}"
-	query := graphQLBody("mutation{createSign(%s){%s}}",reqParams, respParams)
-	logrus.Warn(query)
+	reqParams  := fmt.Sprintf("email:\"%s\", signs:[%d, %d]", testUser.Email, signs[0],signs[1])
+	respParams := "id, signs{id, name, photo{path}, description}"
+	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	resp.Value("code").Number().Equal(http.StatusOK)
+}
+
+func TestCreateSignWithBadParamsSigns(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\"", testUser.Email,)
+	respParams := "id, signs{id, name}"
+	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Field \"addSigns\" argument \"signs\" of type \"[Int]!\" is required but not provided."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+
+}
+
+func TestCreateSignWithoutSigns(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\"", testUser.Email,)
+	respParams := "id, signs{id, name}"
+	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+
+	resp := e.GET("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Field \"addSigns\" argument \"signs\" of type \"[Int]!\" is required but not provided."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+
+}
+
+
+
+
+
+
+
+
+
+
+func TestCreateUser(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\", password: \"%s\", role: %d", testUser.Email, testUser.Password, testUser.Role)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes (query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	body := resp.Value("body").Object().Value("createUser").Object()
+	body.Value("email").Equal(testUser.Email)
+	body.Value("role").Equal(testUser.Role)
+}
+
+func TestCreateUserBadParams(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\", password: %s, role: %d", testUser.Email, testUser.Password, testUser.Role)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes( query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Argument \"password\" has invalid value passPass.\nExpected type \"String\", found passPass."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+}
+
+func TestCreateUserWithoutParams(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\", password: \"%s\"", testUser.Email, testUser.Password)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes( query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Field \"createUser\" argument \"role\" of type \"Int!\" is required but not provided."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+}
+
+
+
+
+
+func TestCreateUserProfile(t *testing.T) {
+	e := expect(t)
+
+	reqParams  := fmt.Sprintf("email:\"%s\", name:\"%s\", address_id: %d, avatar_id: %d, photos:[1,2]", testUser.Email, testUserDetails.Name, testUserDetails.AddressID, testUserDetails.PhotoID )
+	respParams := "id, name, address{lat,lon,id}, avatar{id, path}, photos{id}"
+	query := graphQLBody("mutation{createUserProfile(%s){%s}}",reqParams, respParams)
+
+
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
@@ -242,8 +369,15 @@ func TestCreateSign(t *testing.T) {
 	resp.Keys().ContainsOnly("code", "body")
 
 	resp.Value("code").Number().Equal(http.StatusNotFound)
-	resp.Value("body").NotNull()
+	body := resp.Value("body").Object().Value("createUserProfile").Object()
 
+	body.Value("name").Equal(testUserDetails.Name)
+	body.Value("address").Object().Value("id").Equal(testUserDetails.AddressID)
+	body.Value("address").Object().Value("lat").NotNull()
+	body.Value("address").Object().Value("lon").NotNull()
+
+	body.Value("avatar").Object().Value("id").Equal(testUserDetails.PhotoID)
+	body.Value("avatar").Object().Value("path").NotNull()
 }
 //func TestGetAddress(t *testing.T) {
 //	e := expect(t)
