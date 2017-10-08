@@ -76,7 +76,7 @@ func TestCreateAddress(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createAddress").
@@ -102,7 +102,7 @@ func TestGetAddress(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	obj := root.Object().Value("body").
 		Object().Value("address")
@@ -119,7 +119,7 @@ func TestGetAddress(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }
 
@@ -134,7 +134,7 @@ func TestCreatePhoto(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createPhoto").
@@ -159,7 +159,7 @@ func TestGetPhoto(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	root = root.Object().Value("body").
 		Object().Value("photo")
@@ -174,7 +174,7 @@ func TestGetPhoto(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }
 
@@ -200,7 +200,7 @@ func TestCreateUser(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createUser").
@@ -243,7 +243,7 @@ func TestGetUser(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	root = root.Object().Value("body").
 		Object().Value("user")
@@ -261,6 +261,6 @@ func TestGetUser(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }

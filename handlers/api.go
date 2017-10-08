@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"net/http"
 )
 
 func getRootMutation(db *gorm.DB) *graphql.Object {
@@ -213,24 +214,24 @@ func API(c echo.Context) error {
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		logrus.Error(err)
-		return sendResponse(c, BadRequest, err.Error())
+		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	var dat map[string]interface{}
 	if err := json.Unmarshal(body, &dat); err != nil {
 		logrus.Error(err)
-		return sendResponse(c, BadRequest, err.Error())
+		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	query, ok := dat["query"]
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
-		return sendResponse(c, BadRequest, strErr)
+		return sendResponse(c, http.StatusBadRequest, strErr)
 	}
 	result := executeQuery(query.(string), createSchema())
 
 	if len(result.Errors) > 0 {
-		return sendResponse(c, NotFound, result.Errors)
+		return sendResponse(c, http.StatusNotFound, result.Errors)
 	}
 
-	return sendResponse(c, OK, result.Data)
+	return sendResponse(c, http.StatusOK, result.Data)
 }
