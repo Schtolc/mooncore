@@ -305,7 +305,6 @@ func TestCreateSign(t *testing.T) {
 	body.Value("signs").Array().Last().Object().Value("name").NotNull()
 	body.Value("signs").Array().Last().Object().Value("photo").Object().Value("path").NotNull()
 
-
 }
 
 func TestCreateSignWithBadParamsSigns(t *testing.T) {
@@ -345,8 +344,6 @@ func TestCreateSignWithoutSigns(t *testing.T) {
 	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
 
 }
-
-
 
 func TestCreateUserProfile(t *testing.T) {
 	e := expect(t)
