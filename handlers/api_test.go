@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
@@ -17,6 +18,17 @@ var (
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
 	db        = dependencies.DBInstance()
 )
+
+type graphQLQuery struct {
+	Query string `json:"query"`
+}
+
+func graphQLBody(query string, a ...interface{}) []byte {
+	body, _ := json.Marshal(graphQLQuery{
+		fmt.Sprintf(query, a...),
+	})
+	return body
+}
 
 func expect(t *testing.T) *httpexpect.Expect {
 	return httpexpect.WithConfig(httpexpect.Config{
@@ -58,13 +70,13 @@ func TestCreateAddress(t *testing.T) {
 	lat := rand.Float64()
 	lon := rand.Float64()
 
-	query := fmt.Sprintf("mutation{createAddress(lat:%f,lon:%f){id}}", lat, lon)
+	query := graphQLBody("mutation{createAddress(lat:%f,lon:%f){id}}", lat, lon)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createAddress").
@@ -84,13 +96,13 @@ func TestGetAddress(t *testing.T) {
 
 	address := createAddress(t)
 
-	query := fmt.Sprintf("{address(id:%d){lat, lon}}", address.ID)
+	query := graphQLBody("{address(id:%d){lat, lon}}", address.ID)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	obj := root.Object().Value("body").
 		Object().Value("address")
@@ -103,11 +115,11 @@ func TestGetAddress(t *testing.T) {
 
 	db.Delete(&address)
 
-	root = e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root = e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }
 
@@ -116,13 +128,13 @@ func TestCreatePhoto(t *testing.T) {
 
 	path := randString()
 
-	query := fmt.Sprintf("mutation{createPhoto(path:\"%s\"){id}}", path)
+	query := graphQLBody("mutation{createPhoto(path:\"%s\"){id}}", path)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createPhoto").
@@ -141,13 +153,13 @@ func TestGetPhoto(t *testing.T) {
 
 	photo := createPhoto(t)
 
-	query := fmt.Sprintf("{photo(id:%d){path}}", photo.ID)
+	query := graphQLBody("{photo(id:%d){path}}", photo.ID)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	root = root.Object().Value("body").
 		Object().Value("photo")
@@ -158,11 +170,11 @@ func TestGetPhoto(t *testing.T) {
 
 	db.Delete(&photo)
 
-	root = e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root = e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }
 
@@ -178,17 +190,17 @@ func TestCreateUser(t *testing.T) {
 	addressID := address.ID
 	photoID := photo.ID
 
-	query := fmt.Sprintf("mutation{createUser(name:\"%s\", "+
+	query := graphQLBody("mutation{createUser(name:\"%s\", "+
 		"password:\"%s\", "+
 		"email:\"%s\", "+
 		"address_id:%d, "+
 		"photo_id:%d){id}}", name, password, email, addressID, photoID)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	id := root.Object().Value("body").
 		Object().Value("createUser").
@@ -225,13 +237,13 @@ func TestGetUser(t *testing.T) {
 
 	assert.Nil(t, db.Create(&user).Error, "user was not created")
 
-	query := fmt.Sprintf("{user(id:%d){name, email, address{id}, photo{id}}}", user.ID)
+	query := graphQLBody("{user(id:%d){name, email, address{id}, photo{id}}}", user.ID)
 
-	root := e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root := e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(OK)
+	root.Object().Value("code").Number().Equal(http.StatusOK)
 
 	root = root.Object().Value("body").
 		Object().Value("user")
@@ -245,10 +257,10 @@ func TestGetUser(t *testing.T) {
 	db.Delete(&photo)
 	db.Delete(&address)
 
-	root = e.GET("/graphql").
-		WithQuery("query", query).Expect().
+	root = e.POST("/graphql").
+		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON()
 
-	root.Object().Value("code").Number().Equal(NotFound)
+	root.Object().Value("code").Number().Equal(http.StatusNotFound)
 	root.Object().Value("body").NotNull()
 }
