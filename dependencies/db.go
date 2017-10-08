@@ -18,27 +18,35 @@ func initDatabase(config *Config) *gorm.DB {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
+	db.LogMode(true)
 	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Mock{},
 		&models.Address{},
 		&models.Photo{},
+		&models.Tag{},
 		&models.ManicureType{},
-		&models.ManicureMaterial{},
+		&models.Sign{},
 		&models.User{},
-		&models.Master{},
+		&models.UserDetails{},
 		&models.Service{},
 	)
 
-	db.Table("service_manicure_materials").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
-	db.Table("service_manicure_materials").AddForeignKey("manicure_material_id", "manicure_materials(id)", "CASCADE", "CASCADE")
+	db.Table("user_signs").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")
+	db.Table("user_signs").AddForeignKey("sign_id", "signs(id)", "CASCADE", "CASCADE")
+
 	db.Table("service_photos").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
 	db.Table("service_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
-	db.Table("working_place_photos").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
-	db.Table("working_place_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+
+	db.Table("user_photos").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")
+	db.Table("user_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 
 	logrus.Info("models migrated")
+
+	models.InsertDefaultValues(db)
+	models.InsertConstValues(db)
+
+	logrus.Info("create default and constant values in database")
 	return db
 }
 
