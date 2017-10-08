@@ -1,14 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"encoding/json"
 	"io/ioutil"
 )
 
@@ -213,24 +212,25 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 func API(c echo.Context) error {
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
-		panic(err)
+		logrus.Error(err)
+		return sendResponse(c, BadRequest, err.Error())
 	}
 	var dat map[string]interface{}
 	if err := json.Unmarshal(body, &dat); err != nil {
-		panic(err)
+		logrus.Error(err)
+		return sendResponse(c, BadRequest, err.Error())
 	}
 	query, ok := dat["query"]
 	if !ok {
-		panic(err)
+		strErr := "No query in request"
+		logrus.Error(strErr)
+		return sendResponse(c, BadRequest, strErr)
 	}
 	result := executeQuery(query.(string), createSchema())
-	response := Response{}
+
 	if len(result.Errors) > 0 {
-		response.Code = NotFound
-		response.Body = result.Errors
-	} else {
-		response.Code = OK
-		response.Body = result.Data
+		return sendResponse(c, NotFound, result.Errors)
 	}
-	return c.JSON(http.StatusOK, response)
+
+	return sendResponse(c, OK, result.Data)
 }
