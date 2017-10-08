@@ -25,8 +25,9 @@ var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
+
 // TagObject is a graphql object for photos tags
-var TagObject =  graphql.NewObject(graphql.ObjectConfig{
+var TagObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "TagObject",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -38,8 +39,8 @@ var TagObject =  graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// ManicureType is a graphql object for photos tags
-var ManicureTypeObject =  graphql.NewObject(graphql.ObjectConfig{
+//ManicureTypeObject is a graphql object for photos tags
+var ManicureTypeObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "ManicureTypeObject",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -52,7 +53,7 @@ var ManicureTypeObject =  graphql.NewObject(graphql.ObjectConfig{
 })
 
 // ServiceObject is a graphql object for photos tags
-var ServiceObject =  graphql.NewObject(graphql.ObjectConfig{
+var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "ServiceObject",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -92,7 +93,6 @@ var ServiceObject =  graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-
 // PhotoObject is a graphql object for photo
 var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "PhotoObject",
@@ -113,8 +113,9 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
+
 // SignObject is a graphql object for photos tags
-var SignObject =  graphql.NewObject(graphql.ObjectConfig{
+var SignObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "SignObject",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -123,7 +124,7 @@ var SignObject =  graphql.NewObject(graphql.ObjectConfig{
 		"name": &graphql.Field{
 			Type: graphql.String,
 		},
-		"description":&graphql.Field{
+		"description": &graphql.Field{
 			Type: graphql.String,
 		},
 		"photo": &graphql.Field{
@@ -140,7 +141,7 @@ var SignObject =  graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// UserAuth is a graphql object for user
+// UserObject is a graphql object for user
 var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "UserObject",
 	Fields: graphql.Fields{
@@ -156,8 +157,8 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// UserDetails is a graphql object for user
-var  UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
+// UserDetailsObject is a graphql object for user
+var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "UserDetailsObject",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
@@ -194,27 +195,22 @@ var  UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 				return p.Source.(*models.UserDetails).Photos, nil
 			},
 		},
-		"user_id":&graphql.Field{
+		"user_id": &graphql.Field{
 			Type: graphql.Int,
 		},
 		"stars": &graphql.Field{
 			Type: graphql.Float,
 		},
 		"signs": &graphql.Field{
-			Type: graphql.NewList( SignObject ),
+			Type: graphql.NewList(SignObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				return p.Source.(*models.UserDetails).Signs, nil
 			},
 		},
 		"services": &graphql.Field{
-			Type: graphql.NewList( SignObject ),
+			Type: graphql.NewList(SignObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				services := []models.Sign{}
-				if dbc := dependencies.DBInstance().Find(&services); dbc.Error != nil {
-					logrus.Error(dbc.Error)
-					return nil, dbc.Error
-				}
-				return services , nil
+				return p.Source.(*models.UserDetails).Services, nil
 			},
 		},
 	},

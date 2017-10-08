@@ -8,27 +8,25 @@ import (
 
 	"github.com/Schtolc/mooncore/models"
 
-	"net/url"
-	"testing"
 	"math/rand"
 	"net/http"
-
-	"github.com/sirupsen/logrus"
+	"net/url"
+	"testing"
 )
 
 var (
 	conf      = dependencies.ConfigInstance()
 	localhost = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-	testUser = &models.User{
-		Email : "newEmail",
+	testUser  = &models.User{
+		Email:    "newEmail",
 		Password: "passPass",
-		Role: 0,
+		Role:     0,
 	}
 	testUserDetails = &models.UserDetails{
-		UserID: 1,
-		Name: "aptrik",
+		UserID:    1,
+		Name:      "aptrik",
 		AddressID: 1,
-		PhotoID:1,
+		PhotoID:   1,
 	}
 )
 
@@ -51,26 +49,77 @@ func expect(t *testing.T) *httpexpect.Expect {
 	})
 }
 
-
 // normal
 // bad param - no such value
 // bad param - invalid value
 // without param
 
+func TestCreateUser(t *testing.T) {
+	e := expect(t)
 
+	reqParams := fmt.Sprintf("email:\"%s\", password: \"%s\", role: %d", testUser.Email, testUser.Password, testUser.Role)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}", reqParams, respParams)
 
-func TestCreateAddress (t *testing.T) {
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	body := resp.Value("body").Object().Value("createUser").Object()
+	body.Value("email").Equal(testUser.Email)
+	body.Value("role").Equal(testUser.Role)
+}
+
+func TestCreateUserBadParams(t *testing.T) {
+	e := expect(t)
+
+	reqParams := fmt.Sprintf("email:\"%s\", password: %s, role: %d", testUser.Email, testUser.Password, testUser.Role)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}", reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Argument \"password\" has invalid value passPass.\nExpected type \"String\", found passPass."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+}
+
+func TestCreateUserWithoutParams(t *testing.T) {
+	e := expect(t)
+
+	reqParams := fmt.Sprintf("email:\"%s\", password: \"%s\"", testUser.Email, testUser.Password)
+	respParams := "id, email, role"
+	query := graphQLBody("mutation{createUser(%s){%s}}", reqParams, respParams)
+
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	resp.Keys().ContainsOnly("code", "body")
+
+	errorMessage := "Field \"createUser\" argument \"role\" of type \"Int!\" is required but not provided."
+	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
+}
+
+func TestCreateAddress(t *testing.T) {
 	e := expect(t)
 
 	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
+		Lat:         rand.Float64(),
+		Lon:         rand.Float64(),
 		Description: "description",
 	}
 
-	reqParams  := fmt.Sprintf("lat:\"%.16v\", lon:\"%.16v\", description:\"%s\"",address.Lat, address.Lon, address.Description)
+	reqParams := fmt.Sprintf("lat:\"%.16v\", lon:\"%.16v\", description:\"%s\"", address.Lat, address.Lon, address.Description)
 	respParams := "id, lat, lon, description"
-	query :=  graphQLBody("mutation{createAddress(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -86,18 +135,18 @@ func TestCreateAddress (t *testing.T) {
 	body.Object().Value("description").Equal(address.Description)
 }
 
-func TestCreateAddressBadParamLat (t *testing.T) {
+func TestCreateAddressBadParamLat(t *testing.T) {
 	e := expect(t)
 
 	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
+		Lat:         rand.Float64(),
+		Lon:         rand.Float64(),
 		Description: "description",
 	}
 
-	reqParams  := fmt.Sprintf("lat:\"string\", lon:\"string\", description:\"%s\"", address.Description)
+	reqParams := fmt.Sprintf("lat:\"string\", lon:\"string\", description:\"%s\"", address.Description)
 	respParams := "id, lat, lon, description"
-	query := graphQLBody("mutation{createAddress(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -107,18 +156,18 @@ func TestCreateAddressBadParamLat (t *testing.T) {
 	resp.Value("body").Array().First().Object().Value("message").Equal("InvalidParam: lat")
 }
 
-func TestCreateAddressBadParamDescription (t *testing.T) {
+func TestCreateAddressBadParamDescription(t *testing.T) {
 	e := expect(t)
 
 	address := &models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
+		Lat:         rand.Float64(),
+		Lon:         rand.Float64(),
 		Description: "description",
 	}
 
-	reqParams  := fmt.Sprintf("lat:\"%.16v\", lon:\"%.16v\", description:%.16v",address.Lat, address.Lon, address.Lon)
+	reqParams := fmt.Sprintf("lat:\"%.16v\", lon:\"%.16v\", description:%.16v", address.Lat, address.Lon, address.Lon)
 	respParams := "id, lat, lon, description"
-	query := graphQLBody("mutation{createAddress(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -130,10 +179,10 @@ func TestCreateAddressBadParamDescription (t *testing.T) {
 	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
 }
 
-func TestCreateAddressWithoutParams (t *testing.T) {
+func TestCreateAddressWithoutParams(t *testing.T) {
 	e := expect(t)
 
-	reqParams  := fmt.Sprintf("lat:\"string\", lon:\"string\"")
+	reqParams := fmt.Sprintf("lat:\"string\", lon:\"string\"")
 	respParams := "id, lat, lon, description"
 	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
@@ -151,11 +200,11 @@ func TestCreatePhoto(t *testing.T) {
 	e := expect(t)
 
 	path := "random_path"
-	tags := []int{1,2}
+	tags := []int{1, 2}
 
-	reqParams  := fmt.Sprintf("path:\"%s\", tags:[%d,%d]",path, tags[0], tags[1])
+	reqParams := fmt.Sprintf("path:\"%s\", tags:[%d,%d]", path, tags[0], tags[1])
 	respParams := "path, tags{id, name}"
-	query := graphQLBody("mutation{createPhoto(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createPhoto(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -195,9 +244,9 @@ func TestCreatePhotoWithBadParamsTags(t *testing.T) {
 		rand.Float64(), rand.Float64(),
 	}
 
-	reqParams  := fmt.Sprintf("path:\"%s\", tags:[%0.16v,%0.16v]",path, tags[0], tags[1])
+	reqParams := fmt.Sprintf("path:\"%s\", tags:[%0.16v,%0.16v]", path, tags[0], tags[1])
 	respParams := "path, tags{id, name}"
-	query := graphQLBody("mutation{createPhoto(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createPhoto(%s){%s}}", reqParams, respParams)
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
@@ -215,9 +264,9 @@ func TestCreatePhotoWithoutTags(t *testing.T) {
 
 	path := "random_path"
 
-	reqParams  := fmt.Sprintf("path:\"%s\"",path)
+	reqParams := fmt.Sprintf("path:\"%s\"", path)
 	respParams := "path, tags{id, name}"
-	query := graphQLBody("mutation{createPhoto(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{createPhoto(%s){%s}}", reqParams, respParams)
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
@@ -229,16 +278,13 @@ func TestCreatePhotoWithoutTags(t *testing.T) {
 	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
 }
 
-
-
-
 func TestCreateSign(t *testing.T) {
 	e := expect(t)
 
-	signs := []int{1,2}
-	reqParams  := fmt.Sprintf("email:\"%s\", signs:[%d, %d]", testUser.Email, signs[0],signs[1])
+	signs := []int{1, 2}
+	reqParams := fmt.Sprintf("email:\"%s\", signs:[%d, %d]", testUser.Email, signs[0], signs[1])
 	respParams := "id, signs{id, name, photo{path}, description}"
-	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{addSigns(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -247,14 +293,27 @@ func TestCreateSign(t *testing.T) {
 	resp.Keys().ContainsOnly("code", "body")
 
 	resp.Value("code").Number().Equal(http.StatusOK)
+
+	body := resp.Value("body").Object().Value("addSigns").Object()
+	body.Value("signs").Array().First().Object().Value("description").NotNull()
+	body.Value("signs").Array().First().Object().Value("id").NotNull()
+	body.Value("signs").Array().First().Object().Value("name").NotNull()
+	body.Value("signs").Array().First().Object().Value("photo").Object().Value("path").NotNull()
+
+	body.Value("signs").Array().Last().Object().Value("description").NotNull()
+	body.Value("signs").Array().Last().Object().Value("id").NotNull()
+	body.Value("signs").Array().Last().Object().Value("name").NotNull()
+	body.Value("signs").Array().Last().Object().Value("photo").Object().Value("path").NotNull()
+
+
 }
 
 func TestCreateSignWithBadParamsSigns(t *testing.T) {
 	e := expect(t)
 
-	reqParams  := fmt.Sprintf("email:\"%s\"", testUser.Email,)
+	reqParams := fmt.Sprintf("email:\"%s\"", testUser.Email)
 	respParams := "id, signs{id, name}"
-	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{addSigns(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -271,11 +330,11 @@ func TestCreateSignWithBadParamsSigns(t *testing.T) {
 func TestCreateSignWithoutSigns(t *testing.T) {
 	e := expect(t)
 
-	reqParams  := fmt.Sprintf("email:\"%s\"", testUser.Email,)
+	reqParams := fmt.Sprintf("email:\"%s\"", testUser.Email)
 	respParams := "id, signs{id, name}"
-	query := graphQLBody("mutation{addSigns(%s){%s}}",reqParams, respParams)
+	query := graphQLBody("mutation{addSigns(%s){%s}}", reqParams, respParams)
 
-	resp := e.GET("/graphql").
+	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 
@@ -289,78 +348,15 @@ func TestCreateSignWithoutSigns(t *testing.T) {
 
 
 
-
-
-
-
-
-
-
-func TestCreateUser(t *testing.T) {
-	e := expect(t)
-
-	reqParams  := fmt.Sprintf("email:\"%s\", password: \"%s\", role: %d", testUser.Email, testUser.Password, testUser.Role)
-	respParams := "id, email, role"
-	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
-
-	resp := e.POST("/graphql").
-		WithBytes (query).Expect().
-		Status(http.StatusOK).JSON().Object()
-
-	resp.Keys().ContainsOnly("code", "body")
-
-	body := resp.Value("body").Object().Value("createUser").Object()
-	body.Value("email").Equal(testUser.Email)
-	body.Value("role").Equal(testUser.Role)
-}
-
-func TestCreateUserBadParams(t *testing.T) {
-	e := expect(t)
-
-	reqParams  := fmt.Sprintf("email:\"%s\", password: %s, role: %d", testUser.Email, testUser.Password, testUser.Role)
-	respParams := "id, email, role"
-	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
-
-	resp := e.POST("/graphql").
-		WithBytes( query).Expect().
-		Status(http.StatusOK).JSON().Object()
-
-	resp.Keys().ContainsOnly("code", "body")
-
-	errorMessage := "Argument \"password\" has invalid value passPass.\nExpected type \"String\", found passPass."
-	resp.Value("code").Number().Equal(http.StatusNotFound)
-	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
-}
-
-func TestCreateUserWithoutParams(t *testing.T) {
-	e := expect(t)
-
-	reqParams  := fmt.Sprintf("email:\"%s\", password: \"%s\"", testUser.Email, testUser.Password)
-	respParams := "id, email, role"
-	query := graphQLBody("mutation{createUser(%s){%s}}",reqParams, respParams)
-
-	resp := e.POST("/graphql").
-		WithBytes( query).Expect().
-		Status(http.StatusOK).JSON().Object()
-
-	resp.Keys().ContainsOnly("code", "body")
-
-	errorMessage := "Field \"createUser\" argument \"role\" of type \"Int!\" is required but not provided."
-	resp.Value("code").Number().Equal(http.StatusNotFound)
-	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
-}
-
-
-
-
-
 func TestCreateUserProfile(t *testing.T) {
 	e := expect(t)
+	photos := []int{1, 2}
+	signs := []int{1, 2}
+	reqParams := fmt.Sprintf("email:\"%s\", name:\"%s\", address_id: %d, avatar_id: %d, photos: [%d, %d], signs: [%d, %d]",
+		testUser.Email, testUserDetails.Name, testUserDetails.AddressID, testUserDetails.PhotoID, photos[0], photos[1], signs[0], signs[1])
+	respParams := fmt.Sprintf("id, name, address{lat,lon,id}, avatar{id, path}, photos{id, path}, signs{id, name}")
 
-	reqParams  := fmt.Sprintf("email:\"%s\", name:\"%s\", address_id: %d, avatar_id: %d, photos:[1,2]", testUser.Email, testUserDetails.Name, testUserDetails.AddressID, testUserDetails.PhotoID )
-	respParams := "id, name, address{lat,lon,id}, avatar{id, path}, photos{id}"
-	query := graphQLBody("mutation{createUserProfile(%s){%s}}",reqParams, respParams)
-
+	query := graphQLBody("mutation{createUserProfile(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
@@ -368,7 +364,7 @@ func TestCreateUserProfile(t *testing.T) {
 
 	resp.Keys().ContainsOnly("code", "body")
 
-	resp.Value("code").Number().Equal(http.StatusNotFound)
+	resp.Value("code").Number().Equal(http.StatusOK)
 	body := resp.Value("body").Object().Value("createUserProfile").Object()
 
 	body.Value("name").Equal(testUserDetails.Name)
@@ -378,7 +374,18 @@ func TestCreateUserProfile(t *testing.T) {
 
 	body.Value("avatar").Object().Value("id").Equal(testUserDetails.PhotoID)
 	body.Value("avatar").Object().Value("path").NotNull()
+
+	body.Value("photos").Array().First().Object().Value("id").Equal(1)
+	body.Value("photos").Array().Last().Object().Value("id").Equal(2)
+	body.Value("photos").Array().First().Object().Value("path").NotNull()
+	body.Value("photos").Array().Last().Object().Value("path").NotNull()
+
+	body.Value("signs").Array().First().Object().Value("id").Equal(1)
+	body.Value("signs").Array().Last().Object().Value("id").Equal(2)
+	body.Value("signs").Array().First().Object().Value("name").NotNull()
+	body.Value("signs").Array().Last().Object().Value("name").NotNull()
 }
+
 //func TestGetAddress(t *testing.T) {
 //	e := expect(t)
 //

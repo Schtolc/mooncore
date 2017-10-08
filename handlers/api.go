@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
@@ -10,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
-	"errors"
 	"strconv"
 )
 
@@ -44,8 +44,8 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						return nil, errors.New("InvalidParam: lon")
 					}
 					address := &models.Address{
-						Lat: lat,
-						Lon: lon,
+						Lat:         lat,
+						Lon:         lon,
 						Description: params.Args["description"].(string),
 					}
 					if dbc := db.Create(address); dbc.Error != nil {
@@ -63,7 +63,7 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						Type: graphql.NewNonNull(graphql.String),
 					},
 					"tags": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.NewList( graphql.Int )),
+						Type: graphql.NewNonNull(graphql.NewList(graphql.Int)),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
@@ -103,26 +103,26 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					tx := db.Begin()
-						user := &models.User{
-							Email:  params.Args["email"].(string),
-							Password:  params.Args["password"].(string),
-							Role:  params.Args["role"].(int),
-						}
-						if err := tx.Create(user).Error; err != nil {
-							tx.Rollback()
-							return nil, err
-						}
+					user := &models.User{
+						Email:    params.Args["email"].(string),
+						Password: params.Args["password"].(string),
+						Role:     params.Args["role"].(int),
+					}
+					if err := tx.Create(user).Error; err != nil {
+						tx.Rollback()
+						return nil, err
+					}
 
-						userDetails := &models.UserDetails{
-							UserID : user.ID,
-							AddressID: models.DefaultAddress.ID,
-							PhotoID: models.DefaultAvatar.ID,
-						}
+					userDetails := &models.UserDetails{
+						UserID:    user.ID,
+						AddressID: models.DefaultAddress.ID,
+						PhotoID:   models.DefaultAvatar.ID,
+					}
 
-						if err := tx.Create(userDetails).Error; err != nil {
-							tx.Rollback()
-							return nil, err
-						}
+					if err := tx.Create(userDetails).Error; err != nil {
+						tx.Rollback()
+						return nil, err
+					}
 					tx.Commit()
 					return user, nil
 				},
@@ -144,74 +144,71 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 						Type: graphql.String,
 					},
 					"photos": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.NewList( graphql.Int )),
+						Type: graphql.NewList(graphql.Int),
 					},
 					"signs": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.NewList( graphql.Int )),
+						Type: graphql.NewList(graphql.Int),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-					logrus.Warn(params)
 					userAuth := &models.User{}
-					user     := &models.UserDetails{}
-
+					user := &models.UserDetails{}
 
 					if dbc := db.Where("email = ?", params.Args["email"].(string)).First(userAuth); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
-					if dbc := db.Where("user_id = ?",userAuth.ID).First(user); dbc.Error != nil {
+					if dbc := db.Where("user_id = ?", userAuth.ID).First(user); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
 					tx := db.Begin()
-						if params.Args["name"] != nil {
-							if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("name", params.Args["name"].(string) ); dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
+					if params.Args["name"] != nil {
+						if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("name", params.Args["name"].(string)); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
 						}
-						if params.Args["address_id"] != nil {
-							address := &models.Address{}
-							if dbc := db.Where("id = ?", params.Args["address_id"].(int)).First(address); dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
-							if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("address_id", params.Args["address_id"].(int) ); dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
+					}
+					if params.Args["address_id"] != nil {
+						address := &models.Address{}
+						if dbc := db.Where("id = ?", params.Args["address_id"].(int)).First(address); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
 						}
-						if params.Args["avatar_id"] != nil {
-							photo := &models.Photo{}
-							if dbc := db.Where("id = ?", params.Args["avatar_id"].(int)).First(photo); dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
-							if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("avatar_id", params.Args["avatar_id"].(int) ); dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
+						if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("address_id", params.Args["address_id"].(int)); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
 						}
-						logrus.Warn(params.Args["photos"])
-						if params.Args["photos"] != nil {
-							photos := []models.Photo{}
-							if dbc := db.Where("id in (?)", params.Args["photos"]).Find(&photos);dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
-							user.Photos = photos
+					}
+					if params.Args["avatar_id"] != nil {
+						photo := &models.Photo{}
+						if dbc := db.Where("id = ?", params.Args["avatar_id"].(int)).First(photo); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
 						}
-						logrus.Warn(params.Args["signs"])
-						if params.Args["signs"] != nil {
-							signs := []models.Sign{}
-							if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs);dbc.Error != nil {
-								logrus.Error(dbc.Error)
-								return nil, dbc.Error
-							}
-							user.Signs = signs
+						if dbc := db.Model(user).Where("id = ?", userAuth.ID).Update("avatar_id", params.Args["avatar_id"].(int)); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
 						}
-					logrus.Warn(user)
+					}
+
+					if params.Args["photos"] != nil {
+						photos := []models.Photo{}
+						if dbc := db.Where("id in (?)", params.Args["photos"]).Find(&photos); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
+						}
+						user.Photos = photos
+					}
+
+					if params.Args["signs"] != nil {
+						signs := []models.Sign{}
+						if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs); dbc.Error != nil {
+							logrus.Error(dbc.Error)
+							return nil, dbc.Error
+						}
+						user.Signs = signs
+					}
 					tx.Commit()
 					return user, nil
 				},
@@ -221,7 +218,7 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 				Description: "Edit user fields",
 				Args: graphql.FieldConfigArgument{
 					"signs": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.NewList( graphql.Int )),
+						Type: graphql.NewNonNull(graphql.NewList(graphql.Int)),
 					},
 					"email": &graphql.ArgumentConfig{
 						Type: graphql.NewNonNull(graphql.String),
@@ -230,20 +227,20 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					// return if not admin
 					userAuth := &models.User{}
-					user     := &models.UserDetails{}
-					signs    := []models.Sign{}
+					user := &models.UserDetails{}
+					signs := []models.Sign{}
 					logrus.Warn(params.Args["email"].(string))
-					if dbc := db.Where("email = ?",params.Args["email"].(string)).First(userAuth); dbc.Error != nil {
+					if dbc := db.Where("email = ?", params.Args["email"].(string)).First(userAuth); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
 					logrus.Warn(userAuth.ID)
-					if dbc := db.Where("user_id = ?",userAuth.ID).First(user); dbc.Error != nil {
+					if dbc := db.Where("user_id = ?", userAuth.ID).First(user); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
 					logrus.Warn(user.ID)
-					if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs);dbc.Error != nil {
+					if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
@@ -379,7 +376,7 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 
 // API GraphQL handler
 func API(c echo.Context) error {
-<<<<<<< Updated upstream
+
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		logrus.Error(err)
@@ -391,6 +388,7 @@ func API(c echo.Context) error {
 		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	query, ok := data["query"]
+	logrus.Warn(query)
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
@@ -398,11 +396,6 @@ func API(c echo.Context) error {
 	}
 	result := executeQuery(query.(string), createSchema())
 
-=======
-	logrus.Warn(c.QueryParams().Get("query"))
-	result := executeQuery(c.QueryParams().Get("query"), createSchema())
-	response := Response{}
->>>>>>> Stashed changes
 	if len(result.Errors) > 0 {
 		return sendResponse(c, http.StatusNotFound, result.Errors)
 	}

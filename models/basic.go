@@ -2,10 +2,10 @@ package models
 
 // Address model
 type Address struct {
-	ID  int     `json:"id"`
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
-	Description string `json:"description"`
+	ID          int     `json:"id"`
+	Lat         float64 `json:"lat"`
+	Lon         float64 `json:"lon"`
+	Description string  `json:"description"`
 }
 
 // Photo model
@@ -23,21 +23,21 @@ type Tag struct {
 
 // User model
 type User struct {
-	ID        	int    `json:"id"`
-	Email    	string `json:"email"`
-	Password 	string `json:"password"`
-	Role     	int    `json:"role"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     int    `json:"role"`
 }
 
 // UserDetails model
 type UserDetails struct {
-	ID    int
-	UserID int          `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
+	ID        int
+	UserID    int       `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
 	Name      string    `json:"name"`
 	AddressID int       `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)" json:"address"`
 	PhotoID   int       `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
 	Stars     float64   `json:"stars"`
-	Service   []Service `gorm:"ForeignKey:MasterID"`
+	Services  []Service `gorm:"ForeignKey:MasterID"`
 	Photos    []Photo   `gorm:"many2many:user_photos;"`
 	Signs     []Sign    `gorm:"many2many:user_signs;"`
 }
