@@ -15,7 +15,7 @@ func InitServer(config *dependencies.Config, db *gorm.DB) (e *echo.Echo) {
 
 	server.GET("/ping", handlers.Ping)
 	server.GET("/ping_db", handlers.PingDb(db))
-	server.GET("/graphql", handlers.API)
+	server.POST("/graphql", handlers.API)
 
 	return server
 }
