@@ -216,12 +216,12 @@ func API(c echo.Context) error {
 		logrus.Error(err)
 		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	var dat map[string]interface{}
-	if err := json.Unmarshal(body, &dat); err != nil {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
 		logrus.Error(err)
 		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	query, ok := dat["query"]
+	query, ok := data["query"]
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
