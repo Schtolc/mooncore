@@ -8,6 +8,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"encoding/json"
+	"io/ioutil"
 )
 
 func getRootMutation(db *gorm.DB) *graphql.Object {
@@ -122,7 +124,7 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 
 			"addressList": &graphql.Field{
 				Type:        graphql.NewList(AddressObject),
-				Description: "List of address",
+				Description: "List of addresses",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					var addresses []models.Address
 					if dbc := db.Find(&addresses); dbc.Error != nil {
@@ -209,7 +211,19 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 
 // API GraphQL handler
 func API(c echo.Context) error {
-	result := executeQuery(c.QueryParams().Get("query"), createSchema())
+	body, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		panic(err)
+	}
+	var dat map[string]interface{}
+	if err := json.Unmarshal(body, &dat); err != nil {
+		panic(err)
+	}
+	query, ok := dat["query"]
+	if !ok {
+		panic(err)
+	}
+	result := executeQuery(query.(string), createSchema())
 	response := Response{}
 	if len(result.Errors) > 0 {
 		response.Code = NotFound
