@@ -7,9 +7,16 @@ import (
 
 var (
 	//DefaultAddress
-	DefaultAddress Address
+	DefaultAddress = &Address{
+		Lat: 0,
+		Lon: 0,
+		Description: "default",
+	}
 	//DefaultAvatar
-	DefaultAvatar Photo
+	DefaultAvatar = &Photo{
+		Path: "default",
+		Tags: []Tag{},
+	}
 	//Tags array
 	Tags []Tag
 	//Signs array
