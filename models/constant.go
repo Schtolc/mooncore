@@ -45,6 +45,7 @@ func createConstValues() {
 		Description: "means varnish resistance",
 	})
 }
+
 // InsertDefaultValues of address and photos
 func InsertDefaultValues(db *gorm.DB) {
 	tx := db.Begin()
@@ -58,6 +59,7 @@ func InsertDefaultValues(db *gorm.DB) {
 	}
 	tx.Commit()
 }
+
 // InsertConstValues for tags and signs
 func InsertConstValues(db *gorm.DB) {
 	createConstValues()
