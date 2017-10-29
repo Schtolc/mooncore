@@ -31,17 +31,17 @@ type User struct {
 
 // UserDetails model
 type UserDetails struct {
-	ID        int
+	ID        int       `json:"id"`
 	UserID    int       `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
 	Name      string    `json:"name"`
 	AddressID int       `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)" json:"address"`
-	Address   Address
+	Address   Address   `json:"address"`
 	PhotoID   int       `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
-	Photo	  Photo
+	Photo     Photo     `json:"photo"`
 	Stars     float64   `json:"stars"`
-	Services  []Service `gorm:"ForeignKey:MasterID"`
-	Photos    []Photo   `gorm:"many2many:user_photos;"`
-	Signs     []Sign    `gorm:"many2many:user_signs;"`
+	Services  []Service `gorm:"ForeignKey:MasterID" json:"services"`
+	Photos    []Photo   `gorm:"many2many:user_photos;" json:"photos"`
+	Signs     []Sign    `gorm:"many2many:user_signs;" json:"signs"`
 }
 
 // Service model
@@ -52,7 +52,7 @@ type Service struct {
 	Price          float64 `json:"price"`
 	Description    string  `sql:"type:text" json:"description"`
 	ManicureTypeID int     `sql:"type:int, FOREIGN KEY (manicure_type_id) REFERENCES manicure_types(id)" json:"manicure_type"`
-	Photos         []Photo `gorm:"many2many:service_photos;"`
+	Photos         []Photo `gorm:"many2many:service_photos;" json:"photos"`
 }
 
 // ManicureType model

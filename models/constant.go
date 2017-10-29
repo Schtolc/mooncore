@@ -6,29 +6,29 @@ import (
 )
 
 var (
-	//DefaultAddress
+	// DefaultAddress for unknown address
 	DefaultAddress = &Address{
-		Lat: 0,
-		Lon: 0,
+		Lat:         0,
+		Lon:         0,
 		Description: "default",
 	}
-	//DefaultAvatar
+	// DefaultAvatar  for unknown photos
 	DefaultAvatar = &Photo{
 		Path: "default",
 		Tags: []Tag{},
 	}
-	//Tags array
+	// Tags array
 	Tags []Tag
-	//Signs array
+	// Signs array
 	Signs []Sign
 )
 
 func createConstValues() {
-	tags_name := []string{
+	tagsName := []string{
 		"Shellac", "Paraffin", "Mirror", "Vinylux", "3D_Nails",
 	}
-	for _, tag_name := range tags_name {
-		Tags = append(Tags, Tag{Name: tag_name})
+	for _, tagName := range tagsName {
+		Tags = append(Tags, Tag{Name: tagName})
 	}
 
 	Signs = append(Signs, Sign{
@@ -45,6 +45,7 @@ func createConstValues() {
 		Description: "means varnish resistance",
 	})
 }
+// InsertDefaultValues of address and photos
 func InsertDefaultValues(db *gorm.DB) {
 	tx := db.Begin()
 	if err := tx.FirstOrCreate(&DefaultAddress).Error; err != nil {
@@ -57,7 +58,7 @@ func InsertDefaultValues(db *gorm.DB) {
 	}
 	tx.Commit()
 }
-
+// InsertConstValues for tags and signs
 func InsertConstValues(db *gorm.DB) {
 	createConstValues()
 	tx := db.Begin()

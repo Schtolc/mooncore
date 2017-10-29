@@ -106,7 +106,7 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 		"tags": &graphql.Field{
 			Type: graphql.NewList(TagObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Photo).Tags, nil
+				return p.Source.(models.Photo).Tags, nil
 			},
 		},
 	},
@@ -165,6 +165,9 @@ var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 		"name": &graphql.Field{
 			Type: graphql.String,
 		},
+		"userid": &graphql.Field{
+			Type: graphql.Int,
+		},
 		"address": &graphql.Field{
 			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
@@ -190,6 +193,7 @@ var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 		"photos": &graphql.Field{
 			Type: graphql.NewList(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				logrus.Warn("QWERTYASD")
 				return p.Source.(models.UserDetails).Photos, nil
 			},
 		},
@@ -214,51 +218,52 @@ var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-var FeedElemObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "FeedElem",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type: graphql.Int,
-		},
-		"name": &graphql.Field{
-			Type: graphql.String,
-		},
-		"avatar": &graphql.Field{
-			Type: PhotoObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				photo := &models.Photo{}
-				if dbc := dependencies.DBInstance().First(photo, p.Source.(*models.UserDetails).PhotoID); dbc.Error != nil {
-					logrus.Error(dbc.Error)
-					return nil, dbc.Error
-				}
-				return photo, nil
-			},
-		},
-		"address": &graphql.Field{
-			Type: AddressObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				address := &models.Address{}
-				if dbc := dependencies.DBInstance().First(address, p.Source.(*models.UserDetails).AddressID); dbc.Error != nil {
-					logrus.Error(dbc.Error)
-					return nil, dbc.Error
-				}
-				return address, nil
-			},
-		},
-		"stars": &graphql.Field{
-			Type: graphql.Float,
-		},
-		"signs": &graphql.Field{
-			Type: graphql.NewList(SignObject),
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.UserDetails).Signs, nil
-			},
-		},
-		"photos": &graphql.Field{
-			Type: graphql.NewList(PhotoObject),
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.UserDetails).Photos, nil
-			},
-		},
-	},
-})
+//
+//var FeedElemObject = graphql.NewObject(graphql.ObjectConfig{
+//	Name: "FeedElem",
+//	Fields: graphql.Fields{
+//		"id": &graphql.Field{
+//			Type: graphql.Int,
+//		},
+//		"name": &graphql.Field{
+//			Type: graphql.String,
+//		},
+//		"avatar": &graphql.Field{
+//			Type: PhotoObject,
+//			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+//				photo := &models.Photo{}
+//				if dbc := dependencies.DBInstance().First(photo, p.Source.(*models.UserDetails).PhotoID); dbc.Error != nil {
+//					logrus.Error(dbc.Error)
+//					return nil, dbc.Error
+//				}
+//				return photo, nil
+//			},
+//		},
+//		"address": &graphql.Field{
+//			Type: AddressObject,
+//			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+//				address := &models.Address{}
+//				if dbc := dependencies.DBInstance().First(address, p.Source.(*models.UserDetails).AddressID); dbc.Error != nil {
+//					logrus.Error(dbc.Error)
+//					return nil, dbc.Error
+//				}
+//				return address, nil
+//			},
+//		},
+//		"stars": &graphql.Field{
+//			Type: graphql.Float,
+//		},
+//		"signs": &graphql.Field{
+//			Type: graphql.NewList(SignObject),
+//			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+//				return p.Source.(*models.UserDetails).Signs, nil
+//			},
+//		},
+//		"photos": &graphql.Field{
+//			Type: graphql.NewList(PhotoObject),
+//			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+//				return p.Source.(*models.UserDetails).Photos, nil
+//			},
+//		},
+//	},
+//})
