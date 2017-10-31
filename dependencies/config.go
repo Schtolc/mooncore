@@ -25,7 +25,8 @@ type Config struct {
 			Host string `yaml:"host"`
 		}
 		Auth struct {
-			Lifetime int `yaml:"lifetime"`
+			Lifetime int    `yaml:"lifetime"`
+			Secret   string `yaml:"secret"`
 		}
 	}
 	Database struct {

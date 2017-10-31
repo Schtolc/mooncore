@@ -21,6 +21,31 @@ type UserAuth struct {
 	Password string `json:"password";gorm:"not null;"`
 }
 
+type validationError struct {
+	error string
+}
+
+func (error validationError) Error() string {
+	return error.error
+}
+
+// Validate function for checking fields for emptiness
+func (userAuth *UserAuth) Validate(checkEmail bool) error {
+	if len(userAuth.Name) == 0 {
+		return validationError{"Empty username field"}
+	}
+
+	if len(userAuth.Password) == 0 {
+		return validationError{"Empty password field"}
+	}
+
+	if checkEmail && len(userAuth.Email) == 0 {
+		return validationError{"Empty email field"}
+	}
+
+	return nil
+}
+
 // User model
 type User struct {
 	ID        int    `json:"id"`

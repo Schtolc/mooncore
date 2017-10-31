@@ -15,25 +15,6 @@ func sendResponse(c echo.Context, code int, body interface{}) error {
 	return c.JSON(http.StatusOK, Response{code, body})
 }
 
-var (
-	needRegistration = &Response{
-		Code:  Forbidden,
-		Body: "You need to register",
-	}
-	invalidToken = &Response{
-		Code: Forbidden,
-		Body: "Token is invalid",
-	}
-	internalError = &Response{
-		Code:  InternalServerError,
-		Body: "Internal Error",
-	}
-	userAlreadyExists = &Response{
-		Code: BadRequest,
-		Body: "User already exists in database",
-	}
-	requireFields = &Response{
-		Code:   BadRequest,
-		Body: "require parameters for method",
-	}
-)
+func internalServerError(c echo.Context) error {
+	return sendResponse(c, http.StatusInternalServerError, "Internal server error")
+}

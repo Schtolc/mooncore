@@ -8,7 +8,7 @@ import (
 func TestPing(t *testing.T) {
 	e := expect(t)
 
-	ping := &Response{ Code:  OK, Body: "ECHO_PING" }
+	ping := &Response{Code: http.StatusOK, Body: "ECHO_PING"}
 	e.GET("/ping").
 		Expect().
 		Status(http.StatusOK).JSON().Object().Equal(ping)
