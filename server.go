@@ -21,6 +21,7 @@ func InitServer(config *dependencies.Config, db *gorm.DB) (e *echo.Echo) {
 
 	AuthGroup := server.Group("/")
 	AuthGroup.Use(middleware.JWTWithConfig(handlers.GetJwtConfig()))
+	AuthGroup.Use(handlers.LoadUser)
 	AuthGroup.POST("auth_ping", handlers.PingAuth)
 	server.POST("/graphql", handlers.API)
 

@@ -104,3 +104,18 @@ func createJwtToken(user *models.UserAuth) (tokenString string, err error) {
 	}
 	return tokenString, nil
 }
+
+// LoadUser is a middleware for load authorized user to context
+func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		username := c.Get("user").(*jwt.Token).Claims.(*jwtClaims).Name
+		dbUser := &models.UserAuth{}
+		dbc := dependencies.DBInstance().Where("name = ? ", username).First(dbUser)
+		if dbc.Error != nil {
+			logrus.Info("User was not found in the database when checking token: ", username)
+			return sendResponse(c, http.StatusBadRequest, "Bad token")
+		}
+		c.Set("user", dbUser)
+		return next(c)
+	}
+}

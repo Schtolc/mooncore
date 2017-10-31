@@ -17,7 +17,8 @@ func Ping(c echo.Context) error {
 
 // PingAuth is a handler for checking if authorization works.
 func PingAuth(c echo.Context) error {
-	return sendResponse(c, http.StatusOK, "ECHO_AUTH_PING")
+	user := c.Get("user").(*models.UserAuth)
+	return sendResponse(c, http.StatusOK, user.Name)
 }
 
 // PingDb is a simple handler for checking if database is up and running.

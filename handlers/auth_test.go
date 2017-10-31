@@ -45,11 +45,10 @@ func TestSignIn(t *testing.T) {
 
 func TestPingAuth(t *testing.T) {
 	e := httpexpect.New(t, localhost.String())
-	m := &Response{
-		200,
-		"ECHO_AUTH_PING",
-	}
-	e.POST("/auth_ping").WithHeader("Authorization", "Bearer "+token).WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Equal(m)
+
+	root := e.POST("/auth_ping").WithHeader("Authorization", "Bearer "+token).WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object()
+	root.Value("code").Equal(http.StatusOK)
+	root.Value("body").Equal(testUser.Name)
 
 	dependencies.DBInstance().Delete(&testUser)
 }
