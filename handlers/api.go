@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -122,7 +124,7 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 
 			"addressList": &graphql.Field{
 				Type:        graphql.NewList(AddressObject),
-				Description: "List of address",
+				Description: "List of addresses",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					var addresses []models.Address
 					if dbc := db.Find(&addresses); dbc.Error != nil {
@@ -209,14 +211,27 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 
 // API GraphQL handler
 func API(c echo.Context) error {
-	result := executeQuery(c.QueryParams().Get("query"), createSchema())
-	response := Response{}
-	if len(result.Errors) > 0 {
-		response.Code = NotFound
-		response.Body = result.Errors
-	} else {
-		response.Code = OK
-		response.Body = result.Data
+	body, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		logrus.Error(err)
+		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, response)
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		logrus.Error(err)
+		return sendResponse(c, http.StatusBadRequest, err.Error())
+	}
+	query, ok := data["query"]
+	if !ok {
+		strErr := "No query in request"
+		logrus.Error(strErr)
+		return sendResponse(c, http.StatusBadRequest, strErr)
+	}
+	result := executeQuery(query.(string), createSchema())
+
+	if len(result.Errors) > 0 {
+		return sendResponse(c, http.StatusNotFound, result.Errors)
+	}
+
+	return sendResponse(c, http.StatusOK, result.Data)
 }

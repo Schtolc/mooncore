@@ -65,7 +65,7 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				photo := models.Photo{}
-				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.User).AddressID); dbc.Error != nil {
+				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.User).PhotoID); dbc.Error != nil {
 					logrus.Println(dbc.Error)
 					return nil, dbc.Error
 				}
