@@ -14,8 +14,7 @@ func initDatabase(config *Config) *gorm.DB {
 		logrus.Fatal(err)
 	}
 	logrus.Info("connected to database")
-	err = db.DB().Ping()
-	if err != nil {
+	if err = db.DB().Ping(); err != nil {
 		logrus.Fatal(err)
 	}
 
@@ -29,6 +28,7 @@ func initDatabase(config *Config) *gorm.DB {
 		&models.User{},
 		&models.Master{},
 		&models.Service{},
+		&models.UserAuth{},
 	)
 
 	db.Table("service_manicure_materials").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")

@@ -8,11 +8,10 @@ import (
 func TestPing(t *testing.T) {
 	e := expect(t)
 
-	resp := Resp{Code: "200", Message: "ECHO_PING"}
+	ping := &Response{Code: http.StatusOK, Body: "ECHO_PING"}
 	e.GET("/ping").
 		Expect().
-		Status(http.StatusOK).
-		JSON().Object().Equal(resp)
+		Status(http.StatusOK).JSON().Object().Equal(ping)
 }
 
 func TestPingDb(t *testing.T) {
@@ -21,5 +20,5 @@ func TestPingDb(t *testing.T) {
 	e.GET("/ping_db").
 		Expect().
 		Status(http.StatusOK).
-		JSON().Object().Value("message").String().NotEmpty()
+		JSON().Object().Value("body").String().NotEmpty()
 }
