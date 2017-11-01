@@ -12,8 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
-
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -157,18 +155,18 @@ func TestGetUser(t *testing.T) {
 	body.Value("avatar").Object().Value("path").Equal("default")
 }
 
-func TestListUser(t *testing.T) {
+func TestListUsers(t *testing.T) {
 	e := expect(t)
 
 	respParams := "id, name, address{lat, lon}, avatar{path}"
-	query := graphQLBody("{listUser{%s}}", respParams)
+	query := graphQLBody("{listUsers{%s}}", respParams)
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 
 	resp.Keys().ContainsOnly("code", "body")
-	body := resp.Value("body").Object().Value("listUser").Array().Element(1).Object()
+	body := resp.Value("body").Object().Value("listUsers").Array().Element(1).Object()
 	body.Value("name").Equal("")
 	body.Value("address").Object().Value("lat").Equal(0)
 	body.Value("address").Object().Value("lon").Equal(0)
@@ -568,11 +566,29 @@ func TestGetSign(t *testing.T) {
 
 func TestGetFeed(t *testing.T) {
 	e := expect(t)
-	query := graphQLBody("{getFeed(limit:3){id, name, avatar{id, path, tags{id, name}, photos{id, path, tags{name}}, signs{name, description}  }}}")
+	query := graphQLBody("{getFeed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo{id, path, tags{id, name}}}}}")
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 	resp.Keys().ContainsOnly("code", "body")
 
-	logrus.Warn(resp.Value("body"))
+	body := resp.Value("body").Object().Value("getFeed")
+
+	photo := body.Array().First().Object().Value("photos").Array().First()
+	photo.Object().Value("id").NotNull()
+	photo.Object().Value("path").NotNull()
+	photo.Object().Value("tags").Array()
+
+	sign := body.Array().First().Object().Value("signs").Array().First()
+	sign.Object().Value("description").NotNull()
+	sign.Object().Value("name").NotNull()
+	sign.Object().Value("id").NotNull()
+	sign.Object().Value("photo").Object().Value("path").NotNull()
+	sign.Object().Value("photo").Object().Value("id").NotNull()
+	//sign.Object().Value("photo").Object().Value("tags").Array()
+
+	pho := body.Array().First().Object().Value("avatar")
+	pho.Object().Value("id").NotNull()
+	pho.Object().Value("path").NotNull()
+	//pho.Object().Value("tags").Array().First()
 }

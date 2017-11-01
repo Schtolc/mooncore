@@ -73,7 +73,7 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				master := models.UserDetails{}
 				if dbc := dependencies.DBInstance().First(&master, p.Source.(models.Service).MasterID); dbc.Error != nil {
-					logrus.Println(dbc.Error)
+					logrus.Error(dbc.Error)
 					return nil, dbc.Error
 				}
 				return master, nil
@@ -183,17 +183,22 @@ var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				photo := &models.Photo{}
+
 				if dbc := dependencies.DBInstance().First(photo, p.Source.(models.UserDetails).PhotoID); dbc.Error != nil {
 					logrus.Error(dbc.Error)
 					return nil, dbc.Error
 				}
-				return photo, nil
+				if dbc := dependencies.DBInstance().Model(photo).Association("tags").Find(&photo.Tags); dbc.Error != nil {
+					logrus.Error(dbc.Error)
+					return nil, dbc.Error
+				}
+				logrus.Warn(photo)
+				return *photo, nil
 			},
 		},
 		"photos": &graphql.Field{
 			Type: graphql.NewList(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				logrus.Warn("QWERTYASD")
 				return p.Source.(models.UserDetails).Photos, nil
 			},
 		},

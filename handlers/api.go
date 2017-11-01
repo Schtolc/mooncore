@@ -358,7 +358,7 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					userDetails, err := getUserDetails(params.Args["email"].(string), db)
 					if err != nil {
-						logrus.Warn(err)
+						logrus.Error(err)
 						return nil, err
 					}
 					return *userDetails, nil
@@ -416,15 +416,6 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 					}
 
 					for i, user := range users {
-						if dbc := db.Where("id = ?", user.AddressID).First(&user.Address); dbc.Error != nil {
-							logrus.Error(dbc.Error)
-							return nil, dbc.Error
-						}
-
-						if dbc := db.Where("id = ?", user.PhotoID).First(&user.Photo); dbc.Error != nil {
-							logrus.Error(dbc.Error)
-							return nil, dbc.Error
-						}
 						if dbc := db.Model(&user).Association("Photos").Find(&user.Photos); dbc.Error != nil {
 							logrus.Error(dbc.Error)
 							return nil, dbc.Error
@@ -442,7 +433,6 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 						}
 						users[i] = user
 					}
-					logrus.Warn(users)
 					return users, nil
 				},
 			},
@@ -465,12 +455,10 @@ func createSchema() graphql.Schema {
 }
 
 func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	logrus.Warn("executeQuery")
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
 		RequestString: query,
 	})
-	logrus.Warn(result)
 	return result
 }
 
@@ -488,7 +476,6 @@ func API(c echo.Context) error {
 		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	query, ok := data["query"]
-	logrus.Warn(query)
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)

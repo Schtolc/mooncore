@@ -35,9 +35,7 @@ type UserDetails struct {
 	UserID    int       `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
 	Name      string    `json:"name"`
 	AddressID int       `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)" json:"address"`
-	Address   Address   `json:"address"`
 	PhotoID   int       `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
-	Photo     Photo     `json:"photo"`
 	Stars     float64   `json:"stars"`
 	Services  []Service `gorm:"ForeignKey:MasterID" json:"services"`
 	Photos    []Photo   `gorm:"many2many:user_photos;" json:"photos"`
