@@ -32,7 +32,7 @@ func graphQLBody(query string, a ...interface{}) []byte {
 
 func expect(t *testing.T) *httpexpect.Expect {
 	return httpexpect.WithConfig(httpexpect.Config{
-		BaseURL:  localhost.String(),
+		BaseURL:  localhost.String() + conf.Server.APIPrefix,
 		Reporter: httpexpect.NewAssertReporter(t),
 		Printers: nil,
 	})

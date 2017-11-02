@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/gavv/httpexpect"
 	"net/http"
 	"testing"
 )
@@ -23,7 +22,7 @@ var (
 )
 
 func TestSignUp(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Value("code").Equal(http.StatusOK)
 	e.POST("/sign_up").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().Value("code").Equal(http.StatusBadRequest)
@@ -35,7 +34,7 @@ func TestSignUp(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	m := e.POST("/sign_in").WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object().ContainsKey("body")
 	token = m.Value("body").String().Raw()
@@ -44,7 +43,7 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestPingAuth(t *testing.T) {
-	e := httpexpect.New(t, localhost.String())
+	e := expect(t)
 
 	root := e.POST("/auth_ping").WithHeader("Authorization", "Bearer "+token).WithJSON(testUser).Expect().Status(http.StatusOK).JSON().Object()
 	root.Value("code").Equal(http.StatusOK)
