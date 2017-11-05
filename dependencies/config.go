@@ -28,7 +28,8 @@ type Config struct {
 			Lifetime int    `yaml:"lifetime"`
 			Secret   string `yaml:"secret"`
 		}
-		APIPrefix string `yaml:"api_prefix"`
+		APIPrefix     string `yaml:"api_prefix"`
+		UploadStorage string `yaml:"upload_storage"`
 	}
 	Database struct {
 		User         string `yaml:"user"`
