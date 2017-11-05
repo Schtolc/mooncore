@@ -25,6 +25,7 @@ func TestUpload(t *testing.T) {
 
 	path := body.Value("path").String().Raw()
 
+
 	data, err := ioutil.ReadFile(dependencies.ConfigInstance().Server.UploadStorage + path)
 	assert.Nil(t, err)
 
