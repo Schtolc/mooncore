@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/Schtolc/mooncore/dependencies"
+	"github.com/Schtolc/mooncore/models"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -23,6 +24,7 @@ func TestUpload(t *testing.T) {
 	body.ContainsKey("id").Value("id").NotNull()
 	body.ContainsKey("path").Value("path").NotNull()
 
+	id := int(body.Value("id").Number().Raw())
 	path := body.Value("path").String().Raw()
 
 	data, err := ioutil.ReadFile(dependencies.ConfigInstance().Server.UploadStorage + path)
@@ -30,5 +32,10 @@ func TestUpload(t *testing.T) {
 
 	assert.Equal(t, data, content)
 
+	photo := &models.Photo{
+		ID:   id,
+		Path: path,
+	}
+	dependencies.DBInstance().Delete(photo)
 	os.Remove(dependencies.ConfigInstance().Server.UploadStorage + path)
 }
