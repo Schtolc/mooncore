@@ -228,7 +228,6 @@ func TestEditUserProfileNotAllParams(t *testing.T) {
 	body.Value("avatar").Object().Value("id").Equal(testUserDetails.PhotoID)
 	body.Value("avatar").Object().Value("path").NotNull()
 }
-
 func TestCreateAddress(t *testing.T) {
 	e := expect(t)
 

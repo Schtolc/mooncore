@@ -12,6 +12,6 @@ func main() {
 	db := dependencies.DBInstance()
 	defer db.Close()
 
-	server := InitServer(conf, db)
+	server := InitServer(conf)
 	logrus.Fatal(server.Start(conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port))
 }
