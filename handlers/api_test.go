@@ -7,7 +7,6 @@ import (
 	"github.com/gavv/httpexpect"
 
 	"github.com/Schtolc/mooncore/models"
-
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -237,7 +236,7 @@ func TestCreateAddress(t *testing.T) {
 		Description: "description",
 	}
 
-	reqParams := fmt.Sprintf("lat:\"%.16v\", lon:\"%.16v\", description:\"%s\"", address.Lat, address.Lon, address.Description)
+	reqParams := fmt.Sprintf("lat:\"%.20v\", lon:\"%.20v\", description:\"%s\"", address.Lat, address.Lon, address.Description)
 	respParams := "id, lat, lon, description"
 	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
@@ -294,7 +293,7 @@ func TestCreateAddressBadParamDescription(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 
-	errorMessage := fmt.Sprintf("Argument \"description\" has invalid value 0.6868230728671094.\nExpected type \"String\", found %.16v.", address.Lon)
+	errorMessage := fmt.Sprintf("Argument \"description\" has invalid value %.16v.\nExpected type \"String\", found %.16v.", address.Lon, address.Lon)
 
 	resp.Value("code").Number().Equal(http.StatusNotFound)
 	resp.Value("body").Array().First().Object().Value("message").Equal(errorMessage)
