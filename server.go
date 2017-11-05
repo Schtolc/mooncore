@@ -5,14 +5,12 @@ import (
 	"github.com/Schtolc/mooncore/handlers"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/sirupsen/logrus"
 	"os"
 )
 
 // InitServer inits echo server: sets access logs and handlers
 func InitServer(config *dependencies.Config) (e *echo.Echo) {
-	err := os.Mkdir(config.Server.UploadStorage, 0777)
-	logrus.Fatal(err)
+	_ = os.Mkdir(config.Server.UploadStorage, 0777)
 
 	server := echo.New()
 	group := server.Group(dependencies.ConfigInstance().Server.APIPrefix,

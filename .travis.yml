@@ -15,7 +15,6 @@ script:
   - go build
   - sudo mkdir -p /var/log/mooncore
   - sudo chmod 777 /var/log/mooncore
-  - sudo chmod 777 /var
   - echo 'CREATE DATABASE IF NOT EXISTS moondb' | mysql -u root
   - ./mooncore &
   - go test -v ./...
