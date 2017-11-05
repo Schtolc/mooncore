@@ -6,6 +6,7 @@ server:
     lifetime: 72
     secret: "8f2b55f8971c6c3b2b4d18359a9e0e4806a6bc4d"
   api_prefix: "/api"
+  upload_storage: "/var/www/utrobin/data/upload/"
 database:
   user: "root"
   dbname: "moondb"

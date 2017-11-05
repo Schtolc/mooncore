@@ -123,31 +123,6 @@ func TestGetAddress(t *testing.T) {
 	root.Object().Value("body").NotNull()
 }
 
-func TestCreatePhoto(t *testing.T) {
-	e := expect(t)
-
-	path := randString()
-
-	query := graphQLBody("mutation{createPhoto(path:\"%s\"){id}}", path)
-
-	root := e.POST("/graphql").
-		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON()
-
-	root.Object().Value("code").Number().Equal(http.StatusOK)
-
-	id := root.Object().Value("body").
-		Object().Value("createPhoto").
-		Object().Value("id").Number().Raw()
-
-	photo := models.Photo{}
-
-	assert.Nil(t, db.First(&photo, int(id)).Error, "address was not created")
-	assert.Equal(t, photo.Path, path, "created path doesn't equal to returned")
-
-	db.Delete(&photo)
-}
-
 func TestGetPhoto(t *testing.T) {
 	e := expect(t)
 

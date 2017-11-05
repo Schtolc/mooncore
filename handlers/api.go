@@ -39,27 +39,6 @@ func getRootMutation(db *gorm.DB) *graphql.Object {
 					return address, nil
 				},
 			},
-
-			"createPhoto": &graphql.Field{
-				Type:        PhotoObject,
-				Description: "Create new photo",
-				Args: graphql.FieldConfigArgument{
-					"path": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.String),
-					},
-				},
-				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-					photo := &models.Photo{
-						Path: params.Args["path"].(string),
-					}
-					if dbc := db.Create(photo); dbc.Error != nil {
-						logrus.Println(dbc.Error)
-						return nil, dbc.Error
-					}
-					return photo, nil
-				},
-			},
-
 			"createUser": &graphql.Field{
 				Type:        UserObject,
 				Description: "Create new user",
