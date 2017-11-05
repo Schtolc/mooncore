@@ -306,6 +306,37 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 					return addresses, nil
 				},
 			},
+			"addressListInArea": &graphql.Field{
+				Type:        graphql.NewList(AddressObject),
+				Description: "Get all addresses in this area",
+				Args: graphql.FieldConfigArgument{
+					"lat1": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.Float),
+					},
+					"lon1": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.Float),
+					},
+					"lat2": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.Float),
+					},
+					"lon2": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.Float),
+					},
+				},
+				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					lat1 := params.Args["lat1"]	// первая точка сверху слева
+					lon1 := params.Args["lon1"]	// вторая снизу и справа
+					lat2 := params.Args["lat2"]
+					lon2 := params.Args["lon2"]
+					var address []models.Address
+					query := "lat > ? AND lat < ? AND lon < ? AND lon > ?"
+					if dbc := db.Where(query, lat1, lat2, lon1, lon2).Find(&address); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
+					return address, nil
+				},
+			},
 			"getPhoto": &graphql.Field{
 				Type:        PhotoObject,
 				Description: "Get single photo", // done
