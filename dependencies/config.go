@@ -24,6 +24,11 @@ type Config struct {
 			Port string `yaml:"port"`
 			Host string `yaml:"host"`
 		}
+		Auth struct {
+			Lifetime int    `yaml:"lifetime"`
+			Secret   string `yaml:"secret"`
+		}
+		APIPrefix string `yaml:"api_prefix"`
 	}
 	Database struct {
 		User         string `yaml:"user"`

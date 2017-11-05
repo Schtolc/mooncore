@@ -11,11 +11,20 @@ import (
 // InitServer inits echo server: sets access logs and handlers
 func InitServer(config *dependencies.Config, db *gorm.DB) (e *echo.Echo) {
 	server := echo.New()
-	server.Use(middleware.LoggerWithConfig(GetAccessConfig(config.Logs.Access)))
+	group := server.Group(dependencies.ConfigInstance().Server.APIPrefix,
+		middleware.LoggerWithConfig(GetAccessConfig(config.Logs.Access)))
 
-	server.GET("/ping", handlers.Ping)
-	server.GET("/ping_db", handlers.PingDb(db))
-	server.POST("/graphql", handlers.API)
+	group.POST("/sign_up", handlers.SignUp)
+	group.POST("/sign_in", handlers.SignIn)
+
+	group.GET("/ping", handlers.Ping)
+	group.GET("/ping_db", handlers.PingDb)
+
+	AuthGroup := group.Group("")
+	AuthGroup.Use(middleware.JWTWithConfig(handlers.GetJwtConfig()))
+	AuthGroup.Use(handlers.LoadUser)
+	AuthGroup.POST("/auth_ping", handlers.PingAuth)
+	group.POST("/graphql", handlers.API)
 
 	return server
 }

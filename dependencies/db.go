@@ -14,8 +14,7 @@ func initDatabase(config *Config) *gorm.DB {
 		logrus.Fatal(err)
 	}
 	logrus.Info("connected to database")
-	err = db.DB().Ping()
-	if err != nil {
+	if err = db.DB().Ping(); err != nil {
 		logrus.Fatal(err)
 	}
 	db.LogMode(true)
@@ -30,6 +29,7 @@ func initDatabase(config *Config) *gorm.DB {
 		&models.User{},
 		&models.UserDetails{},
 		&models.Service{},
+		&models.UserAuth{},
 	)
 
 	db.Table("user_signs").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")
