@@ -11,7 +11,7 @@ script:
   - go get github.com/fzipp/gocyclo
   - gofmt -l . | wc -l | awk '{if ($1 != 0) print "ERROR"; else print "OK"}' | grep -v 'ERROR'
   - golint -set_exit_status ./...
-  - gocyclo --over 10 . | wc -l | awk '{if ($1 != 0) print "ERROR"; else print "OK"}' | grep -v 'ERROR'
+  - gocyclo --over 30 . | wc -l | awk '{if ($1 != 0) print "ERROR"; else print "OK"}' | grep -v 'ERROR'
   - go build
   - sudo mkdir -p /var/log/mooncore
   - sudo chmod 777 /var/log/mooncore
