@@ -1,16 +1,16 @@
 package handlers
 
 import (
-	"github.com/labstack/echo"
-	"net/http"
-	"io"
-	"os"
-	"github.com/sirupsen/logrus"
-	"math/rand"
-	"time"
 	"github.com/Schtolc/mooncore/dependencies"
-	"path/filepath"
 	"github.com/Schtolc/mooncore/models"
+	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
+	"io"
+	"math/rand"
+	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 const letterBytes = "0123456789ABCDEF"
@@ -27,6 +27,7 @@ func randFilename(n int) string {
 	return string(b)
 }
 
+// UploadImage uploads image
 func UploadImage(c echo.Context) error {
 	r := c.Request()
 
@@ -39,7 +40,7 @@ func UploadImage(c echo.Context) error {
 
 	filename := randFilename(32) + filepath.Ext(header.Filename)
 
-	f, err := os.OpenFile(dependencies.ConfigInstance().Server.UploadStorage + filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(dependencies.ConfigInstance().Server.UploadStorage+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		logrus.Error(err)
 		return internalServerError(c)

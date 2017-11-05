@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"testing"
-	"net/http"
-	"io/ioutil"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"testing"
 )
 
 func TestUpload(t *testing.T) {
