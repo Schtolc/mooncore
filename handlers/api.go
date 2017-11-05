@@ -311,24 +311,40 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				Description: "Get all addresses in this area",
 				Args: graphql.FieldConfigArgument{
 					"lat1": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.Float),
+						Type: graphql.NewNonNull(graphql.String),
 					},
 					"lon1": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.Float),
+						Type: graphql.NewNonNull(graphql.String),
 					},
 					"lat2": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.Float),
+						Type: graphql.NewNonNull(graphql.String),
 					},
 					"lon2": &graphql.ArgumentConfig{
-						Type: graphql.NewNonNull(graphql.Float),
+						Type: graphql.NewNonNull(graphql.String),
 					},
 				},
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-					lat1 := params.Args["lat1"]	// первая точка сверху слева
-					lon1 := params.Args["lon1"]	// вторая снизу и справа
-					lat2 := params.Args["lat2"]
-					lon2 := params.Args["lon2"]
-					var address []models.Address
+					lat1, err := strconv.ParseFloat(params.Args["lat1"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					lon1, _ := strconv.ParseFloat(params.Args["lon1"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					lat2, err := strconv.ParseFloat(params.Args["lat2"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					lon2, err := strconv.ParseFloat(params.Args["lon2"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					} // первая точка сверху слева
+					var address []models.Address // вторая снизу и справа
 					query := "lat > ? AND lat < ? AND lon < ? AND lon > ?"
 					if dbc := db.Where(query, lat1, lat2, lon1, lon2).Find(&address); dbc.Error != nil {
 						logrus.Error(dbc.Error)

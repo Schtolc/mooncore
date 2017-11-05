@@ -599,12 +599,12 @@ func TestGetAddressInGivenArea(t *testing.T) {
 	db := dependencies.DBInstance()
 
 	boundary1 := models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
+		Lat: rand.Float64() + 10, // to avoid ranges close to zero
+		Lon: rand.Float64() + 10,
 	}
 	boundary2 := models.Address{
-		Lat: rand.Float64(),
-		Lon: rand.Float64(),
+		Lat: rand.Float64() + 10,
+		Lon: rand.Float64() + 10,
 	}
 
 	if boundary1.Lat > boundary2.Lat { // To reach correct order
@@ -627,13 +627,23 @@ func TestGetAddressInGivenArea(t *testing.T) {
 		Lat: boundary2.Lat + rand.Float64(),
 		Lon: (boundary1.Lon + boundary2.Lon) / 2,
 	}
+	objectOutOfArea3 := models.Address{
+		Lat: (boundary1.Lat + boundary2.Lat) / 2,
+		Lon: boundary1.Lon + rand.Float64(),
+	}
+	objectOutOfArea4 := models.Address{
+		Lat: (boundary1.Lat + boundary2.Lat) / 2,
+		Lon: boundary2.Lon - rand.Float64(),
+	}
 
 	db.Create(&objectInArea)
 	db.Create(&objectOutOfArea1)
 	db.Create(&objectOutOfArea2)
+	db.Create(&objectOutOfArea3)
+	db.Create(&objectOutOfArea4)
 
 	query := graphQLBody(
-		"{addressListInArea(lat1:%f, lon1:%f, lat2:%f, lon2:%f){lat, lon}}",
+		"{addressListInArea(lat1:\"%f\", lon1:\"%f\", lat2:\"%f\", lon2:\"%f\"){lat, lon}}",
 		boundary1.Lat,
 		boundary1.Lon,
 		boundary2.Lat,
@@ -644,14 +654,15 @@ func TestGetAddressInGivenArea(t *testing.T) {
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 
+	db.Delete(&objectInArea)
+	db.Delete(&objectOutOfArea1)
+	db.Delete(&objectOutOfArea2)
+	db.Delete(&objectOutOfArea3)
+	db.Delete(&objectOutOfArea4)
+
 	resp.Value("code").Number().Equal(http.StatusOK)
 
 	obj := resp.Value("body").
 		Object().Value("addressListInArea").Array()
-
-	db.Delete(&objectInArea)
-	db.Delete(&objectOutOfArea1)
-	db.Delete(&objectOutOfArea2)
-
 	obj.Length().Equal(1)
 }
