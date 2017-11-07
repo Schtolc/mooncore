@@ -326,10 +326,10 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 					lat1, err := strconv.ParseFloat(params.Args["lat1"].(string), 64)
 					if err != nil {
-						logrus.Error(err)
-						return nil, err
+						logrus.Error(err) // первая точка сверху слева
+						return nil, err   // вторая снизу и справа
 					}
-					lon1, _ := strconv.ParseFloat(params.Args["lon1"].(string), 64)
+					lon1, err := strconv.ParseFloat(params.Args["lon1"].(string), 64)
 					if err != nil {
 						logrus.Error(err)
 						return nil, err
@@ -343,14 +343,14 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 					if err != nil {
 						logrus.Error(err)
 						return nil, err
-					} // первая точка сверху слева
-					var address []models.Address // вторая снизу и справа
+					}
+					var addresses []models.Address
 					query := "lat > ? AND lat < ? AND lon < ? AND lon > ?"
-					if dbc := db.Where(query, lat1, lat2, lon1, lon2).Find(&address); dbc.Error != nil {
+					if dbc := db.Where(query, lat1, lat2, lon1, lon2).Find(&addresses); dbc.Error != nil {
 						logrus.Error(dbc.Error)
 						return nil, dbc.Error
 					}
-					return address, nil
+					return addresses, nil
 				},
 			},
 			"getPhoto": &graphql.Field{
