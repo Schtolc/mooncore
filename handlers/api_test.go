@@ -599,41 +599,38 @@ func TestGetAddressInGivenArea(t *testing.T) {
 	db := dependencies.DBInstance()
 
 	boundary1 := models.Address{
-		Lat: rand.Float64() + 10, // to avoid ranges close to zero
-		Lon: rand.Float64() + 10,
+		Lat: 5,
+		Lon: 10,
 	}
 	boundary2 := models.Address{
-		Lat: rand.Float64() + 10,
-		Lon: rand.Float64() + 10,
+		Lat: 10,
+		Lon: 5,
 	}
 
-	if boundary1.Lat > boundary2.Lat { // To reach correct order
-		boundary1.Lat, boundary2.Lat = boundary2.Lat, boundary1.Lat
-	}
-	if boundary1.Lon < boundary2.Lon { // To reach correct order
-		boundary1.Lon, boundary2.Lon = boundary2.Lon, boundary1.Lon
-	}
+	halfSide := (boundary2.Lat - boundary1.Lat) / 2
+	latInArea := (boundary1.Lat + boundary2.Lat) / 2
+	lonInArea := (boundary1.Lon + boundary2.Lon) / 2
 
 	objectInArea := models.Address{
-		Lat: (boundary1.Lat + boundary2.Lat) / 2,
-		Lon: (boundary1.Lon + boundary2.Lon) / 2,
+		Lat: latInArea,
+		Lon: lonInArea,
 	}
 
 	objectOutOfArea1 := models.Address{
-		Lat: boundary1.Lat - rand.Float64(),
-		Lon: (boundary1.Lon + boundary2.Lon) / 2,
+		Lat: boundary1.Lat - halfSide,
+		Lon: lonInArea,
 	}
 	objectOutOfArea2 := models.Address{
-		Lat: boundary2.Lat + rand.Float64(),
-		Lon: (boundary1.Lon + boundary2.Lon) / 2,
+		Lat: boundary2.Lat + halfSide,
+		Lon: lonInArea,
 	}
 	objectOutOfArea3 := models.Address{
-		Lat: (boundary1.Lat + boundary2.Lat) / 2,
-		Lon: boundary1.Lon + rand.Float64(),
+		Lat: latInArea,
+		Lon: boundary1.Lon + halfSide,
 	}
 	objectOutOfArea4 := models.Address{
-		Lat: (boundary1.Lat + boundary2.Lat) / 2,
-		Lon: boundary2.Lon - rand.Float64(),
+		Lat: latInArea,
+		Lon: boundary2.Lon - halfSide,
 	}
 
 	db.Create(&objectInArea)
