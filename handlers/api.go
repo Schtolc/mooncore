@@ -306,6 +306,53 @@ func getRootQuery(db *gorm.DB) *graphql.Object {
 					return addresses, nil
 				},
 			},
+			"addressListInArea": &graphql.Field{
+				Type:        graphql.NewList(AddressObject),
+				Description: "Get all addresses in this area",
+				Args: graphql.FieldConfigArgument{
+					"lat1": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"lon1": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"lat2": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"lon2": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+				},
+				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					lat1, err := strconv.ParseFloat(params.Args["lat1"].(string), 64)
+					if err != nil {
+						logrus.Error(err) // первая точка сверху слева
+						return nil, err   // вторая снизу и справа
+					}
+					lon1, err := strconv.ParseFloat(params.Args["lon1"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					lat2, err := strconv.ParseFloat(params.Args["lat2"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					lon2, err := strconv.ParseFloat(params.Args["lon2"].(string), 64)
+					if err != nil {
+						logrus.Error(err)
+						return nil, err
+					}
+					var addresses []models.Address
+					query := "lat > ? AND lat < ? AND lon < ? AND lon > ?"
+					if dbc := db.Where(query, lat1, lat2, lon1, lon2).Find(&addresses); dbc.Error != nil {
+						logrus.Error(dbc.Error)
+						return nil, dbc.Error
+					}
+					return addresses, nil
+				},
+			},
 			"getPhoto": &graphql.Field{
 				Type:        PhotoObject,
 				Description: "Get single photo", // done

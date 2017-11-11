@@ -590,3 +590,77 @@ func TestGetFeed(t *testing.T) {
 	pho.Object().Value("path").NotNull()
 	//pho.Object().Value("tags").Array().First()
 }
+
+//// [[ GET ADDRESSES IN GIVEN AREA ]]
+
+func TestGetAddressInGivenArea(t *testing.T) {
+	e := expect(t)
+
+	db := dependencies.DBInstance()
+
+	boundary1 := models.Address{
+		Lat: 5,
+		Lon: 10,
+	}
+	boundary2 := models.Address{
+		Lat: 10,
+		Lon: 5,
+	}
+
+	halfSide := (boundary2.Lat - boundary1.Lat) / 2
+	latInArea := (boundary1.Lat + boundary2.Lat) / 2
+	lonInArea := (boundary1.Lon + boundary2.Lon) / 2
+
+	objectInArea := models.Address{
+		Lat: latInArea,
+		Lon: lonInArea,
+	}
+
+	objectOutOfArea1 := models.Address{
+		Lat: boundary1.Lat - halfSide,
+		Lon: lonInArea,
+	}
+	objectOutOfArea2 := models.Address{
+		Lat: boundary2.Lat + halfSide,
+		Lon: lonInArea,
+	}
+	objectOutOfArea3 := models.Address{
+		Lat: latInArea,
+		Lon: boundary1.Lon + halfSide,
+	}
+	objectOutOfArea4 := models.Address{
+		Lat: latInArea,
+		Lon: boundary2.Lon - halfSide,
+	}
+
+	db.Create(&objectInArea)
+	db.Create(&objectOutOfArea1)
+	db.Create(&objectOutOfArea2)
+	db.Create(&objectOutOfArea3)
+	db.Create(&objectOutOfArea4)
+
+	query := graphQLBody(
+		"{addressListInArea(lat1:\"%f\", lon1:\"%f\", lat2:\"%f\", lon2:\"%f\"){lat, lon, id}}",
+		boundary1.Lat,
+		boundary1.Lon,
+		boundary2.Lat,
+		boundary2.Lon,
+	)
+
+	resp := e.POST("/graphql").
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object()
+
+	db.Delete(&objectInArea)
+	db.Delete(&objectOutOfArea1)
+	db.Delete(&objectOutOfArea2)
+	db.Delete(&objectOutOfArea3)
+	db.Delete(&objectOutOfArea4)
+
+	resp.Value("code").Number().Equal(http.StatusOK)
+
+	obj := resp.Value("body").
+		Object().Value("addressListInArea").Array()
+	obj.Length().Equal(1)
+	obj.Element(0).Object().Value("id").Equal(objectInArea.ID)
+}
