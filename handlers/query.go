@@ -135,7 +135,7 @@ var getSigns = &graphql.Field{
 			logrus.Warn(err)
 			return nil, err
 		}
-		signs := []models.Sign{}
+		var signs []models.Sign
 		db.Model(&userDetails).Association("signs").Find(&signs)
 		return signs, nil
 	},
@@ -151,7 +151,7 @@ var feed = &graphql.Field{
 		var offset int
 		db.Table("user_details").Count(&offset)
 		offset = rand.Intn(offset)
-		users := []models.UserDetails{}
+		var users []models.UserDetails
 
 		if dbc := db.Limit(p.Args["limit"].(int)).Offset(0).Find(&users); dbc.Error != nil {
 			logrus.Error(dbc.Error)

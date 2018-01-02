@@ -19,7 +19,7 @@ func just(param graphql.Type) *graphql.ArgumentConfig {
 func notNull(param graphql.Type) *graphql.ArgumentConfig {
 	return just(graphql.NewNonNull(param))
 }
-func listof(param graphql.Type) *graphql.ArgumentConfig {
+func listOf(param graphql.Type) *graphql.ArgumentConfig {
 	return just(graphql.NewList(param))
 }
 

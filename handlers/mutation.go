@@ -120,7 +120,7 @@ var createAvatar = &graphql.Field{
 	Description: "Create new address",
 	Args: graphql.FieldConfigArgument{
 		"path": notNull(graphql.String),
-		"tags": listof(graphql.Int),
+		"tags": listOf(graphql.Int),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 		photo := &models.Photo{
@@ -149,7 +149,7 @@ var addPhoto = &graphql.Field{
 	Description: "Add new photo - master",
 	Args: graphql.FieldConfigArgument{
 		"path":  notNull(graphql.String),
-		"tags":  listof(graphql.Int),
+		"tags":  listOf(graphql.Int),
 		"email": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
@@ -185,7 +185,7 @@ var addPhoto = &graphql.Field{
 
 var addSigns = &graphql.Field{
 	Type:        UserDetailsObject,
-	Description: "Add signs -  admin",
+	Description: "Add signs - admin",
 	Args: graphql.FieldConfigArgument{
 		"signs": notNull(graphql.NewList(graphql.Int)),
 		"email": notNull(graphql.String),
@@ -196,7 +196,7 @@ var addSigns = &graphql.Field{
 			logrus.Warn(err)
 			return nil, err
 		}
-		signs := []models.Sign{}
+		var signs []models.Sign
 		if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs); dbc.Error != nil {
 			logrus.Error(dbc.Error)
 			return nil, dbc.Error
