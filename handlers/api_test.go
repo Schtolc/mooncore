@@ -564,13 +564,13 @@ func TestGetSign(t *testing.T) {
 
 func TestGetFeed(t *testing.T) {
 	e := expect(t)
-	query := graphQLBody("{getFeed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo{id, path, tags{id, name}}}}}")
+	query := graphQLBody("{feed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo{id, path, tags{id, name}}}}}")
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
 	resp.Keys().ContainsOnly("code", "body")
 
-	body := resp.Value("body").Object().Value("getFeed")
+	body := resp.Value("body").Object().Value("feed")
 
 	photo := body.Array().First().Object().Value("photos").Array().First()
 	photo.Object().Value("id").NotNull()

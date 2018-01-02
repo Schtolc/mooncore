@@ -20,6 +20,7 @@ func InitServer(config *dependencies.Config) (e *echo.Echo) {
 	group.POST("/sign_in", handlers.SignIn)
 	group.POST("/upload", handlers.UploadImage)
 	group.POST("/graphql", handlers.API)
+	group.OPTIONS("/graphql", handlers.Headers)
 
 	group.GET("/ping", handlers.Ping)
 	group.GET("/ping_db", handlers.PingDb)
