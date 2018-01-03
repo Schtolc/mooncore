@@ -33,7 +33,6 @@ func Headers(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderAccessControlAllowCredentials, "true")
 	c.Response().Header().Set(echo.HeaderAccessControlAllowHeaders, "content-type")
 	c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, "DELETE, GET, OPTIONS, PATCH, POST, PUT")
-	c.Response().Header().Set(echo.HeaderAccessControlAllowOrigin, "*")
 	return sendResponse(c, http.StatusOK, "")
 }
 
