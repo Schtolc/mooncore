@@ -14,7 +14,16 @@ func InitServer(config *dependencies.Config) (e *echo.Echo) {
 
 	server := echo.New()
 	group := server.Group(dependencies.ConfigInstance().Server.APIPrefix,
-		middleware.LoggerWithConfig(GetAccessConfig(config.Logs.Access)))
+		middleware.LoggerWithConfig(GetAccessConfig(config.Logs.Access)),
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				c.Response().Header().Set(echo.HeaderAccessControlAllowCredentials, "true")
+				c.Response().Header().Set(echo.HeaderAccessControlAllowHeaders, "content-type")
+				c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, "DELETE, GET, OPTIONS, PATCH, POST, PUT")
+				c.Response().Header().Set(echo.HeaderAccessControlAllowOrigin, "*")
+				return next(c)
+			}
+		})
 
 	group.POST("/sign_up", handlers.SignUp)
 	group.POST("/sign_in", handlers.SignIn)
