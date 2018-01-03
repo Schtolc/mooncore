@@ -126,15 +126,7 @@ var SignObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.String,
 		},
 		"photo": &graphql.Field{
-			Type: PhotoObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				photo := models.Photo{}
-				if dbc := dependencies.DBInstance().First(&photo, p.Source.(models.Sign).PhotoID); dbc.Error != nil {
-					logrus.Error(dbc.Error)
-					return nil, dbc.Error
-				}
-				return photo, nil
-			},
+			Type: graphql.String,
 		},
 	},
 })

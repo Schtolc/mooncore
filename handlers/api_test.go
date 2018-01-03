@@ -473,7 +473,7 @@ func TestCreateSign(t *testing.T) {
 
 	signs := []int{1, 2}
 	reqParams := fmt.Sprintf("email:\"%s\", signs:[%d, %d]", testUser.Email, signs[0], signs[1])
-	respParams := "id, signs{id, name, photo{path}, description}"
+	respParams := "id, signs{id, name, photo, description}"
 	query := graphQLBody("mutation{addSigns(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
@@ -489,13 +489,13 @@ func TestCreateSign(t *testing.T) {
 	firstElem.Value("description").NotNull()
 	firstElem.Value("id").NotNull()
 	firstElem.Value("name").NotNull()
-	firstElem.Value("photo").Object().Value("path").NotNull()
+	firstElem.Value("photo").NotNull()
 
 	lastElem := body.Value("signs").Array().Last().Object()
 	lastElem.Value("description").NotNull()
 	lastElem.Value("id").NotNull()
 	lastElem.Value("name").NotNull()
-	lastElem.Value("photo").Object().Value("path").NotNull()
+	lastElem.Value("photo").NotNull()
 
 }
 
@@ -542,7 +542,7 @@ func TestGetSign(t *testing.T) {
 	e := expect(t)
 
 	reqParams := fmt.Sprintf("email:\"%s\"", testUser.Email)
-	respParams := "id, name, photo{path}, description"
+	respParams := "id, name, photo, description"
 	query := graphQLBody("{getSigns(%s){%s}}", reqParams, respParams)
 
 	resp := e.POST("/graphql").
@@ -557,14 +557,14 @@ func TestGetSign(t *testing.T) {
 	body.First().Object().Value("name").Equal("accuracy")
 	body.First().Object().Value("description").Equal("means accuracy")
 
-	body.First().Object().Value("photo").Object().Value("path").Equal("default")
+	body.First().Object().Value("photo").Equal("default")
 }
 
 //// [[ GET FEED ]]
 
 func TestGetFeed(t *testing.T) {
 	e := expect(t)
-	query := graphQLBody("{feed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo{id, path, tags{id, name}}}}}")
+	query := graphQLBody("{feed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo}}}")
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object()
@@ -581,8 +581,7 @@ func TestGetFeed(t *testing.T) {
 	sign.Object().Value("description").NotNull()
 	sign.Object().Value("name").NotNull()
 	sign.Object().Value("id").NotNull()
-	sign.Object().Value("photo").Object().Value("path").NotNull()
-	sign.Object().Value("photo").Object().Value("id").NotNull()
+	sign.Object().Value("photo").NotNull()
 	//sign.Object().Value("photo").Object().Value("tags").Array()
 
 	pho := body.Array().First().Object().Value("avatar")
