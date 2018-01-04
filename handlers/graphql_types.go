@@ -125,7 +125,7 @@ var SignObject = graphql.NewObject(graphql.ObjectConfig{
 		"description": &graphql.Field{
 			Type: graphql.String,
 		},
-		"photo": &graphql.Field{
+		"icon": &graphql.Field{
 			Type: graphql.String,
 		},
 	},

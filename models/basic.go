@@ -96,7 +96,7 @@ type ManicureType struct {
 type Sign struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
-	Photo       string `json:"photo"`
+	Icon        string `json:"icon"`
 	Description string `json:"description"`
 }
 
