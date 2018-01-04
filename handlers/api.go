@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
@@ -66,6 +67,7 @@ func getRootQuery() *graphql.Object {
 			"listUsers":         listUsers,
 			"getSigns":          getSigns,
 			"feed":              feed,
+			"viewer":            viewer,
 		},
 	})
 }
@@ -84,17 +86,19 @@ func createSchema() graphql.Schema {
 	return *schema
 }
 
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	result := graphql.Do(graphql.Params{
+func executeQuery(query string, schema graphql.Schema, c echo.Context) *graphql.Result {
+	params := graphql.Params{
 		Schema:        schema,
 		RequestString: query,
-	})
+		Context:       context.WithValue(context.TODO(), USER_KEY, c.Get(USER_KEY)),
+	}
+
+	result := graphql.Do(params)
 	return result
 }
 
 // API GraphQL handler
 func API(c echo.Context) error {
-
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		logrus.Error(err)
@@ -111,7 +115,7 @@ func API(c echo.Context) error {
 		logrus.Error(strErr)
 		return sendResponse(c, http.StatusBadRequest, strErr)
 	}
-	result := executeQuery(query.(string), createSchema())
+	result := executeQuery(query.(string), createSchema(), c)
 
 	if len(result.Errors) > 0 {
 		return sendResponse(c, http.StatusNotFound, result.Errors)

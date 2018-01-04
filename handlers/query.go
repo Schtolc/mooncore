@@ -180,6 +180,14 @@ var feed = &graphql.Field{
 	},
 }
 
+var viewer = &graphql.Field{
+	Type:        UserAuth,
+	Description: "current user",
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		return p.Context.Value(USER_KEY), nil
+	},
+}
+
 var getPhoto = &graphql.Field{
 	Type:        PhotoObject,
 	Description: "Get single photo", // done

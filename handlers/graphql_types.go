@@ -147,6 +147,16 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
+// UserAuth is a graphql object for userauth
+var UserAuth = graphql.NewObject(graphql.ObjectConfig{
+	Name: "UserAuth",
+	Fields: graphql.Fields{
+		"name": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
 // UserDetailsObject is a graphql object for user
 var UserDetailsObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "UserDetailsObject",

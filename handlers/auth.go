@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const USER_KEY = "user"
+
 type jwtClaims struct {
 	Name string `json:"name"`
 	jwt.StandardClaims
@@ -25,6 +27,9 @@ func GetJwtConfig() middleware.JWTConfig {
 		SigningMethod: "HS256",
 		Claims:        &jwtClaims{},
 		SigningKey:    signingKey,
+		Skipper: func(c echo.Context) bool {
+			return len(c.Request().Header.Get(echo.HeaderAuthorization)) == 0
+		},
 	}
 }
 
@@ -113,14 +118,18 @@ func createJwtToken(user *models.UserAuth) (tokenString string, err error) {
 // LoadUser is a middleware for load authorized user to context
 func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		username := c.Get("user").(*jwt.Token).Claims.(*jwtClaims).Name
+		user := c.Get(USER_KEY)
+		if user == nil {
+			return next(c)
+		}
+		username := user.(*jwt.Token).Claims.(*jwtClaims).Name
 		dbUser := &models.UserAuth{}
 		dbc := dependencies.DBInstance().Where("name = ? ", username).First(dbUser)
 		if dbc.Error != nil {
 			logrus.Info("User was not found in the database when checking token: ", username)
 			return sendResponse(c, http.StatusBadRequest, "Bad token")
 		}
-		c.Set("user", dbUser)
+		c.Set(USER_KEY, dbUser)
 		return next(c)
 	}
 }
