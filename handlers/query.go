@@ -150,9 +150,9 @@ var feed = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		var userCount int
 		db.Table("user_details").Count(&userCount)
-		offset := 1;
-		if userCount - p.Args["limit"].(int) > 0 {
-			offset = userCount - p.Args["limit"].(int);
+		offset := 1
+		if userCount-p.Args["limit"].(int) > 0 {
+			offset = userCount - p.Args["limit"].(int)
 		}
 		offset = rand.Intn(offset)
 		var users []models.UserDetails
