@@ -17,7 +17,6 @@ func initDatabase(config *Config) *gorm.DB {
 	if err = db.DB().Ping(); err != nil {
 		logrus.Fatal(err)
 	}
-	db.LogMode(true)
 	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Mock{},

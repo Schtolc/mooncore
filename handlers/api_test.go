@@ -462,17 +462,10 @@ func TestGetSign(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object()
-
-	resp.Keys().ContainsOnly("code", "body")
-
-	resp.Value("code").Number().Equal(http.StatusOK)
-
-	body := resp.Value("body").Object().Value("getSigns").Array()
-	body.First().Object().Value("name").Equal("accuracy")
-	body.First().Object().Value("description").Equal("means accuracy")
-
-	body.First().Object().Value("icon").Equal("default")
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getSigns").Array()
+	resp.First().Object().Value("name").Equal("accuracy")
+	resp.First().Object().Value("description").Equal("means accuracy")
+	resp.First().Object().Value("icon").Equal("default")
 }
 
 //// [[ GET FEED ]]
