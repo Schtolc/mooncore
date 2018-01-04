@@ -184,7 +184,7 @@ var viewer = &graphql.Field{
 	Type:        UserAuth,
 	Description: "current user",
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		return p.Context.Value(USER_KEY), nil
+		return p.Context.Value(UserKey), nil
 	},
 }
 

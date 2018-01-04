@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
@@ -90,7 +89,7 @@ func executeQuery(query string, schema graphql.Schema, c echo.Context) *graphql.
 	params := graphql.Params{
 		Schema:        schema,
 		RequestString: query,
-		Context:       context.WithValue(context.TODO(), USER_KEY, c.Get(USER_KEY)),
+		Context:       c.Request().Context(),
 	}
 
 	result := graphql.Do(params)

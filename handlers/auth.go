@@ -12,7 +12,8 @@ import (
 	"time"
 )
 
-const USER_KEY = "user"
+// UserKey is a context key for current logged user instance
+const UserKey = "user"
 
 type jwtClaims struct {
 	Name string `json:"name"`
@@ -118,7 +119,7 @@ func createJwtToken(user *models.UserAuth) (tokenString string, err error) {
 // LoadUser is a middleware for load authorized user to context
 func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get(USER_KEY)
+		user := c.Get(UserKey)
 		if user == nil {
 			return next(c)
 		}
@@ -129,7 +130,7 @@ func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 			logrus.Info("User was not found in the database when checking token: ", username)
 			return sendResponse(c, http.StatusBadRequest, "Bad token")
 		}
-		c.Set(USER_KEY, dbUser)
+		c.Set(UserKey, dbUser)
 		return next(c)
 	}
 }
