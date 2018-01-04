@@ -11,7 +11,7 @@ func TestPing(t *testing.T) {
 	ping := "ECHO_PING"
 	e.GET("/ping").
 		Expect().
-		Status(http.StatusOK).Text().Equal(ping)
+		Status(http.StatusOK).JSON().Object().Value("data").Equal(ping)
 }
 
 func TestPingDb(t *testing.T) {
@@ -19,5 +19,5 @@ func TestPingDb(t *testing.T) {
 
 	e.GET("/ping_db").
 		Expect().
-		Status(http.StatusOK).Text().NotEmpty()
+		Status(http.StatusOK).JSON().Object().Value("data").String().NotEmpty()
 }

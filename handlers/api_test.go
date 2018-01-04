@@ -67,7 +67,7 @@ func TestCreateUser(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("createUser").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createUser").Object()
 	resp.Value("email").Equal(testUser.Email)
 	resp.Value("role").Equal(testUser.Role)
 }
@@ -81,7 +81,7 @@ func TestCreateSecondUser(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("createUser").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createUser").Object()
 
 	resp.Value("email").Equal(testUser.Email)
 	resp.Value("role").Equal(testUser.Role)
@@ -96,7 +96,7 @@ func TestCreateUserBadParams(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 	errorMessage := "Argument \"password\" has invalid value passPass.\nExpected type \"String\", found passPass."
 	resp.First().Object().Value("message").Equal(errorMessage)
 }
@@ -110,7 +110,7 @@ func TestCreateUserWithoutParams(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := "Field \"createUser\" argument \"role\" of type \"Int!\" is required but not provided."
 	resp.First().Object().Value("message").Equal(errorMessage)
@@ -127,7 +127,7 @@ func TestGetUser(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("getUser").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getUser").Object()
 	resp.Value("address").Object().Value("lat").Equal(0)
 	resp.Value("address").Object().Value("lon").Equal(0)
 	resp.Value("avatar").Object().Value("path").Equal("default")
@@ -141,7 +141,7 @@ func TestListUsers(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("listUsers").Array()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("listUsers").Array()
 
 	resp.Element(1).Object().Value("name").Equal("")
 	resp.Element(1).Object().Value("address").Object().Value("lat").Equal(0)
@@ -162,7 +162,7 @@ func TestEditUserProfile(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("editUserProfile").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("editUserProfile").Object()
 
 	resp.Value("name").Equal(testUserDetails.Name)
 	resp.Value("address").Object().Value("id").Equal(testUserDetails.AddressID)
@@ -184,7 +184,7 @@ func TestEditUserProfileNotAllParams(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("editUserProfile").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("editUserProfile").Object()
 
 	resp.Value("name").Equal(testUserDetails.Name)
 	resp.Value("address").Object().Value("id").Equal(testUserDetails.AddressID)
@@ -209,7 +209,7 @@ func TestCreateAddress(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("createAddress").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createAddress").Object()
 
 	resp.Value("lat").Equal(address.Lat)
 	resp.Value("lon").Equal(address.Lon)
@@ -231,7 +231,7 @@ func TestCreateAddressBadParamLat(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := "strconv.ParseFloat: parsing \"string\": invalid syntax"
 	resp.First().Object().Value("message").Equal(errorMessage)
@@ -252,7 +252,7 @@ func TestCreateAddressBadParamDescription(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 	errorMessage := fmt.Sprintf("Argument \"description\" has invalid value %.16v.\nExpected type \"String\", found %.16v.", address.Lon, address.Lon)
 	resp.First().Object().Value("message").Equal(errorMessage)
 }
@@ -266,7 +266,7 @@ func TestCreateAddressWithoutParams(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := "Field \"createAddress\" argument \"description\" of type \"String!\" is required but not provided."
 	resp.First().Object().Value("message").Equal(errorMessage)
@@ -284,7 +284,7 @@ func TestCreateAvatar(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("createAvatar").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createAvatar").Object()
 
 	resp.Value("path").Equal(path)
 	resp.Value("tags").Array().First().Object().Value("id").Equal(tags[0])
@@ -301,7 +301,7 @@ func TestCreateAvatarWithNotExistingTags(t *testing.T) {
 	query := graphQLBody("mutation{createAvatar(%s){%s}}", reqParams, respParams)
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	resp.First().Object().Value("message").Equal("No such tags")
 }
@@ -319,7 +319,7 @@ func TestCreateAvatarWithBadParamsTags(t *testing.T) {
 	query := graphQLBody("mutation{createAvatar(%s){%s}}", reqParams, respParams)
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := fmt.Sprintf("Argument \"tags\" has invalid value [%0.16v, %0.16v].\nIn element #1: Expected type \"Int\", found %0.16v.\nIn element #1: Expected type \"Int\", found %0.16v.", tags[0], tags[1], tags[0], tags[1])
 
@@ -336,7 +336,7 @@ func TestCreateAvatarWithoutTags(t *testing.T) {
 	query := graphQLBody("mutation{createAvatar(%s){%s}}", reqParams, respParams)
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("createAvatar").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createAvatar").Object()
 
 	resp.Value("path").Equal(path)
 }
@@ -355,7 +355,7 @@ func TestAddPhoto(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("addPhoto").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("addPhoto").Object()
 	resp.Value("path").Equal(path)
 	resp.Value("tags").Array().First().Object().Value("id").Equal(tags[0])
 	resp.Value("tags").Array().Last().Object().Value("id").Equal(tags[1])
@@ -372,7 +372,7 @@ func TestGetPhoto(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("getPhoto").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getPhoto").Object()
 	resp.Value("path").NotNull()
 	resp.Value("tags").Array().First().Object().Value("id").NotNull()
 	resp.Value("tags").Array().Last().Object().Value("id").NotNull()
@@ -387,7 +387,7 @@ func TestGetUserPhotos(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("getUserPhotos").Array()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getUserPhotos").Array()
 
 	resp.First().Object().Value("path").NotNull()
 	resp.First().Object().Value("tags").NotNull()
@@ -405,7 +405,7 @@ func TestCreateSign(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("addSigns").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("addSigns").Object()
 
 	firstElem := resp.Value("signs").Array().First().Object()
 	firstElem.Value("description").NotNull()
@@ -429,7 +429,7 @@ func TestCreateSignWithBadParamsSigns(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := "Field \"addSigns\" argument \"signs\" of type \"[Int]!\" is required but not provided."
 	resp.First().Object().Value("message").Equal(errorMessage)
@@ -445,7 +445,7 @@ func TestCreateSignWithoutSigns(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusNotFound).JSON().Array()
+		Status(http.StatusNotFound).JSON().Object().Value("data").Array()
 
 	errorMessage := "Field \"addSigns\" argument \"signs\" of type \"[Int]!\" is required but not provided."
 	resp.First().Object().Value("message").Equal(errorMessage)
@@ -462,7 +462,7 @@ func TestGetSign(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("getSigns").Array()
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getSigns").Array()
 	resp.First().Object().Value("name").Equal("accuracy")
 	resp.First().Object().Value("description").Equal("means accuracy")
 	resp.First().Object().Value("photo").Object().Value("path").Equal("default")
@@ -475,7 +475,7 @@ func TestGetFeed(t *testing.T) {
 	query := graphQLBody("{feed(limit:3){id, name, avatar{id, path, tags{id, name}}, photos{id, path, tags{name}}, signs{id, name, description, photo{id, path, tags{id, name}}}}}")
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("feed")
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("feed")
 	photo := resp.Array().First().Object().Value("photos").Array().First()
 	photo.Object().Value("id").NotNull()
 	photo.Object().Value("path").NotNull()
@@ -553,8 +553,7 @@ func TestGetAddressInGivenArea(t *testing.T) {
 
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("addressListInArea").Array()
-
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("addressListInArea").Array()
 	db.Delete(&objectInArea)
 	db.Delete(&objectOutOfArea1)
 	db.Delete(&objectOutOfArea2)
