@@ -33,15 +33,15 @@ func createConstValues() {
 
 	Signs = append(Signs, Sign{
 		Name:        "accuracy",
-		PhotoID:     DefaultAvatar.ID,
+		Icon:        "default",
 		Description: "means accuracy",
 	}, Sign{
 		Name:        "politeness",
-		PhotoID:     DefaultAvatar.ID,
+		Icon:        "default",
 		Description: "means politeness",
 	}, Sign{
 		Name:        "varnish resistance",
-		PhotoID:     DefaultAvatar.ID,
+		Icon:        "default",
 		Description: "means varnish resistance",
 	})
 }
