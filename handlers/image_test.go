@@ -17,9 +17,7 @@ func TestUpload(t *testing.T) {
 
 	body := e.POST("/upload").WithMultipart().
 		WithFileBytes("file", "abc", content).Expect().
-		Status(http.StatusOK).JSON().Object()
-	body.Value("code").Equal(http.StatusOK)
-	body = body.Value("body").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").Object()
 
 	body.ContainsKey("id").Value("id").NotNull()
 	body.ContainsKey("path").Value("path").NotNull()

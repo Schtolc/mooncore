@@ -7,12 +7,11 @@ import (
 
 // Response model
 type Response struct {
-	Code int         `json:"code"`
-	Body interface{} `json:"body"`
+	Data interface{} `json:"data"`
 }
 
 func sendResponse(c echo.Context, code int, body interface{}) error {
-	return c.JSON(http.StatusOK, Response{code, body})
+	return c.JSON(code, Response{body})
 }
 
 func internalServerError(c echo.Context) error {
