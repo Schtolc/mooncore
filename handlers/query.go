@@ -148,12 +148,15 @@ var feed = &graphql.Field{
 		"limit": notNull(graphql.Int),
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		var offset int
-		db.Table("user_details").Count(&offset)
+		var userCount int
+		db.Table("user_details").Count(&userCount)
+		offset := 1;
+		if userCount - p.Args["limit"].(int) > 0 {
+			offset = userCount - p.Args["limit"].(int);
+		}
 		offset = rand.Intn(offset)
 		var users []models.UserDetails
-
-		if dbc := db.Limit(p.Args["limit"].(int)).Offset(0).Find(&users); dbc.Error != nil {
+		if dbc := db.Limit(p.Args["limit"].(int)).Offset(offset).Find(&users); dbc.Error != nil {
 			logrus.Error(dbc.Error)
 			return nil, dbc.Error
 		}
