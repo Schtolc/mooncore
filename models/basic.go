@@ -96,7 +96,7 @@ type ManicureType struct {
 type Sign struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
-	PhotoID     int    `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
+	Icon        string `json:"icon"`
 	Description string `json:"description"`
 }
 
