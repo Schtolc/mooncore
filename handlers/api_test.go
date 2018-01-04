@@ -465,7 +465,7 @@ func TestGetSign(t *testing.T) {
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("getSigns").Array()
 	resp.First().Object().Value("name").Equal("accuracy")
 	resp.First().Object().Value("description").Equal("means accuracy")
-	resp.First().Object().Value("photo").Object().Value("path").Equal("default")
+	resp.First().Object().Value("icon").Object().Value("path").Equal("default")
 }
 
 //// [[ GET FEED ]]
