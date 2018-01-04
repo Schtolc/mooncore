@@ -5,14 +5,14 @@ import (
 	"net/http"
 )
 
-// Response model
-type Response struct {
-	Code int         `json:"code"`
-	Body interface{} `json:"body"`
-}
 
 func sendResponse(c echo.Context, code int, body interface{}) error {
-	return c.JSON(http.StatusOK, Response{code, body})
+	switch body.(type) {
+		case string:
+			return c.String(code, body.(string));
+		default:
+			return c.JSON(code, body)
+	}
 }
 
 func internalServerError(c echo.Context) error {
