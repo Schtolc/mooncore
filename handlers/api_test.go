@@ -1,11 +1,11 @@
-package handlers;
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/gavv/httpexpect"
 	"github.com/Schtolc/mooncore/models"
+	"github.com/gavv/httpexpect"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -163,7 +163,7 @@ func TestEditUserProfile(t *testing.T) {
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("editUserProfile").Object()
-	
+
 	resp.Value("name").Equal(testUserDetails.Name)
 	resp.Value("address").Object().Value("id").Equal(testUserDetails.AddressID)
 	resp.Value("address").Object().Value("lat").NotNull()
@@ -406,7 +406,6 @@ func TestCreateSign(t *testing.T) {
 	resp := e.POST("/graphql").
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("addSigns").Object()
-
 
 	firstElem := resp.Value("signs").Array().First().Object()
 	firstElem.Value("description").NotNull()

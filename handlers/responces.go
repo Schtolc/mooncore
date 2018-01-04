@@ -5,13 +5,12 @@ import (
 	"net/http"
 )
 
-
 func sendResponse(c echo.Context, code int, body interface{}) error {
 	switch body.(type) {
-		case string:
-			return c.String(code, body.(string));
-		default:
-			return c.JSON(code, body)
+	case string:
+		return c.String(code, body.(string))
+	default:
+		return c.JSON(code, body)
 	}
 }
 
