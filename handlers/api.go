@@ -114,9 +114,7 @@ func API(c echo.Context) error {
 
 	variables, ok := data["variables"].(map[string]interface{})
 	if !ok {
-		strErr := "No variables in request"
-		logrus.Error(strErr)
-		return sendResponse(c, http.StatusBadRequest, strErr)
+		variables = make(map[string]interface{})
 	}
 
 	result := executeQuery(query.(string), variables, createSchema())
