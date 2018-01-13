@@ -9,6 +9,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 func just(param graphql.Type) *graphql.ArgumentConfig {
@@ -105,17 +108,52 @@ func API(c echo.Context) error {
 		logrus.Error(err)
 		return sendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	query, ok := data["query"]
+	query, ok := data["query"].(string)
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
 		return sendResponse(c, http.StatusBadRequest, strErr)
 	}
-	result := executeQuery(query.(string), createSchema())
+
+	variables, ok := data["variables"].(map[string]interface{})
+	if !ok {
+		strErr := "No variables in request"
+		logrus.Error(strErr)
+		return sendResponse(c, http.StatusBadRequest, strErr)
+	}
+
+	braceIdx := strings.Index(query, "{")
+	if braceIdx == -1 {
+		strErr := "Bad request"
+		logrus.Error(strErr)
+		return sendResponse(c, http.StatusBadRequest, strErr)
+	}
+	query = query[braceIdx:] // Отбрасываем все что до первой фигурной скобки
+
+	for key, value := range variables {
+		re := regexp.MustCompile(`\$(?i)` + key) // case ignore replacing
+		switch value.(type) {
+		case float64:
+			query = re.ReplaceAllString(query, FloatToString(value.(float64)))
+		case string:
+			query = re.ReplaceAllString(query, value.(string))
+		default:
+			strErr := "Unknown type of variable"
+			logrus.Error(strErr)
+			return sendResponse(c, http.StatusBadRequest, strErr)
+		}
+	}
+
+	result := executeQuery(query, createSchema())
 
 	if len(result.Errors) > 0 {
 		return sendResponse(c, http.StatusNotFound, result.Errors)
 	}
 
 	return sendResponse(c, http.StatusOK, result.Data)
+}
+
+// FloatToString converts a float number to a string
+func FloatToString(inputNum float64) string {
+	return strconv.FormatFloat(inputNum, 'f', -1, 64)
 }
