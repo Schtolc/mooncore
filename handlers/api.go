@@ -84,17 +84,17 @@ func createSchema() graphql.Schema {
 	return *schema
 }
 
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
+func executeQuery(query string, variables map[string]interface{}, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
+		Schema:         schema,
+		RequestString:  query,
+		VariableValues: variables,
 	})
 	return result
 }
 
 // API GraphQL handler
 func API(c echo.Context) error {
-
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		logrus.Error(err)
@@ -111,7 +111,13 @@ func API(c echo.Context) error {
 		logrus.Error(strErr)
 		return sendResponse(c, http.StatusBadRequest, strErr)
 	}
-	result := executeQuery(query.(string), createSchema())
+
+	variables, ok := data["variables"].(map[string]interface{})
+	if !ok {
+		variables = make(map[string]interface{})
+	}
+
+	result := executeQuery(query.(string), variables, createSchema())
 
 	if len(result.Errors) > 0 {
 		return sendResponse(c, http.StatusNotFound, result.Errors)
