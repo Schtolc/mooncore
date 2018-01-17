@@ -84,7 +84,7 @@ var getUserPhotos = &graphql.Field{
 		"email": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("email", params.Args["email"].(string))
 		if err != nil {
 			logrus.Warn(err)
 			return nil, err
@@ -98,10 +98,10 @@ var getUser = &graphql.Field{
 	Type:        UserDetailsObject,
 	Description: "Get single user",
 	Args: graphql.FieldConfigArgument{
-		"email": notNull(graphql.String),
+		"id": notNull(graphql.Int),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("id", params.Args["id"].(int))
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
@@ -130,7 +130,7 @@ var getSigns = &graphql.Field{
 		"email": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("email", params.Args["email"].(string))
 		if err != nil {
 			logrus.Warn(err)
 			return nil, err

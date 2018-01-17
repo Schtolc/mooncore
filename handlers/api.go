@@ -25,10 +25,10 @@ func listOf(param graphql.Type) *graphql.ArgumentConfig {
 
 var db = dependencies.DBInstance()
 
-func getUserDetails(email string) (*models.UserDetails, error) {
+func getUserDetails(argName string, arg interface{}) (*models.UserDetails, error) {
 	user := &models.User{}
 	userDetails := &models.UserDetails{}
-	if dbc := db.Where("email in (?)", email).First(user); dbc.Error != nil {
+	if dbc := db.Where( argName+" in (?)", arg).First(user); dbc.Error != nil {
 		logrus.Error(dbc.Error)
 		return nil, dbc.Error
 	}
@@ -62,7 +62,7 @@ func getRootQuery() *graphql.Object {
 			"addressListInArea": addressListInArea,
 			"getPhoto":          getPhoto,
 			"getUserPhotos":     getUserPhotos,
-			"getUser":           getUser,
+			"user":              getUser,
 			"listUsers":         listUsers,
 			"getSigns":          getSigns,
 			"feed":              feed,

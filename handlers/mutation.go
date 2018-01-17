@@ -51,7 +51,7 @@ var editUserProfile = &graphql.Field{
 		"avatar_id":  just(graphql.Int),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("email", params.Args["email"].(string))
 		if err != nil {
 			logrus.Warn(err)
 			return nil, err
@@ -153,7 +153,7 @@ var addPhoto = &graphql.Field{
 		"email": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("email", params.Args["email"].(string))
 		if err != nil {
 			logrus.Warn(err)
 			return nil, err
@@ -191,7 +191,7 @@ var addSigns = &graphql.Field{
 		"email": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
+		userDetails, err := getUserDetails("email", params.Args["email"].(string))
 		if err != nil {
 			logrus.Warn(err)
 			return nil, err
