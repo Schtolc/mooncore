@@ -26,9 +26,9 @@ func initDatabase(config *Config) *gorm.DB {
 		&models.ManicureType{},
 		&models.Sign{},
 		&models.User{},
-		&models.UserDetails{},
+		&models.Master{},
+		&models.Client{},
 		&models.Service{},
-		&models.UserAuth{},
 	)
 
 	db.Table("user_signs").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")

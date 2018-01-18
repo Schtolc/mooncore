@@ -1,43 +1,70 @@
-package handlers
+package graphql
 
 import (
 	"errors"
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"unicode"
 )
 
-var createUser = &graphql.Field{
-	Type:        UserObject,
-	Description: "Create new user",
+var createMaster = &graphql.Field{
+	Type:        MasterObject,
+	Description: "Create new master",
 	Args: graphql.FieldConfigArgument{
-		"email":    notNull(graphql.String),
-		"password": notNull(graphql.String),
-		"role":     notNull(graphql.Int),
+		"username":   notNull(graphql.String),
+		"email":      notNull(graphql.String),
+		"password":   notNull(graphql.String),
+		"name":       notNull(graphql.String),
+		"address_id": notNull(graphql.Int),
+		"photo_id":   notNull(graphql.Int),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		tx := db.Begin()
-		user := &models.User{
-			Email:    params.Args["email"].(string),
-			Password: params.Args["password"].(string),
-			Role:     params.Args["role"].(int),
-		}
-		if err := tx.Create(user).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-		userDetails := &models.UserDetails{
-			UserID:    user.ID,
-			AddressID: models.DefaultAddress.ID,
-			PhotoID:   models.DefaultAvatar.ID,
-		}
-		if err := tx.Create(userDetails).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-		tx.Commit()
-		return user, nil
+		return dao.CreateMaster(
+			params.Args["username"].(string),
+			params.Args["email"].(string),
+			params.Args["password"].(string),
+			params.Args["name"].(string),
+			params.Args["address_id"].(int64),
+			params.Args["photo_id"].(int64))
+	},
+}
+
+var createClient = &graphql.Field{
+	Type:        ClientObject,
+	Description: "Create new master",
+	Args: graphql.FieldConfigArgument{
+		"username": notNull(graphql.String),
+		"email":    notNull(graphql.String),
+		"password": notNull(graphql.String),
+		"name":     notNull(graphql.String),
+		"photo_id": notNull(graphql.Int),
+	},
+	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		return dao.CreateClient(
+			params.Args["username"].(string),
+			params.Args["email"].(string),
+			params.Args["password"].(string),
+			params.Args["name"].(string),
+			params.Args["photo_id"].(int64))
+	},
+}
+
+var signIn = &graphql.Field{
+	Type:        TokenObject, // nil if user not found
+	Description: "Sign in",
+	Args: graphql.FieldConfigArgument{
+		"username": notNull(graphql.String),
+		"email":    notNull(graphql.String),
+		"password": notNull(graphql.String),
+	},
+	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		return dao.SignIn(
+			params.Args["username"].(string),
+			params.Args["email"].(string),
+			params.Args["password"].(string))
 	},
 }
 
@@ -115,35 +142,6 @@ var createAddress = &graphql.Field{
 	},
 }
 
-var createAvatar = &graphql.Field{
-	Type:        PhotoObject,
-	Description: "Create new address",
-	Args: graphql.FieldConfigArgument{
-		"path": notNull(graphql.String),
-		"tags": listOf(graphql.Int),
-	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		photo := &models.Photo{
-			Path: params.Args["path"].(string),
-			Tags: []models.Tag{},
-		}
-		if dbc := db.Where("id in (?)", params.Args["tags"]).Find(&photo.Tags); dbc.Error != nil {
-			logrus.Error(dbc.Error)
-			return nil, dbc.Error
-		}
-		if len(photo.Tags) == 0 && params.Args["tags"] != nil {
-			logrus.Error("No such tags")
-			return nil, errors.New("No such tags")
-		}
-
-		if dbc := db.Create(photo); dbc.Error != nil {
-			logrus.Error(dbc.Error)
-			return nil, dbc.Error
-		}
-		return *photo, nil
-	},
-}
-
 var addPhoto = &graphql.Field{
 	Type:        PhotoObject,
 	Description: "Add new photo - master",
@@ -183,35 +181,3 @@ var addPhoto = &graphql.Field{
 	},
 }
 
-var addSigns = &graphql.Field{
-	Type:        UserDetailsObject,
-	Description: "Add signs - admin",
-	Args: graphql.FieldConfigArgument{
-		"signs": notNull(graphql.NewList(graphql.Int)),
-		"email": notNull(graphql.String),
-	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		userDetails, err := getUserDetails(params.Args["email"].(string))
-		if err != nil {
-			logrus.Warn(err)
-			return nil, err
-		}
-		var signs []models.Sign
-		if dbc := db.Where("id in (?)", params.Args["signs"]).Find(&signs); dbc.Error != nil {
-			logrus.Error(dbc.Error)
-			return nil, dbc.Error
-		}
-		if len(signs) == 0 {
-			return nil, errors.New("No such signs")
-		}
-		tx := db.Begin()
-		for _, sign := range signs {
-			if err := tx.Model(&userDetails).Association("signs").Append([]models.Sign{sign}).Error; err != nil {
-				tx.Rollback()
-				return nil, err
-			}
-		}
-		tx.Commit()
-		return *userDetails, nil
-	},
-}

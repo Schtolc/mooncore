@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"github.com/Schtolc/mooncore/dependencies"

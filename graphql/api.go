@@ -1,9 +1,8 @@
-package handlers
+package graphql
 
 import (
 	"encoding/json"
-	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -23,32 +22,18 @@ func listOf(param graphql.Type) *graphql.ArgumentConfig {
 	return just(graphql.NewList(param))
 }
 
-var db = dependencies.DBInstance()
-
-func getUserDetails(email string) (*models.UserDetails, error) {
-	user := &models.User{}
-	userDetails := &models.UserDetails{}
-	if dbc := db.Where("email in (?)", email).First(user); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
-	}
-	if dbc := db.Where("user_id in (?)", user.ID).First(userDetails); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
-	}
-	return userDetails, nil
-}
-
 func getRootMutation() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootMutation",
 		Fields: graphql.Fields{
-			"createUser":      createUser,
-			"editUserProfile": editUserProfile,
-			"createAddress":   createAddress,
-			"createAvatar":    createAvatar,
-			"addPhoto":        addPhoto,
-			"addSigns":        addSigns,
+			"createMaster":  createMaster,
+			"createClient":  createClient,
+			"signIn":        signIn,
+			"editMaster":    editMaster,
+			"editClient":    editClient,
+			"addService":    addService,
+			"removeService": removeService,
+			"createAddress": createAddress,
 		},
 	})
 }
@@ -57,16 +42,12 @@ func getRootQuery() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootQuery",
 		Fields: graphql.Fields{
-			"address":           address,
-			"addressList":       addressList,
-			"addressListInArea": addressListInArea,
-			"getPhoto":          getPhoto,
-			"getUserPhotos":     getUserPhotos,
-			"getUser":           getUser,
-			"listUsers":         listUsers,
-			"getSigns":          getSigns,
-			"feed":              feed,
-			"viewer":            viewer,
+			"address":         address,
+			"addressesInArea": addressesInArea,
+			"master":          master,
+			"client":          client,
+			"feed":            feed,
+			"viewer":          viewer,
 		},
 	})
 }
@@ -102,30 +83,44 @@ func API(c echo.Context) error {
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		logrus.Error(err)
-		return sendResponse(c, http.StatusBadRequest, err.Error())
+		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		logrus.Error(err)
-		return sendResponse(c, http.StatusBadRequest, err.Error())
+		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	query, ok := data["query"]
+	rawQuery, ok := data["query"]
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
-		return sendResponse(c, http.StatusBadRequest, strErr)
+		return utils.SendResponse(c, http.StatusBadRequest, strErr)
 	}
 
-	variables, ok := data["variables"].(map[string]interface{})
+	query, err := rawQuery.(string)
+	if err != nil {
+		strErr := "Bad query format"
+		logrus.Error(strErr)
+		return utils.SendResponse(c, http.StatusBadRequest, strErr)
+	}
+
+	rawVariables, ok := data["variables"]
 	if !ok {
-		variables = make(map[string]interface{})
+		rawVariables = make(map[string]interface{})
 	}
 
-	result := executeQuery(query.(string), variables, createSchema(), c)
+	variables, err := rawVariables.(map[string]interface{})
+	if err != nil {
+		strErr := "Bad variables format"
+		logrus.Error(strErr)
+		return utils.SendResponse(c, http.StatusBadRequest, strErr)
+	}
+
+	result := executeQuery(query, variables, createSchema(), c)
 
 	if len(result.Errors) > 0 {
-		return sendResponse(c, http.StatusNotFound, result.Errors)
+		return utils.SendResponse(c, http.StatusNotFound, result.Errors)
 	}
 
-	return sendResponse(c, http.StatusOK, result.Data)
+	return utils.SendResponse(c, http.StatusOK, result.Data)
 }

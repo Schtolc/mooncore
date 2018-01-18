@@ -1,8 +1,9 @@
-package handlers
+package rest
 
 import (
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -12,13 +13,13 @@ import (
 
 // Ping is a simple handler for checking if server is up and running.
 func Ping(c echo.Context) error {
-	return sendResponse(c, http.StatusOK, "ECHO_PING")
+	return utils.SendResponse(c, http.StatusOK, "ECHO_PING")
 }
 
 // PingAuth is a handler for checking if authorization works.
 func PingAuth(c echo.Context) error {
-	user := c.Get("user").(*models.UserAuth)
-	return sendResponse(c, http.StatusOK, user.Name)
+	user := c.Get("user").(*models.User)
+	return utils.SendResponse(c, http.StatusOK, user.Username)
 }
 
 // PingDb is a simple handler for checking if database is up and running.
@@ -27,9 +28,9 @@ func PingDb(c echo.Context) error {
 		Path: c.Path(),
 		Time: gorm.NowFunc(),
 	}
-	if dbc := dependencies.DBInstance().Create(m); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return internalServerError(c)
+	if err := dependencies.DBInstance().Create(m).Error; err != nil {
+		logrus.Error(err)
+		return utils.InternalServerError(c)
 	}
-	return sendResponse(c, http.StatusOK, strconv.Itoa(m.ID))
+	return utils.SendResponse(c, http.StatusOK, strconv.Itoa(m.ID))
 }
