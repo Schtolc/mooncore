@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/graphql"
 	"github.com/Schtolc/mooncore/rest"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"os"
+	"github.com/Schtolc/mooncore/utils"
 )
 
 // InitServer inits echo server: sets access logs and graphql
@@ -26,7 +26,7 @@ func InitServer(config *dependencies.Config) (e *echo.Echo) {
 				return next(c)
 			}
 		},
-		middleware.JWTWithConfig(dao.GetJwtConfig()),
+		middleware.JWTWithConfig(utils.GetJwtConfig()),
 		rest.LoadUser)
 
 	group.POST("/upload", rest.UploadImage)

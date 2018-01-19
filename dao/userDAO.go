@@ -1,15 +1,9 @@
 package dao
 
 import (
-	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
-	"time"
 	"github.com/Schtolc/mooncore/utils"
+	"github.com/sirupsen/logrus"
 )
 
 func GetMasterById(id int64) (*models.Master, error) {
