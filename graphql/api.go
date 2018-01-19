@@ -26,13 +26,13 @@ func getRootMutation() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootMutation",
 		Fields: graphql.Fields{
-			"createMaster":  createMaster,
-			"createClient":  createClient,
-			"signIn":        signIn,
-			"editMaster":    editMaster,
-			"editClient":    editClient,
-			"addService":    addService,
-			"removeService": removeService,
+			"createMaster": createMaster,
+			"createClient": createClient,
+			"signIn":       signIn,
+			//"editMaster":    editMaster,
+			//"editClient":    editClient,
+			//"addService":    addService,
+			//"removeService": removeService,
 			"createAddress": createAddress,
 		},
 	})
@@ -97,8 +97,8 @@ func API(c echo.Context) error {
 		return utils.SendResponse(c, http.StatusBadRequest, strErr)
 	}
 
-	query, err := rawQuery.(string)
-	if err != nil {
+	query, ok := rawQuery.(string)
+	if !ok {
 		strErr := "Bad query format"
 		logrus.Error(strErr)
 		return utils.SendResponse(c, http.StatusBadRequest, strErr)
@@ -109,8 +109,8 @@ func API(c echo.Context) error {
 		rawVariables = make(map[string]interface{})
 	}
 
-	variables, err := rawVariables.(map[string]interface{})
-	if err != nil {
+	variables, ok := rawVariables.(map[string]interface{})
+	if !ok {
 		strErr := "Bad variables format"
 		logrus.Error(strErr)
 		return utils.SendResponse(c, http.StatusBadRequest, strErr)

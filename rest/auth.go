@@ -1,16 +1,13 @@
 package rest
 
 import (
-	"encoding/json"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"time"
 )
 
 const UserKey = "user"
@@ -19,7 +16,6 @@ const UserKey = "user"
 func Headers(c echo.Context) error {
 	return utils.SendResponse(c, http.StatusOK, "")
 }
-
 
 // LoadUser is a middleware for load authorized user to context
 func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
@@ -30,8 +26,7 @@ func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		username := user.(*jwt.Token).Claims.(*models.JwtClaims).Name
 		dbUser := &models.User{}
-		dbc := dependencies.DBInstance().Where("name = ? ", username).First(dbUser)
-		if dbc.Error != nil {
+		if dependencies.DBInstance().Where("name = ? ", username).First(dbUser).Error != nil {
 			logrus.Info("User was not found in the database when checking token: ", username)
 			return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
 		}

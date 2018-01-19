@@ -212,7 +212,7 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 		"master": &graphql.Field{
 			Type: MasterObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetMasterById(p.Source.(models.Service).MasterID), nil
+				return dao.GetMasterById(p.Source.(models.Service).MasterID)
 			},
 		},
 		"manicure": &graphql.Field{ // TODO delete query

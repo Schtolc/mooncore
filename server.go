@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/graphql"
 	"github.com/Schtolc/mooncore/rest"
@@ -25,7 +26,7 @@ func InitServer(config *dependencies.Config) (e *echo.Echo) {
 				return next(c)
 			}
 		},
-		middleware.JWTWithConfig(rest.GetJwtConfig()),
+		middleware.JWTWithConfig(dao.GetJwtConfig()),
 		rest.LoadUser)
 
 	group.POST("/upload", rest.UploadImage)

@@ -1,14 +1,15 @@
 package dao
 
 import (
+	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/dgrijalva/jwt-go"
 	"time"
-	"github.com/labstack/echo/middleware"
-	"github.com/labstack/echo"
+	"github.com/Schtolc/mooncore/utils"
 )
 
 func GetMasterById(id int64) (*models.Master, error) {
@@ -44,7 +45,7 @@ func GetClientById(id int64) (*models.Client, error) {
 func CreateMaster(username, email, password, name string, addressId, photoId int64) (*models.Master, error) {
 	tx := db.Begin()
 
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := utils.HashPassword(password)
 
 	if err != nil {
 		tx.Rollback()
@@ -82,7 +83,7 @@ func CreateMaster(username, email, password, name string, addressId, photoId int
 func CreateClient(username, email, password, name string, photoId int64) (*models.Client, error) {
 	tx := db.Begin()
 
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := utils.HashPassword(password)
 
 	if err != nil {
 		tx.Rollback()
@@ -119,12 +120,17 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 func SignIn(username, email, password string) (*models.Token, error) {
 	user := &models.User{}
 
-	if err := db.Where("username = ? AND email =? AND password = ?", username, email, password).First(user).Error; err != nil {
+	if err := db.Where("username = ? AND email = ?", username, email).First(user).Error; err != nil {
 		logrus.Info("Unregistered user: ", username)
 		return nil, nil
 	}
 
-	tokenString, err := CreateJwtToken(user)
+	if !utils.CheckPasswordHash(password, user.PasswordHash) {
+		logrus.Info("Unregistered user: ", username)
+		return nil, nil
+	}
+
+	tokenString, err := utils.CreateJwtToken(user)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -133,43 +139,10 @@ func SignIn(username, email, password string) (*models.Token, error) {
 	return &models.Token{Token: tokenString}, nil
 }
 
-// TODO remove all to the end of the file
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-var signingKey = []byte(dependencies.ConfigInstance().Server.Auth.Secret)
-
-// GetJwtConfig return configuration for jwt registration
-func GetJwtConfig() middleware.JWTConfig {
-	return middleware.JWTConfig{
-		SigningMethod: "HS256",
-		Claims:        &models.JwtClaims{},
-		SigningKey:    signingKey,
-		Skipper: func(c echo.Context) bool {
-			return len(c.Request().Header.Get(echo.HeaderAuthorization)) == 0
-		},
+func Feed(offset, limit int64) ([]models.Master, error) {
+	var masters []models.Master
+	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
+		return nil, err
 	}
-}
-
-func CreateJwtToken(user *models.User) (tokenString string, err error) {
-	claims := &models.JwtClaims{
-		Name: user.Username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * time.Duration(dependencies.ConfigInstance().Server.Auth.Lifetime)).Unix(),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	if tokenString, err = token.SignedString(signingKey); err != nil {
-		return "", err
-	}
-	return tokenString, nil
+	return masters, nil
 }
