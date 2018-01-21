@@ -17,28 +17,39 @@ func initDatabase(config *Config) *gorm.DB {
 	if err = db.DB().Ping(); err != nil {
 		logrus.Fatal(err)
 	}
+	db.LogMode(true);
 	db.DB().SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.AutoMigrate(
 		&models.Mock{},
 		&models.Address{},
-		&models.Photo{},
 		&models.Tag{},
-		&models.ManicureType{},
+		&models.Photo{},	
 		&models.Sign{},
 		&models.User{},
+		&models.Salon{},
+		&models.Material{},
 		&models.Master{},
+		&models.ServiceType{},
 		&models.Client{},
 		&models.Service{},
 	)
 
-	db.Table("user_signs").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")
-	db.Table("user_signs").AddForeignKey("sign_id", "signs(id)", "CASCADE", "CASCADE")
+	db.Table("photo_tags").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+	db.Table("photo_tags").AddForeignKey("tag_id", "tags(id)", "CASCADE", "CASCADE")
 
 	db.Table("service_photos").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
 	db.Table("service_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
 
-	db.Table("user_photos").AddForeignKey("user_details_id", "user_details(id)", "CASCADE", "CASCADE")
-	db.Table("user_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+	db.Table("service_materials").AddForeignKey("service_id", "services(id)", "CASCADE", "CASCADE")
+	db.Table("service_materials").AddForeignKey("material_id", "materials(id)", "CASCADE", "CASCADE")
+
+	db.Table("master_photos").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
+	db.Table("master_photos").AddForeignKey("photo_id", "photos(id)", "CASCADE", "CASCADE")
+	db.Table("master_signs").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
+	db.Table("master_signs").AddForeignKey("sign_id", "signs(id)", "CASCADE", "CASCADE")
+
+	db.Table("client_favorites").AddForeignKey("client_id", "clients(id)", "CASCADE", "CASCADE")
+	db.Table("client_favorites").AddForeignKey("master_id", "masters(id)", "CASCADE", "CASCADE")
 
 	logrus.Info("models migrated")
 
