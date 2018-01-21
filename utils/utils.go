@@ -36,7 +36,7 @@ func GetJwtConfig() middleware.JWTConfig {
 
 func CreateJwtToken(user *models.User) (tokenString string, err error) {
 	claims := &models.JwtClaims{
-		Name: user.Username,
+		Name: user.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(dependencies.ConfigInstance().Server.Auth.Lifetime)).Unix(),
 		},

@@ -1,11 +1,9 @@
 package graphql
 
 import (
-	"github.com/Schtolc/mooncore/dao"
-	"github.com/Schtolc/mooncore/dependencies"
+	// "github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
-	"github.com/sirupsen/logrus"
 )
 
 // AddressObject is a graphql object for address
@@ -78,18 +76,6 @@ var SignObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-//ManicureTypeObject is a graphql object for photos tags
-var ManicureTypeObject = graphql.NewObject(graphql.ObjectConfig{
-	Name: "ManicureType",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
-		},
-		"name": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
-		},
-	},
-})
 
 // UserObject is a graphql object for user
 var UserObject = graphql.NewObject(graphql.ObjectConfig{
@@ -209,23 +195,12 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 		"price": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.Float),
 		},
-		"master": &graphql.Field{
-			Type: MasterObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetMasterById(p.Source.(models.Service).MasterID)
-			},
-		},
-		"manicure": &graphql.Field{ // TODO delete query
-			Type: ManicureTypeObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				manicure := models.ManicureType{}
-				if dbc := dependencies.DBInstance().First(&manicure, p.Source.(models.Service).ManicureTypeID); dbc.Error != nil {
-					logrus.Println(dbc.Error)
-					return nil, dbc.Error
-				}
-				return manicure, nil
-			},
-		},
+		// "master": &graphql.Field{
+		// 	Type: MasterObject,
+		// 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		// 		return dao.GetMasterById(p.Source.(models.Service).MasterID)
+		// 	},
+		// },
 	},
 })
 

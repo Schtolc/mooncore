@@ -1,6 +1,9 @@
 package models
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"github.com/dgrijalva/jwt-go"
+	"database/sql"
+)
 
 // Address model
 type Address struct {
@@ -31,82 +34,82 @@ type Sign struct {
 	Description string `json:"description"`
 }
 
-// ManicureType model
-type ManicureType struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
 // User model
 type User struct {
 	ID           int64  `json:"id"`
-	Username     string `json:"username";gorm:"not null;unique;"`
 	Email        string `json:"email";gorm:"not null;unique;"`
 	PasswordHash string `gorm:"not null"` // not serializable
 	Role         int    `json:"role"`
+	Ctime        int64   
+	Atime        int64
 }
 
 // Master model
 type Master struct {
 	ID        int64     `json:"id"`
-	UserID    int64     `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
 	Name      string    `json:"name"`
-	AddressID int64     `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)" json:"address"`
-	PhotoID   int64     `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
-	Stars     int   `json:"stars"`
-	Services  []Service `gorm:"ForeignKey:MasterID" json:"services"`
-	Photos    []Photo   `gorm:"many2many:user_photos;" json:"photos"`
-	Signs     []Sign    `gorm:"many2many:user_signs;" json:"signs"`
-	User      User      //TODO load user
-	Address   Address   //TODO load address
-	Photo     Photo     //TODO load photo
-	SalonID int64
-	Salon Salon
+	UserID    int64     `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
+	User      User      `json:"user"`
+	AddressID int64     `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Address   Address   `json:"address"`
+	PhotoID   int64     `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo     Photo     `json:"photo"`
+	SalonID   int64     `sql:"type:bigint, FOREIGN KEY (salon_id) REFERENCES salons(id)"`
+	Salon     Salon		`json:"salon"`
+	Stars     int       `json:"stars"`
+	Services  []Service `json:"services"`
+	Photos    []Photo   `gorm:"many2many:master_photos;" json:"photos"`
+	Signs     []Sign    `gorm:"many2many:master_signs;" json:"signs"`
+	Home      int       `sql:"type:int", json:"home_service"`		
 }
-
-//photo := &models.Photo{}
-//
-//if dbc := dependencies.DBInstance().First(photo, p.Source.(models.UserDetails).PhotoID); dbc.Error != nil {
-//logrus.Error(dbc.Error)
-//return nil, dbc.Error
-//}
-//if dbc := dependencies.DBInstance().Model(photo).Association("tags").Find(&photo.Tags); dbc.Error != nil {
-//logrus.Error(dbc.Error)
-//return nil, dbc.Error
-//}
-//logrus.Warn(photo)
-//return *photo, nil
 
 // Client model
 type Client struct {
 	ID        int64    `json:"id"`
-	UserID    int64    `sql:"type:int, FOREIGN KEY (user_id) REFERENCES users(id)" json:"user"`
 	Name      string   `json:"name"`
-	PhotoID   int64    `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
-	Favorites []Master //TODO add table definition
-	User      User
-	Photo     Photo
+	UserID    int64    `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
+	User      User	   `json:"user"`
+	PhotoID   int64    `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo     Photo    `json:"photo"`
+	Home      bool     `json:"home_service"`		
+	Favorites []Master `gorm:"many2many:client_favorites;" json:"favorites"`
+}
+
+type Material struct {
+	ID          int64   `json:"id"`
+	Firm 		string  `sql:"type:text" json:"firm"`
+	Description string  `sql:"type:text" json:"description"`
+	Name 		string  `json:"name"`
 }
 
 // Service model
 type Service struct {
 	ID             int64   `json:"id"`
-	MasterID       int64   `json:"master"`
 	Name           string  `json:"name"`
 	Price          float64 `json:"price"`
 	Description    string  `sql:"type:text" json:"description"`
-	ManicureTypeID int64   `sql:"type:int, FOREIGN KEY (manicure_type_id) REFERENCES manicure_types(id)" json:"manicure_type"`
-	Photos         []Photo `gorm:"many2many:service_photos;" json:"photos"`
+	Photos         []Photo    `gorm:"many2many:service_photos;" json:"photos"`
+	Materials      []Material `gorm:"many2many:service_materials;" json:"materials"`
+	Ctime          int64
+	TypeID		   int64  `sql:"type:bigint, FOREIGN KEY (type_id) REFERENCES service_types(id)"`
+	Type		   ServiceType  `json:"type"`
+}
+
+type ServiceType struct {
+	ID            int64   `json:"id"`
+	ParentID 	sql.NullInt64  `sql:"type:bigint, FOREIGN KEY (parent_id) REFERENCES service_types(id)"`
+	Parent      *ServiceType `json:"parent"`
+	Name 		string  `json:"name"`
 }
 
 type Salon struct {
-	ID int64
-	Name string
-	AddressID int64
-	Address Address
-	PhotoID   int64
-	Photo Photo
-	Stars int
+	ID int64 `json:"id"`
+	Name string      `json:"name"`
+	AddressID int64	`sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Address Address `json:"address"`
+	PhotoID   int64 `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo Photo `json:"photo"`
+	Stars int	 `json:"stars"`
 }
 
 type Token struct {

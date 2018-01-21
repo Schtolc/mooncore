@@ -47,7 +47,6 @@ func CreateMaster(username, email, password, name string, addressId, photoId int
 	}
 
 	user := &models.User{
-		Username:     username,
 		Email:        email,
 		PasswordHash: passwordHash,
 		Role:         0,
@@ -85,7 +84,6 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 	}
 
 	user := &models.User{
-		Username:     username,
 		Email:        email,
 		PasswordHash: passwordHash,
 		Role:         0,
