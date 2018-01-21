@@ -53,13 +53,15 @@ type Master struct {
 	Name      string    `json:"name"`
 	AddressID int64     `sql:"type:int, FOREIGN KEY (address_id) REFERENCES addresses(id)" json:"address"`
 	PhotoID   int64     `sql:"type:int, FOREIGN KEY (photo_id) REFERENCES photos(id)" json:"photo"`
-	Stars     float64   `json:"stars"`
+	Stars     int   `json:"stars"`
 	Services  []Service `gorm:"ForeignKey:MasterID" json:"services"`
 	Photos    []Photo   `gorm:"many2many:user_photos;" json:"photos"`
 	Signs     []Sign    `gorm:"many2many:user_signs;" json:"signs"`
 	User      User      //TODO load user
 	Address   Address   //TODO load address
 	Photo     Photo     //TODO load photo
+	SalonID int64
+	Salon Salon
 }
 
 //photo := &models.Photo{}
@@ -95,6 +97,16 @@ type Service struct {
 	Description    string  `sql:"type:text" json:"description"`
 	ManicureTypeID int64   `sql:"type:int, FOREIGN KEY (manicure_type_id) REFERENCES manicure_types(id)" json:"manicure_type"`
 	Photos         []Photo `gorm:"many2many:service_photos;" json:"photos"`
+}
+
+type Salon struct {
+	ID int64
+	Name string
+	AddressID int64
+	Address Address
+	PhotoID   int64
+	Photo Photo
+	Stars int
 }
 
 type Token struct {

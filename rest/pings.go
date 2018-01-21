@@ -11,18 +11,18 @@ import (
 	"strconv"
 )
 
-// Ping is a simple handler for checking if server is up and running.
+// Ping is a simple handler for checking server is up and running
 func Ping(c echo.Context) error {
 	return utils.SendResponse(c, http.StatusOK, "ECHO_PING")
 }
 
-// PingAuth is a handler for checking if authorization works.
+// PingAuth is a handler for checking authorization works
 func PingAuth(c echo.Context) error {
-	user := c.Get("user").(*models.User)
+	user := c.Get(UserKey).(*models.User)
 	return utils.SendResponse(c, http.StatusOK, user.Username)
 }
 
-// PingDb is a simple handler for checking if database is up and running.
+// PingDb is a simple handler for checking database is up and running
 func PingDb(c echo.Context) error {
 	m := &models.Mock{
 		Path: c.Path(),
