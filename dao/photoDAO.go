@@ -33,3 +33,7 @@ func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 
 	return photo, nil
 }
+
+func DeletePhoto(id int64) error {
+	return db.Delete(models.Photo{ID: id}).Error
+}

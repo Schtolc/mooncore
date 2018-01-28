@@ -2,7 +2,6 @@ package rest
 
 import (
 	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -12,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"github.com/Schtolc/mooncore/dao"
 )
 
 const letterBytes = "0123456789ABCDEF"
@@ -47,13 +47,17 @@ func UploadImage(c echo.Context) error {
 		return utils.InternalServerError(c)
 	}
 	defer f.Close()
-	io.Copy(f, file)
+	_, err = io.Copy(f, file)
 
-	photo := &models.Photo{
-		Path: filename,
+	if err != nil {
+		logrus.Error(err)
+		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
-	if dbc := dependencies.DBInstance().Create(photo); dbc.Error != nil {
-		logrus.Println(dbc.Error)
+
+	photo, err := dao.CreatePhoto(filename, nil)
+
+	if err != nil {
+		logrus.Println(err)
 		return utils.InternalServerError(c)
 	}
 

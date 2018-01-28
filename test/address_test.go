@@ -40,9 +40,9 @@ func TestCreateAddress(t *testing.T) {
 		t.Error("address hasn't been created")
 	}
 
-	assert.Equal(t, lat, dbAddress.Lat)
-	assert.Equal(t, lon, dbAddress.Lon)
-	assert.Equal(t, desc, dbAddress.Description)
+	assert.Equal(t, lat, dbAddress.Lat, "lat differs")
+	assert.Equal(t, lon, dbAddress.Lon, "lon differs")
+	assert.Equal(t, desc, dbAddress.Description, "description differs")
 
 	if err := dao.DeleteAddress(dbAddress.ID); err != nil {
 		t.Error("address cannot be deleted")
