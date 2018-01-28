@@ -4,10 +4,10 @@ import (
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/graphql"
 	"github.com/Schtolc/mooncore/rest"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"os"
-	"github.com/Schtolc/mooncore/utils"
 )
 
 // InitServer inits echo server: sets access logs and graphql

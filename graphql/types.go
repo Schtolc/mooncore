@@ -11,7 +11,7 @@ var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Address",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"lat": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.Float),
@@ -30,7 +30,7 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Photo",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"path": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
@@ -49,7 +49,7 @@ var TagObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Tag",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"name": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
@@ -62,7 +62,7 @@ var SignObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Sign",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"name": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
@@ -76,13 +76,12 @@ var SignObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-
 // UserObject is a graphql object for user
 var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "User",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"username": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
@@ -101,7 +100,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Master",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
@@ -153,7 +152,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Client",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
@@ -184,7 +183,7 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Service",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"name": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),

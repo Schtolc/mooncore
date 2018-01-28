@@ -22,7 +22,7 @@ func TestUpload(t *testing.T) {
 	body.ContainsKey("id").Value("id").NotNull()
 	body.ContainsKey("path").Value("path").NotNull()
 
-	id := int(body.Value("id").Number().Raw())
+	id := int64(body.Value("id").Number().Raw())
 	path := body.Value("path").String().Raw()
 
 	data, err := ioutil.ReadFile(dependencies.ConfigInstance().Server.UploadStorage + path)

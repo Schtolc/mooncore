@@ -26,14 +26,14 @@ func getRootMutation() *graphql.Object {
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootMutation",
 		Fields: graphql.Fields{
-			"createMaster": createMaster,
-			"createClient": createClient,
-			"signIn":       signIn,
+			"createAddress": createAddress,
+			"createMaster":  createMaster,
+			"createClient":  createClient,
+			"signIn":        signIn,
 			//"editMaster":    editMaster,
 			//"editClient":    editClient,
 			//"addService":    addService,
 			//"removeService": removeService,
-			"createAddress": createAddress,
 		},
 	})
 }

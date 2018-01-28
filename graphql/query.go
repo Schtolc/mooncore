@@ -12,7 +12,7 @@ var master = &graphql.Field{
 	Type:        MasterObject, // == nil if not found
 	Description: "Get master by id",
 	Args: graphql.FieldConfigArgument{
-		"id": notNull(graphql.Int),
+		"id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 		return dao.GetMasterById(params.Args["id"].(int64))
@@ -23,7 +23,7 @@ var client = &graphql.Field{
 	Type:        ClientObject, // == nil if not found
 	Description: "Get client by id",
 	Args: graphql.FieldConfigArgument{
-		"id": notNull(graphql.Int),
+		"id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 		return dao.GetClientById(params.Args["id"].(int64))
@@ -34,10 +34,14 @@ var address = &graphql.Field{
 	Type:        AddressObject,
 	Description: "Get address by id",
 	Args: graphql.FieldConfigArgument{
-		"id": notNull(graphql.Int),
+		"id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		return dao.GetAddressById(params.Args["id"].(int))
+		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return dao.GetAddressById(id)
 	},
 }
 

@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"database/sql"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // Address model
@@ -40,7 +40,7 @@ type User struct {
 	Email        string `json:"email";gorm:"not null;unique;"`
 	PasswordHash string `gorm:"not null"` // not serializable
 	Role         int    `json:"role"`
-	Ctime        int64   
+	Ctime        int64
 	Atime        int64
 }
 
@@ -55,12 +55,12 @@ type Master struct {
 	PhotoID   int64     `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 	Photo     Photo     `json:"photo"`
 	SalonID   int64     `sql:"type:bigint, FOREIGN KEY (salon_id) REFERENCES salons(id)"`
-	Salon     Salon		`json:"salon"`
+	Salon     Salon     `json:"salon"`
 	Stars     int       `json:"stars"`
 	Services  []Service `json:"services"`
 	Photos    []Photo   `gorm:"many2many:master_photos;" json:"photos"`
 	Signs     []Sign    `gorm:"many2many:master_signs;" json:"signs"`
-	Home      int       `sql:"type:int", json:"home_service"`		
+	Home      int       `sql:"type:int", json:"home_service"`
 }
 
 // Client model
@@ -68,48 +68,48 @@ type Client struct {
 	ID        int64    `json:"id"`
 	Name      string   `json:"name"`
 	UserID    int64    `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
-	User      User	   `json:"user"`
+	User      User     `json:"user"`
 	PhotoID   int64    `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 	Photo     Photo    `json:"photo"`
-	Home      bool     `json:"home_service"`		
+	Home      bool     `json:"home_service"`
 	Favorites []Master `gorm:"many2many:client_favorites;" json:"favorites"`
 }
 
 type Material struct {
-	ID          int64   `json:"id"`
-	Firm 		string  `sql:"type:text" json:"firm"`
-	Description string  `sql:"type:text" json:"description"`
-	Name 		string  `json:"name"`
+	ID          int64  `json:"id"`
+	Firm        string `sql:"type:text" json:"firm"`
+	Description string `sql:"type:text" json:"description"`
+	Name        string `json:"name"`
 }
 
 // Service model
 type Service struct {
-	ID             int64   `json:"id"`
-	Name           string  `json:"name"`
-	Price          float64 `json:"price"`
-	Description    string  `sql:"type:text" json:"description"`
-	Photos         []Photo    `gorm:"many2many:service_photos;" json:"photos"`
-	Materials      []Material `gorm:"many2many:service_materials;" json:"materials"`
-	Ctime          int64
-	TypeID		   int64  `sql:"type:bigint, FOREIGN KEY (type_id) REFERENCES service_types(id)"`
-	Type		   ServiceType  `json:"type"`
+	ID          int64      `json:"id"`
+	Name        string     `json:"name"`
+	Price       float64    `json:"price"`
+	Description string     `sql:"type:text" json:"description"`
+	Photos      []Photo    `gorm:"many2many:service_photos;" json:"photos"`
+	Materials   []Material `gorm:"many2many:service_materials;" json:"materials"`
+	Ctime       int64
+	TypeID      int64       `sql:"type:bigint, FOREIGN KEY (type_id) REFERENCES service_types(id)"`
+	Type        ServiceType `json:"type"`
 }
 
 type ServiceType struct {
-	ID            int64   `json:"id"`
-	ParentID 	sql.NullInt64  `sql:"type:bigint, FOREIGN KEY (parent_id) REFERENCES service_types(id)"`
-	Parent      *ServiceType `json:"parent"`
-	Name 		string  `json:"name"`
+	ID       int64         `json:"id"`
+	ParentID sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (parent_id) REFERENCES service_types(id)"`
+	Parent   *ServiceType  `json:"parent"`
+	Name     string        `json:"name"`
 }
 
 type Salon struct {
-	ID int64 `json:"id"`
-	Name string      `json:"name"`
-	AddressID int64	`sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
-	Address Address `json:"address"`
-	PhotoID   int64 `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
-	Photo Photo `json:"photo"`
-	Stars int	 `json:"stars"`
+	ID        int64   `json:"id"`
+	Name      string  `json:"name"`
+	AddressID int64   `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Address   Address `json:"address"`
+	PhotoID   int64   `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo     Photo   `json:"photo"`
+	Stars     int     `json:"stars"`
 }
 
 type Token struct {

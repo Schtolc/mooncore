@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetAddressById(id int) (*models.Address, error) {
+func GetAddressById(id int64) (*models.Address, error) {
 	address := models.Address{}
 	if err := db.First(&address, id).Error; err != nil {
 		logrus.Error(err)
@@ -35,4 +35,8 @@ func CreateAddress(lat, lon float64, description string) (*models.Address, error
 		return nil, err
 	}
 	return address, nil
+}
+
+func DeleteAddress(id int64) error {
+	return db.Delete(models.Address{ID: id}).Error
 }
