@@ -11,21 +11,39 @@ var createMaster = &graphql.Field{
 	Type:        MasterObject,
 	Description: "Create new master",
 	Args: graphql.FieldConfigArgument{
-		"username":   notNull(graphql.String),
+		"username":   just(graphql.String),
 		"email":      notNull(graphql.String),
 		"password":   notNull(graphql.String),
 		"name":       notNull(graphql.String),
-		"address_id": notNull(graphql.Int),
-		"photo_id":   notNull(graphql.Int),
+		"address_id": notNull(graphql.ID),
+		"photo_id":   notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		username, ok := params.Args["username"].(string)
+
+		if !ok {
+			username = ""
+		}
+
+		addressID, err := strconv.ParseInt(params.Args["address_id"].(string), 10, 64)
+
+		if err != nil {
+			return nil, err
+		}
+
+		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
+
+		if err != nil {
+			return nil, err
+		}
+
 		return dao.CreateMaster(
-			params.Args["username"].(string),
+			username,
 			params.Args["email"].(string),
 			params.Args["password"].(string),
 			params.Args["name"].(string),
-			params.Args["address_id"].(int64),
-			params.Args["photo_id"].(int64))
+			addressID,
+			photoID)
 	},
 }
 
@@ -33,7 +51,7 @@ var createClient = &graphql.Field{
 	Type:        ClientObject,
 	Description: "Create new master",
 	Args: graphql.FieldConfigArgument{
-		"username": notNull(graphql.String),
+		"username": just(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
 		"name":     notNull(graphql.String),
@@ -53,7 +71,7 @@ var signIn = &graphql.Field{
 	Type:        TokenObject, // nil if user not found
 	Description: "Sign in",
 	Args: graphql.FieldConfigArgument{
-		"username": notNull(graphql.String),
+		//"username": notNull(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
 	},

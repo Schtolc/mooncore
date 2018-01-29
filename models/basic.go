@@ -46,21 +46,21 @@ type User struct {
 
 // Master model
 type Master struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	UserID    int64     `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
-	User      User      `json:"user"`
-	AddressID int64     `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
-	Address   Address   `json:"address"`
-	PhotoID   int64     `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
-	Photo     Photo     `json:"photo"`
-	SalonID   int64     `sql:"type:bigint, FOREIGN KEY (salon_id) REFERENCES salons(id)"`
-	Salon     Salon     `json:"salon"`
-	Stars     int       `json:"stars"`
-	Services  []Service `json:"services"`
-	Photos    []Photo   `gorm:"many2many:master_photos;" json:"photos"`
-	Signs     []Sign    `gorm:"many2many:master_signs;" json:"signs"`
-	Home      int       `sql:"type:int", json:"home_service"`
+	ID        int64         `json:"id"`
+	Name      string        `json:"name"`
+	UserID    int64         `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
+	User      User          `json:"user"`
+	AddressID int64         `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Address   Address       `json:"address"`
+	PhotoID   int64         `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo     Photo         `json:"photo"`
+	SalonID   sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (salon_id) REFERENCES salons(id)"`
+	Salon     *Salon        `json:"salon"`
+	Stars     int           `json:"stars"`
+	Services  []Service     `json:"services"`
+	Photos    []Photo       `gorm:"many2many:master_photos;" json:"photos"`
+	Signs     []Sign        `gorm:"many2many:master_signs;" json:"signs"`
+	Home      int           `sql:"type:int", json:"home_service"`
 }
 
 // Client model

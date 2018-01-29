@@ -4,6 +4,7 @@ import (
 	// "github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
+	"github.com/Schtolc/mooncore/dao"
 )
 
 // AddressObject is a graphql object for address
@@ -38,13 +39,13 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 		"tags": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(TagObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Photo).Tags, nil
+				return p.Source.(*models.Photo).Tags, nil
 			},
 		},
 	},
 })
 
-// TagObject is a graphql object for photos tags
+// TagObject is a graphql object for photo tags
 var TagObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Tag",
 	Fields: graphql.Fields{
@@ -57,7 +58,7 @@ var TagObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// SignObject is a graphql object for photos tags
+// SignObject is a graphql object for master sign
 var SignObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Sign",
 	Fields: graphql.Fields{
@@ -84,7 +85,7 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"username": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
+			Type: graphql.String,
 		},
 		"email": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
@@ -95,7 +96,7 @@ var UserObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// MasterObject is a graphql object for user
+// MasterObject is a graphql object for master
 var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Master",
 	Fields: graphql.Fields{
@@ -105,7 +106,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).User, nil
+				return dao.GetUserById(p.Source.(*models.Master).UserID)
 			},
 		},
 		"name": &graphql.Field{
@@ -114,19 +115,19 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"address": &graphql.Field{
 			Type: graphql.NewNonNull(AddressObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).Address, nil
+				return dao.GetAddressById(p.Source.(*models.Master).AddressID)
 			},
 		},
 		"avatar": &graphql.Field{
 			Type: graphql.NewNonNull(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).Photo, nil
+				return dao.GetPhotoById(p.Source.(*models.Master).PhotoID)
 			},
 		},
 		"photos": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(PhotoObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).Photos, nil
+				return p.Source.(*models.Master).Photos, nil // TODO write
 			},
 		},
 		"stars": &graphql.Field{
@@ -135,17 +136,16 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"signs": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(SignObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).Signs, nil
+				return p.Source.(*models.Master).Signs, nil // TODO write
 			},
 		},
 		"services": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(SignObject))),
+			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(ServiceObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Master).Services, nil
+				return p.Source.(*models.Master).Services, nil // TODO write
 			},
 		},
 	},
-	//TODO try to remove resolver
 })
 
 var ClientObject = graphql.NewObject(graphql.ObjectConfig{
@@ -178,7 +178,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// ServiceObject is a graphql object for photos tags
+// ServiceObject is a graphql object for service
 var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Service",
 	Fields: graphql.Fields{

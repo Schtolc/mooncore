@@ -1,14 +1,14 @@
 package test
 
 import (
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"testing"
-	"math/rand"
-	"github.com/Schtolc/mooncore/dao"
 )
 
 func TestUpload(t *testing.T) {

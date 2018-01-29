@@ -1,13 +1,13 @@
 package test
 
 import (
+	"fmt"
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"net/http"
-	"testing"
-	"fmt"
 	"strconv"
+	"testing"
 )
 
 func TestCreateAddress(t *testing.T) {
@@ -29,7 +29,7 @@ func TestCreateAddress(t *testing.T) {
 	resp.Value("lon").Equal(lon)
 	resp.Value("description").Equal(desc)
 
-	id, err :=  strconv.ParseInt(resp.Value("id").String().Raw(), 10, 64)
+	id, err := strconv.ParseInt(resp.Value("id").String().Raw(), 10, 64)
 
 	if err != nil {
 		t.Error("Cannot parse id from response")
@@ -77,4 +77,3 @@ func TestGetAddress(t *testing.T) {
 		t.Error("address cannot be deleted")
 	}
 }
-

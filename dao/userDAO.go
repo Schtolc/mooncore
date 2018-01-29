@@ -4,6 +4,7 @@ import (
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/jinzhu/gorm"
 )
 
 func GetMasterById(id int64) (*models.Master, error) {
@@ -39,23 +40,12 @@ func GetClientById(id int64) (*models.Client, error) {
 func CreateMaster(username, email, password, name string, addressId, photoId int64) (*models.Master, error) {
 	tx := db.Begin()
 
-	passwordHash, err := utils.HashPassword(password)
-
+	user, err := createUser(email, password, tx)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
-	user := &models.User{
-		Email:        email,
-		PasswordHash: passwordHash,
-		Role:         0,
-	}
-
-	if err := tx.Create(user).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
+	// TODO check addressID & photoId
 
 	master := &models.Master{
 		UserID:    user.ID,
@@ -76,21 +66,8 @@ func CreateMaster(username, email, password, name string, addressId, photoId int
 func CreateClient(username, email, password, name string, photoId int64) (*models.Client, error) {
 	tx := db.Begin()
 
-	passwordHash, err := utils.HashPassword(password)
-
+	user, err := createUser(email, password, tx)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	user := &models.User{
-		Email:        email,
-		PasswordHash: passwordHash,
-		Role:         0,
-	}
-
-	if err := tx.Create(user).Error; err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
@@ -107,6 +84,39 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 
 	tx.Commit()
 	return client, nil
+}
+
+func DeleteMasterById(id int64) error {
+	master, err := GetMasterById(id)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Delete(models.Master{ID: id}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return deleteUserById(master.UserID)
+
+}
+
+func DeleteClientById(id int64) error {
+	client, err := GetClientById(id)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Delete(models.Client{ID: id}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return deleteUserById(client.UserID)
 }
 
 func SignIn(username, email, password string) (*models.Token, error) {
@@ -129,6 +139,43 @@ func SignIn(username, email, password string) (*models.Token, error) {
 	}
 
 	return &models.Token{Token: tokenString}, nil
+}
+
+func GetUserById(id int64) (*models.User, error) {
+	user := &models.User{}
+
+	if err := db.First(&user, id).Error; err != nil {
+		logrus.Info("USer not found: ", id)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
+	passwordHash, err := utils.HashPassword(password)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	user := &models.User{
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         0,
+	}
+
+	if err := tx.Create(user).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func deleteUserById(id int64) error {
+	return db.Delete(models.User{ID: id}).Error
 }
 
 func Feed(offset, limit int64) ([]models.Master, error) {

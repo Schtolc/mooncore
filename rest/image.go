@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	"github.com/Schtolc/mooncore/dao"
 )
 
 const letterBytes = "0123456789ABCDEF"

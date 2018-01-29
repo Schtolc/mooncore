@@ -15,7 +15,11 @@ var master = &graphql.Field{
 		"id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		return dao.GetMasterById(params.Args["id"].(int64))
+		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return dao.GetMasterById(id)
 	},
 }
 
