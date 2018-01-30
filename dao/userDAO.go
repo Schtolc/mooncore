@@ -3,8 +3,8 @@ package dao
 import (
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
-	"github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 func GetMasterById(id int64) (*models.Master, error) {
@@ -86,7 +86,7 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 	return client, nil
 }
 
-func DeleteMasterById(id int64) error {
+func DeleteMaster(id int64) error {
 	master, err := GetMasterById(id)
 
 	if err != nil {
@@ -103,7 +103,7 @@ func DeleteMasterById(id int64) error {
 
 }
 
-func DeleteClientById(id int64) error {
+func DeleteClientBy(id int64) error {
 	client, err := GetClientById(id)
 
 	if err != nil {
@@ -178,8 +178,8 @@ func deleteUserById(id int64) error {
 	return db.Delete(models.User{ID: id}).Error
 }
 
-func Feed(offset, limit int64) ([]models.Master, error) {
-	var masters []models.Master
+func Feed(offset, limit int) ([]*models.Master, error) {
+	var masters []*models.Master
 	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
 		return nil, err
 	}

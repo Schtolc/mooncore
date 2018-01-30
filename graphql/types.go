@@ -2,9 +2,9 @@ package graphql
 
 import (
 	// "github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
-	"github.com/Schtolc/mooncore/dao"
 )
 
 // AddressObject is a graphql object for address

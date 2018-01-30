@@ -91,7 +91,7 @@ var feed = &graphql.Field{
 		"limit":  notNull(graphql.Int),
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		return dao.Feed(p.Args["offset"].(int64), p.Args["limit"].(int64))
+		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
 	},
 }
 
