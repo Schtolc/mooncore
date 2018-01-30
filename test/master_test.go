@@ -52,7 +52,6 @@ func TestCreateMaster(t *testing.T) {
 
 	user := root.ContainsKey("user").Value("user").Object()
 	user.ContainsKey("email").Value("email").String().Equal(email)
-	user.ContainsKey("email").Value("email").String().Equal(email)
 
 	responseAddress := root.ContainsKey("address").Value("address").Object()
 	addressID, err := strconv.ParseInt(responseAddress.ContainsKey("id").Value("id").String().Raw(), 10, 64)
@@ -79,9 +78,9 @@ func TestCreateMaster(t *testing.T) {
 		t.Error("cannot load master from database")
 	}
 
-	assert.Equal(t, master.AddressID, address.ID, "address in database id differs")
-	assert.Equal(t, master.PhotoID, photo.ID, "photo in database id differs")
-	assert.Equal(t, master.Name, name, "name in database id differs")
+	assert.Equal(t, master.AddressID, address.ID, "address id in database differs")
+	assert.Equal(t, master.PhotoID, photo.ID, "photo id in database differs")
+	assert.Equal(t, master.Name, name, "name in database differs")
 
 	dao.DeleteMaster(id)
 }
@@ -129,7 +128,7 @@ func TestGetMaster(t *testing.T) {
 	root.ContainsKey("name").Value("name").String().Equal(name)
 
 	user := root.ContainsKey("user").Value("user").Object()
-	user.ContainsKey("email").Value("email").String().Equal(email)
+	user.ContainsKey("id").Value("id").String().Equal(strconv.FormatInt(master.UserID, 10))
 	user.ContainsKey("email").Value("email").String().Equal(email)
 
 	responseAddress := root.ContainsKey("address").Value("address").Object()

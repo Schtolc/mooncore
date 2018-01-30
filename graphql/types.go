@@ -157,7 +157,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Client).User, nil
+				return dao.GetUserById(p.Source.(*models.Client).UserID)
 			},
 		},
 		"name": &graphql.Field{
@@ -166,13 +166,13 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"avatar": &graphql.Field{
 			Type: graphql.NewNonNull(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Client).Photo, nil
+				return dao.GetPhotoById(p.Source.(*models.Client).PhotoID)
 			},
 		},
 		"favorites": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(models.Client).Favorites, nil
+				return p.Source.(*models.Client).Favorites, nil
 			},
 		},
 	},

@@ -49,21 +49,33 @@ var createMaster = &graphql.Field{
 
 var createClient = &graphql.Field{
 	Type:        ClientObject,
-	Description: "Create new master",
+	Description: "Create new client",
 	Args: graphql.FieldConfigArgument{
 		"username": just(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
 		"name":     notNull(graphql.String),
-		"photo_id": notNull(graphql.Int),
+		"photo_id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		username, ok := params.Args["username"].(string)
+
+		if !ok {
+			username = ""
+		}
+
+		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
+
+		if err != nil {
+			return nil, err
+		}
+
 		return dao.CreateClient(
-			params.Args["username"].(string),
+			username,
 			params.Args["email"].(string),
 			params.Args["password"].(string),
 			params.Args["name"].(string),
-			params.Args["photo_id"].(int64))
+			photoID)
 	},
 }
 
