@@ -89,7 +89,6 @@ var signIn = &graphql.Field{
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 		return dao.SignIn(
-			params.Args["username"].(string),
 			params.Args["email"].(string),
 			params.Args["password"].(string))
 	},

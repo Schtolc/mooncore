@@ -7,16 +7,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func SignIn(username, email, password string) (*models.Token, error) {
+func SignIn(email, password string) (*models.Token, error) {
 	user := &models.User{}
 
-	if err := db.Where("username = ? AND email = ?", username, email).First(user).Error; err != nil {
-		logrus.Info("Unregistered user: ", username)
+	if err := db.Where("email = ?", email).First(user).Error; err != nil {
+		logrus.Info("Unregistered user: ", email)
 		return nil, nil
 	}
 
 	if !utils.CheckPasswordHash(password, user.PasswordHash) {
-		logrus.Info("Unregistered user: ", username)
+		logrus.Info("Unregistered user: ", email)
 		return nil, nil
 	}
 
@@ -33,7 +33,7 @@ func GetUserById(id int64) (*models.User, error) {
 	user := &models.User{}
 
 	if err := db.First(&user, id).Error; err != nil {
-		logrus.Info("USer not found: ", id)
+		logrus.Info("User not found: ", id)
 		return nil, err
 	}
 

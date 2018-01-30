@@ -169,18 +169,17 @@ func TestFeed(t *testing.T) {
 
 	defer dao.DeletePhoto(photo.ID)
 
+	email := randString()
+	password := randString()
+	name := randString()
 
-		email := randString()
-		password := randString()
-		name := randString()
+	master, err := dao.CreateMaster("", email, password, name, address.ID, photo.ID)
 
-		master, err := dao.CreateMaster("", email, password, name, address.ID, photo.ID)
+	if err != nil {
+		t.Error("cannot create master")
+	}
 
-		if err != nil {
-			t.Error("cannot create master")
-		}
-
-		defer dao.DeleteMaster(master.ID)
+	defer dao.DeleteMaster(master.ID)
 
 	e := expect(t)
 

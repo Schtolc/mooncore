@@ -29,7 +29,7 @@ func getRootMutation() *graphql.Object {
 			"createAddress": createAddress, // tested
 			"createMaster":  createMaster,  // tested
 			"createClient":  createClient,  // tested
-			"signIn":        signIn,
+			"signIn":        signIn, // tested
 			//"editMaster":    editMaster,
 			//"editClient":    editClient,
 			//"addService":    addService,
@@ -46,8 +46,8 @@ func getRootQuery() *graphql.Object {
 			"addressesInArea": addressesInArea,
 			"master":          master, //tested
 			"client":          client, // tested
-			"feed":            feed, // tested
-			"viewer":          viewer,
+			"feed":            feed,   // tested
+			"viewer":          viewer, // tested
 		},
 	})
 }
