@@ -151,3 +151,60 @@ func TestGetMaster(t *testing.T) {
 	assert.Equal(t, photo.ID, photoID, "photo id in response differs")
 	responsePhoto.ContainsKey("path").Value("path").Equal(photo.Path)
 }
+
+func TestFeed(t *testing.T) {
+	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+
+	if err != nil {
+		t.Error("cannot create address")
+	}
+
+	defer dao.DeleteAddress(address.ID)
+
+	photo, err := dao.CreatePhoto(randString(), nil)
+
+	if err != nil {
+		t.Error("cannot create photo")
+	}
+
+	defer dao.DeletePhoto(photo.ID)
+
+
+		email := randString()
+		password := randString()
+		name := randString()
+
+		master, err := dao.CreateMaster("", email, password, name, address.ID, photo.ID)
+
+		if err != nil {
+			t.Error("cannot create master")
+		}
+
+		defer dao.DeleteMaster(master.ID)
+
+	e := expect(t)
+
+	realCount := dao.MasterCount()
+
+	reqParams := fmt.Sprintf("limit:%d, offset:%d", realCount, 0)
+	respParams := "id, user {id, username, email, role}, name, address {id, lat, lon, description}, avatar {id, path, tags { id, name } }, photos {id, path, tags { id, name } }, stars, signs {id, name, description, icon}, services {id, name, description, price }"
+
+	query := graphQLBody("query {feed(%s){%s}}", reqParams, respParams)
+
+	root := e.POST(graphqlUrl).
+		WithBytes(query).Expect().
+		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("feed").Array()
+
+	root.Length().Ge(1)
+
+	first := root.First().Object()
+	first.ContainsKey("id").
+		ContainsKey("user").
+		ContainsKey("name").
+		ContainsKey("address").
+		ContainsKey("avatar").
+		ContainsKey("photos").
+		ContainsKey("stars").
+		ContainsKey("signs").
+		ContainsKey("services")
+}

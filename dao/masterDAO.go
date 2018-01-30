@@ -61,3 +61,11 @@ func DeleteMaster(id int64) error {
 
 	return deleteUser(master.UserID)
 }
+
+func MasterCount() int64 {
+	var count int64
+	if err := db.Model(&models.Master{}).Count(&count).Error; err != nil {
+		return 0
+	}
+	return count
+}
