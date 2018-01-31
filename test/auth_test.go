@@ -54,7 +54,8 @@ func TestSignIn(t *testing.T) {
 
 	query = graphQLBody("query { viewer { id, username, email, role } }")
 
-	root := e.POST(graphqlUrl).WithBytes(query).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK).JSON().Object()
+	root := e.POST(graphqlUrl).WithBytes(query).WithHeader("Authorization", "Bearer "+token).
+		Expect().Status(http.StatusOK).JSON().Object().Value("data").Object().Value("viewer").Object()
 
 	root.ContainsKey("id")
 	root.ContainsKey("username")

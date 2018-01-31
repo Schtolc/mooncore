@@ -1,7 +1,9 @@
 package graphql
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/Schtolc/mooncore/rest"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo"
@@ -53,12 +55,12 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Mutation: rootMutation,
 })
 
-func executeQuery(query string, variables map[string]interface{}, context echo.Context) *graphql.Result {
+func executeQuery(query string, variables map[string]interface{}, c echo.Context) *graphql.Result {
 	return graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        context.Request().Context(),
+		Context:        context.WithValue(c.Request().Context(), rest.UserKey, c.Get(rest.UserKey)),
 	})
 }
 
