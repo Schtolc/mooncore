@@ -195,12 +195,12 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 		"price": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.Float),
 		},
-		"master": &graphql.Field{
-			Type: MasterObject,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetMasterByID(p.Source.(*models.Service).MasterID)
-			},
-		},
+		//"master": &graphql.Field{
+		//	Type: MasterObject,
+		//	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		//		return dao.GetMasterByID(p.Source.(*models.Service).MasterID)
+		//	},
+		//},
 	},
 })
 
