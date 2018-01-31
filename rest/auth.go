@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/Schtolc/mooncore/dependencies"
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -24,13 +24,15 @@ func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 		if user == nil {
 			return next(c)
 		}
-		username := user.(*jwt.Token).Claims.(*models.JwtClaims).Name
-		dbUser := &models.User{}
-		if dependencies.DBInstance().Where("name = ? ", username).First(dbUser).Error != nil {
-			logrus.Info("User was not found in the database when checking token: ", username)
+		email := user.(*jwt.Token).Claims.(*models.JwtClaims).Email
+
+		user, err := dao.GetUserByEmail(email)
+		if err != nil {
+			logrus.Info("User was not found in the database when checking token: ", email)
 			return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
 		}
-		c.Set(UserKey, dbUser)
+
+		c.Set(UserKey, user)
 		return next(c)
 	}
 }

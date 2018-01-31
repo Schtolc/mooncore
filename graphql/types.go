@@ -172,7 +172,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"favorites": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Client).Favorites, nil
+				return p.Source.(*models.Client).Favorites, nil // TODO write
 			},
 		},
 	},

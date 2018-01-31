@@ -101,7 +101,7 @@ var feed = &graphql.Field{
 
 var viewer = &graphql.Field{
 	Type:        UserObject,
-	Description: "current user",
+	Description: "current logged user",
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		return p.Context.Value(rest.UserKey), nil
 	},

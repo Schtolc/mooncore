@@ -22,86 +22,70 @@ func listOf(param graphql.Type) *graphql.ArgumentConfig {
 	return just(graphql.NewList(param))
 }
 
-func getRootMutation() *graphql.Object {
-	return graphql.NewObject(graphql.ObjectConfig{
-		Name: "RootMutation",
-		Fields: graphql.Fields{
-			"createAddress": createAddress, // tested
-			"createMaster":  createMaster,  // tested
-			"createClient":  createClient,  // tested
-			"signIn":        signIn, // tested
-			//"editMaster":    editMaster,
-			//"editClient":    editClient,
-			//"addService":    addService,
-			//"removeService": removeService,
-		},
-	})
-}
+var rootMutation = graphql.NewObject(graphql.ObjectConfig{
+	Name: "RootMutation",
+	Fields: graphql.Fields{
+		"createAddress": createAddress, // tested
+		"createMaster":  createMaster,  // tested
+		"createClient":  createClient,  // tested
+		"signIn":        signIn,        // tested
+		//"editMaster":    editMaster,
+		//"editClient":    editClient,
+		//"addService":    addService,
+		//"removeService": removeService,
+	},
+})
 
-func getRootQuery() *graphql.Object {
-	return graphql.NewObject(graphql.ObjectConfig{
-		Name: "RootQuery",
-		Fields: graphql.Fields{
-			"address":         address, // tested
-			"addressesInArea": addressesInArea,
-			"master":          master, //tested
-			"client":          client, // tested
-			"feed":            feed,   // tested
-			"viewer":          viewer, // tested
-		},
-	})
-}
+var rootQuery = graphql.NewObject(graphql.ObjectConfig{
+	Name: "RootQuery",
+	Fields: graphql.Fields{
+		"address":         address, // tested
+		"addressesInArea": addressesInArea,
+		"master":          master, //tested
+		"client":          client, // tested
+		"feed":            feed,   // tested
+		"viewer":          viewer, // tested
+	},
+})
 
-var schema *graphql.Schema
+var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
+	Query:    rootQuery,
+	Mutation: rootMutation,
+})
 
-func createSchema() graphql.Schema {
-	if schema != nil {
-		return *schema
-	}
-	_schema, _ := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    getRootQuery(),
-		Mutation: getRootMutation(),
-	})
-	schema = &_schema
-	return *schema
-}
-
-func executeQuery(query string, variables map[string]interface{}, schema graphql.Schema, c echo.Context) *graphql.Result {
-	params := graphql.Params{
+func executeQuery(query string, variables map[string]interface{}, context echo.Context) *graphql.Result {
+	return graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        c.Request().Context(),
-	}
-
-	result := graphql.Do(params)
-	return result
+		Context:        context.Request().Context(),
+	})
 }
 
 // API GraphQL handler
-func API(c echo.Context) error {
-	body, err := ioutil.ReadAll(c.Request().Body)
+func API(context echo.Context) error {
+	body, err := ioutil.ReadAll(context.Request().Body)
 	if err != nil {
 		logrus.Error(err)
-		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
+		return utils.SendResponse(context, http.StatusBadRequest, err.Error())
 	}
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		logrus.Error(err)
-		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
+		return utils.SendResponse(context, http.StatusBadRequest, err.Error())
 	}
 	rawQuery, ok := data["query"]
 	if !ok {
 		strErr := "No query in request"
 		logrus.Error(strErr)
-		return utils.SendResponse(c, http.StatusBadRequest, strErr)
+		return utils.SendResponse(context, http.StatusBadRequest, strErr)
 	}
 
 	query, ok := rawQuery.(string)
 	if !ok {
 		strErr := "Bad query format"
 		logrus.Error(strErr)
-		return utils.SendResponse(c, http.StatusBadRequest, strErr)
+		return utils.SendResponse(context, http.StatusBadRequest, strErr)
 	}
 
 	rawVariables, ok := data["variables"]
@@ -113,14 +97,14 @@ func API(c echo.Context) error {
 	if !ok {
 		strErr := "Bad variables format"
 		logrus.Error(strErr)
-		return utils.SendResponse(c, http.StatusBadRequest, strErr)
+		return utils.SendResponse(context, http.StatusBadRequest, strErr)
 	}
 
-	result := executeQuery(query, variables, createSchema(), c)
+	result := executeQuery(query, variables, context)
 
 	if len(result.Errors) > 0 {
-		return utils.SendResponse(c, http.StatusNotFound, result.Errors)
+		return utils.SendResponse(context, http.StatusNotFound, result.Errors)
 	}
 
-	return utils.SendResponse(c, http.StatusOK, result.Data)
+	return utils.SendResponse(context, http.StatusOK, result.Data)
 }

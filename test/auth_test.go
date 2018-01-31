@@ -48,13 +48,13 @@ func TestSignIn(t *testing.T) {
 	token := e.POST(graphqlUrl).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").
-			Object().Value("signIn").Object().ContainsKey("token").Value("token").String().Raw()
+		Object().Value("signIn").Object().ContainsKey("token").Value("token").String().Raw()
 
 	assert.NotEmpty(t, token, "empty token")
 
 	query = graphQLBody("query { viewer { id, username, email, role } }")
 
-	root := e.POST(graphqlUrl).WithBytes(query).WithHeader("Authorization", "Bearer " + token).Expect().Status(http.StatusOK).JSON().Object()
+	root := e.POST(graphqlUrl).WithBytes(query).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK).JSON().Object()
 
 	root.ContainsKey("id")
 	root.ContainsKey("username")

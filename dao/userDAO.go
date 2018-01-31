@@ -40,6 +40,17 @@ func GetUserById(id int64) (*models.User, error) {
 	return user, nil
 }
 
+func GetUserByEmail(email string) (*models.User, error) {
+	user := &models.User{}
+
+	if err := db.Where("email = ? ", email).First(user).Error; err != nil {
+		logrus.Info("User not found: ", email)
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 	passwordHash, err := utils.HashPassword(password)
 

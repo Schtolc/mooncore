@@ -117,6 +117,6 @@ type Token struct {
 }
 
 type JwtClaims struct {
-	Name string `json:"name"`
+	Email string
 	jwt.StandardClaims
 }
