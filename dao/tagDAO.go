@@ -5,7 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetTagById(id int64) (*models.Tag, error) {
+// GetTagByID returns tag by id
+func GetTagByID(id int64) (*models.Tag, error) {
 	tag := models.Tag{}
 	if err := db.First(&tag, id).Error; err != nil {
 		logrus.Error(err)
@@ -14,6 +15,7 @@ func GetTagById(id int64) (*models.Tag, error) {
 	return &tag, nil
 }
 
+// CreateTag creates tag
 func CreateTag(name string) (*models.Tag, error) {
 	tag := &models.Tag{
 		Name: name,

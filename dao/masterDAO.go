@@ -5,7 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetMasterById(id int64) (*models.Master, error) {
+// GetMasterByID returns master by id
+func GetMasterByID(id int64) (*models.Master, error) {
 	user := &models.User{}
 	master := &models.Master{}
 	if dbc := db.First(master, id); dbc.Error != nil {
@@ -20,7 +21,8 @@ func GetMasterById(id int64) (*models.Master, error) {
 	return master, nil
 }
 
-func CreateMaster(username, email, password, name string, addressId, photoId int64) (*models.Master, error) {
+// CreateMaster creates new master
+func CreateMaster(username, email, password, name string, addressID, photoID int64) (*models.Master, error) {
 	tx := db.Begin()
 
 	user, err := createUser(email, password, tx)
@@ -28,13 +30,13 @@ func CreateMaster(username, email, password, name string, addressId, photoId int
 		return nil, err
 	}
 
-	// TODO check addressID & photoId
+	// TODO check addressID & photoID
 
 	master := &models.Master{
 		UserID:    user.ID,
 		Name:      name,
-		AddressID: addressId,
-		PhotoID:   photoId,
+		AddressID: addressID,
+		PhotoID:   photoID,
 	}
 
 	if err := tx.Create(master).Error; err != nil {
@@ -46,8 +48,9 @@ func CreateMaster(username, email, password, name string, addressId, photoId int
 	return master, nil
 }
 
+// DeleteMaster deletes master
 func DeleteMaster(id int64) error {
-	master, err := GetMasterById(id)
+	master, err := GetMasterByID(id)
 
 	if err != nil {
 		return err
@@ -62,10 +65,20 @@ func DeleteMaster(id int64) error {
 	return deleteUser(master.UserID)
 }
 
+// MasterCount return count of masters
 func MasterCount() int64 {
 	var count int64
 	if err := db.Model(&models.Master{}).Count(&count).Error; err != nil {
 		return 0
 	}
 	return count
+}
+
+// Feed returns feed
+func Feed(offset, limit int) ([]*models.Master, error) {
+	var masters []*models.Master
+	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
+		return nil, err
+	}
+	return masters, nil
 }

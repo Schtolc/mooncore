@@ -14,7 +14,7 @@ import (
 var (
 	conf       = dependencies.ConfigInstance()
 	localhost  = url.URL{Scheme: "http", Host: conf.Server.Hostbase.Host + ":" + conf.Server.Hostbase.Port}
-	graphqlUrl = "/graphql"
+	graphqlURL = "/graphql"
 )
 
 type graphQLQuery struct {
@@ -48,21 +48,21 @@ func expect(t *testing.T) *httpexpect.Expect {
 func TestApiCall(t *testing.T) {
 	e := expect(t)
 
-	e.OPTIONS(graphqlUrl).Expect().Status(http.StatusOK)
+	e.OPTIONS(graphqlURL).Expect().Status(http.StatusOK)
 
 	// test empty request
-	e.POST(graphqlUrl).Expect().Status(http.StatusBadRequest)
+	e.POST(graphqlURL).Expect().Status(http.StatusBadRequest)
 
 	// test request without query
-	e.POST(graphqlUrl).WithText("{}").
+	e.POST(graphqlURL).WithText("{}").
 		Expect().Status(http.StatusBadRequest).JSON().Object().Value("data").Equal("No query in request")
 
 	// test bad query format
-	e.POST(graphqlUrl).WithText("{\"query\":[1,2,3]}").
+	e.POST(graphqlURL).WithText("{\"query\":[1,2,3]}").
 		Expect().Status(http.StatusBadRequest).JSON().Object().Value("data").Equal("Bad query format")
 
 	// test bad variables format
-	e.POST(graphqlUrl).WithText("{\"query\":\"123\",\"variables\":[1,2,3]}").
+	e.POST(graphqlURL).WithText("{\"query\":\"123\",\"variables\":[1,2,3]}").
 		Expect().Status(http.StatusBadRequest).JSON().Object().Value("data").Equal("Bad variables format")
 
 }

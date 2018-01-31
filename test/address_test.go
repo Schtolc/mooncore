@@ -21,7 +21,7 @@ func TestCreateAddress(t *testing.T) {
 	respParams := "id, lat, lon, description"
 	query := graphQLBody("mutation{createAddress(%s){%s}}", reqParams, respParams)
 
-	resp := e.POST(graphqlUrl).
+	resp := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createAddress").Object()
 
@@ -35,7 +35,7 @@ func TestCreateAddress(t *testing.T) {
 		t.Error("Cannot parse id from response")
 	}
 
-	dbAddress, err := dao.GetAddressById(id)
+	dbAddress, err := dao.GetAddressByID(id)
 	if err != nil {
 		t.Error("address hasn't been created")
 	}
@@ -66,7 +66,7 @@ func TestGetAddress(t *testing.T) {
 	respParams := "id, lat, lon, description"
 	query := graphQLBody("{address(%s){%s}}", reqParams, respParams)
 
-	resp := e.POST(graphqlUrl).
+	resp := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("address").Object()
 	resp.Value("lat").Equal(lat)

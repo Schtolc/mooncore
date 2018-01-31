@@ -38,7 +38,7 @@ func TestCreateMaster(t *testing.T) {
 
 	query := graphQLBody("mutation{createMaster(%s){%s}}", reqParams, respParams)
 
-	root := e.POST(graphqlUrl).
+	root := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createMaster").Object()
 
@@ -73,7 +73,7 @@ func TestCreateMaster(t *testing.T) {
 	assert.Equal(t, photo.ID, photoID, "photo id in response differs")
 	responsePhoto.ContainsKey("path").Value("path").Equal(photo.Path)
 
-	master, err := dao.GetMasterById(id)
+	master, err := dao.GetMasterByID(id)
 	if err != nil {
 		t.Error("cannot load master from database")
 	}
@@ -121,7 +121,7 @@ func TestGetMaster(t *testing.T) {
 
 	query := graphQLBody("query {master(%s){%s}}", reqParams, respParams)
 
-	root := e.POST(graphqlUrl).
+	root := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("master").Object()
 
@@ -190,7 +190,7 @@ func TestFeed(t *testing.T) {
 
 	query := graphQLBody("query {feed(%s){%s}}", reqParams, respParams)
 
-	root := e.POST(graphqlUrl).
+	root := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("feed").Array()
 

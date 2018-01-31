@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// SignIn checks user credentials and returns token
 func SignIn(email, password string) (*models.Token, error) {
 	user := &models.User{}
 
@@ -29,7 +30,8 @@ func SignIn(email, password string) (*models.Token, error) {
 	return &models.Token{Token: tokenString}, nil
 }
 
-func GetUserById(id int64) (*models.User, error) {
+// GetUserByID returns user by id
+func GetUserByID(id int64) (*models.User, error) {
 	user := &models.User{}
 
 	if err := db.First(&user, id).Error; err != nil {
@@ -40,6 +42,7 @@ func GetUserById(id int64) (*models.User, error) {
 	return user, nil
 }
 
+// GetUserByEmail returns user by email
 func GetUserByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 
@@ -75,12 +78,4 @@ func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 
 func deleteUser(id int64) error {
 	return db.Delete(models.User{ID: id}).Error
-}
-
-func Feed(offset, limit int) ([]*models.Master, error) {
-	var masters []*models.Master
-	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
-		return nil, err
-	}
-	return masters, nil
 }

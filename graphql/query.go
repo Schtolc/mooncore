@@ -19,7 +19,7 @@ var master = &graphql.Field{
 		if err != nil {
 			return nil, err
 		}
-		return dao.GetMasterById(id)
+		return dao.GetMasterByID(id)
 	},
 }
 
@@ -34,7 +34,7 @@ var client = &graphql.Field{
 		if err != nil {
 			return nil, err
 		}
-		return dao.GetClientById(id)
+		return dao.GetClientByID(id)
 	},
 }
 
@@ -49,7 +49,7 @@ var address = &graphql.Field{
 		if err != nil {
 			return nil, err
 		}
-		return dao.GetAddressById(id)
+		return dao.GetAddressByID(id)
 	},
 }
 

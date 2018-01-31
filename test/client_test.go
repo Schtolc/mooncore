@@ -29,7 +29,7 @@ func TestCreateClient(t *testing.T) {
 
 	query := graphQLBody("mutation{createClient(%s){%s}}", reqParams, respParams)
 
-	root := e.POST(graphqlUrl).
+	root := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("createClient").Object()
 
@@ -53,7 +53,7 @@ func TestCreateClient(t *testing.T) {
 	assert.Equal(t, photo.ID, photoID, "photo id in response differs")
 	responsePhoto.ContainsKey("path").Value("path").Equal(photo.Path)
 
-	client, err := dao.GetClientById(id)
+	client, err := dao.GetClientByID(id)
 	if err != nil {
 		t.Error("cannot load client from database")
 	}
@@ -92,7 +92,7 @@ func TestGetClient(t *testing.T) {
 
 	query := graphQLBody("query {client(%s){%s}}", reqParams, respParams)
 
-	root := e.POST(graphqlUrl).
+	root := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("client").Object()
 

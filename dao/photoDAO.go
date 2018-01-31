@@ -5,7 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetPhotoById(id int64) (*models.Photo, error) {
+// GetPhotoByID returns photo by id
+func GetPhotoByID(id int64) (*models.Photo, error) {
 	photo := models.Photo{}
 
 	if err := db.First(&photo, id).Error; err != nil {
@@ -16,6 +17,7 @@ func GetPhotoById(id int64) (*models.Photo, error) {
 	return &photo, nil
 }
 
+// CreatePhoto creates new photo
 func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 	photo := &models.Photo{
 		Path: path,
@@ -34,6 +36,7 @@ func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 	return photo, nil
 }
 
+// DeletePhoto deletes photo
 func DeletePhoto(id int64) error {
 	return db.Delete(models.Photo{ID: id}).Error
 }

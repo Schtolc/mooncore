@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+// HashPassword hashes pasword
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
+// CheckPasswordHash checks password and hash
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
@@ -34,6 +36,7 @@ func GetJwtConfig() middleware.JWTConfig {
 	}
 }
 
+// CreateJwtToken creates a new token
 func CreateJwtToken(user *models.User) (tokenString string, err error) {
 	claims := &models.JwtClaims{
 		Email: user.Email,

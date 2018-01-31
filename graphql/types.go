@@ -45,7 +45,7 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// TagObject is a graphql object for photo tags
+// TagObject is a graphql object for photo tag
 var TagObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Tag",
 	Fields: graphql.Fields{
@@ -106,7 +106,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetUserById(p.Source.(*models.Master).UserID)
+				return dao.GetUserByID(p.Source.(*models.Master).UserID)
 			},
 		},
 		"name": &graphql.Field{
@@ -115,13 +115,13 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"address": &graphql.Field{
 			Type: graphql.NewNonNull(AddressObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetAddressById(p.Source.(*models.Master).AddressID)
+				return dao.GetAddressByID(p.Source.(*models.Master).AddressID)
 			},
 		},
 		"avatar": &graphql.Field{
 			Type: graphql.NewNonNull(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetPhotoById(p.Source.(*models.Master).PhotoID)
+				return dao.GetPhotoByID(p.Source.(*models.Master).PhotoID)
 			},
 		},
 		"photos": &graphql.Field{
@@ -148,6 +148,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
+// ClientObject is a graphql object for client
 var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Client",
 	Fields: graphql.Fields{
@@ -157,7 +158,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"user": &graphql.Field{
 			Type: graphql.NewNonNull(UserObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetUserById(p.Source.(*models.Client).UserID)
+				return dao.GetUserByID(p.Source.(*models.Client).UserID)
 			},
 		},
 		"name": &graphql.Field{
@@ -166,7 +167,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"avatar": &graphql.Field{
 			Type: graphql.NewNonNull(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetPhotoById(p.Source.(*models.Client).PhotoID)
+				return dao.GetPhotoByID(p.Source.(*models.Client).PhotoID)
 			},
 		},
 		"favorites": &graphql.Field{
@@ -194,15 +195,16 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 		"price": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.Float),
 		},
-		// "master": &graphql.Field{
-		// 	Type: MasterObject,
-		// 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		// 		return dao.GetMasterById(p.Source.(models.Service).MasterID)
-		// 	},
-		// },
+		"master": &graphql.Field{
+			Type: MasterObject,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return dao.GetMasterByID(p.Source.(*models.Service).MasterID)
+			},
+		},
 	},
 })
 
+// TokenObject is a graphql object for jwt token
 var TokenObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Token",
 	Fields: graphql.Fields{

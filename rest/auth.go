@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// UserKey is a context key for current logged user object
 const UserKey = "user"
 
 // Headers for option request

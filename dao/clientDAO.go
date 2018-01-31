@@ -5,7 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetClientById(id int64) (*models.Client, error) {
+// GetClientByID returns client by id
+func GetClientByID(id int64) (*models.Client, error) {
 	user := &models.User{}
 	client := &models.Client{}
 	if dbc := db.First(client, id); dbc.Error != nil {
@@ -20,7 +21,8 @@ func GetClientById(id int64) (*models.Client, error) {
 	return client, nil
 }
 
-func CreateClient(username, email, password, name string, photoId int64) (*models.Client, error) {
+// CreateClient creates new client
+func CreateClient(username, email, password, name string, photoID int64) (*models.Client, error) {
 	tx := db.Begin()
 
 	user, err := createUser(email, password, tx)
@@ -31,7 +33,7 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 	client := &models.Client{
 		UserID:  user.ID,
 		Name:    name,
-		PhotoID: photoId,
+		PhotoID: photoID,
 	}
 
 	if err := tx.Create(client).Error; err != nil {
@@ -43,8 +45,9 @@ func CreateClient(username, email, password, name string, photoId int64) (*model
 	return client, nil
 }
 
+// DeleteClient deletes client
 func DeleteClient(id int64) error {
-	client, err := GetClientById(id)
+	client, err := GetClientByID(id)
 
 	if err != nil {
 		return err

@@ -5,7 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetAddressById(id int64) (*models.Address, error) {
+// GetAddressByID returns address by id
+func GetAddressByID(id int64) (*models.Address, error) {
 	address := models.Address{}
 	if err := db.First(&address, id).Error; err != nil {
 		logrus.Error(err)
@@ -14,6 +15,7 @@ func GetAddressById(id int64) (*models.Address, error) {
 	return &address, nil
 }
 
+// GetAddressesInArea returns addresses in area
 func GetAddressesInArea(lat1, lon1, lat2, lon2 float64) ([]models.Address, error) {
 	var addresses []models.Address
 	query := "lat > ? AND lat < ? AND lon < ? AND lon > ?"
@@ -24,6 +26,7 @@ func GetAddressesInArea(lat1, lon1, lat2, lon2 float64) ([]models.Address, error
 	return addresses, nil
 }
 
+// CreateAddress creates new address
 func CreateAddress(lat, lon float64, description string) (*models.Address, error) {
 	address := &models.Address{
 		Lat:         lat,
@@ -37,6 +40,7 @@ func CreateAddress(lat, lon float64, description string) (*models.Address, error
 	return address, nil
 }
 
+// DeleteAddress deletes address
 func DeleteAddress(id int64) error {
 	return db.Delete(models.Address{ID: id}).Error
 }

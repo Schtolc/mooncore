@@ -75,6 +75,7 @@ type Client struct {
 	Favorites []Master `gorm:"many2many:client_favorites;" json:"favorites"`
 }
 
+// Material model
 type Material struct {
 	ID          int64  `json:"id"`
 	Firm        string `sql:"type:text" json:"firm"`
@@ -87,6 +88,8 @@ type Service struct {
 	ID          int64      `json:"id"`
 	Name        string     `json:"name"`
 	Price       float64    `json:"price"`
+	MasterID    int64      `sql:"type:bigint, FOREIGN KEY (master_id) REFERENCES master(id)"`
+	Master      Master     `json:"master"`
 	Description string     `sql:"type:text" json:"description"`
 	Photos      []Photo    `gorm:"many2many:service_photos;" json:"photos"`
 	Materials   []Material `gorm:"many2many:service_materials;" json:"materials"`
@@ -95,6 +98,7 @@ type Service struct {
 	Type        ServiceType `json:"type"`
 }
 
+// ServiceType model
 type ServiceType struct {
 	ID       int64         `json:"id"`
 	ParentID sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (parent_id) REFERENCES service_types(id)"`
@@ -102,6 +106,7 @@ type ServiceType struct {
 	Name     string        `json:"name"`
 }
 
+// Salon model
 type Salon struct {
 	ID        int64   `json:"id"`
 	Name      string  `json:"name"`
@@ -112,10 +117,12 @@ type Salon struct {
 	Stars     int     `json:"stars"`
 }
 
+// Token model
 type Token struct {
 	Token string `json:"token"`
 }
 
+// JwtClaims model
 type JwtClaims struct {
 	Email string
 	jwt.StandardClaims
