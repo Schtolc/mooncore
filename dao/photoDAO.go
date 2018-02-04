@@ -30,6 +30,7 @@ func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 	}
 
 	if err := db.Create(photo).Error; err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -38,5 +39,9 @@ func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 
 // DeletePhoto deletes photo
 func DeletePhoto(id int64) error {
-	return db.Delete(models.Photo{ID: id}).Error
+	if err := db.Delete(models.Photo{ID: id}).Error; err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
 }

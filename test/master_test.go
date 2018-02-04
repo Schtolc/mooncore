@@ -183,7 +183,10 @@ func TestFeed(t *testing.T) {
 
 	e := expect(t)
 
-	realCount := dao.MasterCount()
+	realCount, err := dao.MasterCount()
+	if err != nil {
+		t.Error("cannot count master")
+	}
 
 	reqParams := fmt.Sprintf("limit:%d, offset:%d", realCount, 0)
 	respParams := "id, user {id, username, email, role}, name, address {id, lat, lon, description}, avatar {id, path, tags { id, name } }, photos {id, path, tags { id, name } }, stars, signs {id, name, description, icon}, services {id, name, description, price }"

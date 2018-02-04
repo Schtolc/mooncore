@@ -9,13 +9,13 @@ import (
 func GetClientByID(id int64) (*models.Client, error) {
 	user := &models.User{}
 	client := &models.Client{}
-	if dbc := db.First(client, id); dbc.Error != nil {
-		logrus.Error(dbc.Error)
+	if err := db.First(client, id).Error; err != nil {
+		logrus.Error(err)
 		return nil, nil
 	}
-	if dbc := db.First(user, client.UserID); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
+	if err := db.First(user, client.UserID).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
 	}
 	client.User = *user
 	return client, nil
@@ -27,6 +27,7 @@ func CreateClient(username, email, password, name string, photoID int64) (*model
 
 	user, err := createUser(email, password, tx)
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -38,6 +39,7 @@ func CreateClient(username, email, password, name string, photoID int64) (*model
 
 	if err := tx.Create(client).Error; err != nil {
 		tx.Rollback()
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -48,16 +50,22 @@ func CreateClient(username, email, password, name string, photoID int64) (*model
 // DeleteClient deletes client
 func DeleteClient(id int64) error {
 	client, err := GetClientByID(id)
-
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
 	err = db.Delete(models.Client{ID: id}).Error
-
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
-	return deleteUser(client.UserID)
+	err = deleteUser(client.UserID)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	return nil
 }

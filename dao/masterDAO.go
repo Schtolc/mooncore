@@ -27,6 +27,7 @@ func CreateMaster(username, email, password, name string, addressID, photoID int
 
 	user, err := createUser(email, password, tx)
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -41,6 +42,7 @@ func CreateMaster(username, email, password, name string, addressID, photoID int
 
 	if err := tx.Create(master).Error; err != nil {
 		tx.Rollback()
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -51,33 +53,41 @@ func CreateMaster(username, email, password, name string, addressID, photoID int
 // DeleteMaster deletes master
 func DeleteMaster(id int64) error {
 	master, err := GetMasterByID(id)
-
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
 	err = db.Delete(models.Master{ID: id}).Error
-
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
-	return deleteUser(master.UserID)
+	err = deleteUser(master.UserID)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	return nil
 }
 
 // MasterCount return count of masters
-func MasterCount() int64 {
+func MasterCount() (int64, error) {
 	var count int64
 	if err := db.Model(&models.Master{}).Count(&count).Error; err != nil {
-		return 0
+		logrus.Error(err)
+		return 0, err
 	}
-	return count
+	return count, nil
 }
 
 // Feed returns feed
 func Feed(offset, limit int) ([]*models.Master, error) {
 	var masters []*models.Master
 	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 	return masters, nil

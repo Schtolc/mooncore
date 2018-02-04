@@ -22,6 +22,7 @@ func CreateTag(name string) (*models.Tag, error) {
 	}
 
 	if err := db.Create(tag).Error; err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 

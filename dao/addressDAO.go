@@ -42,5 +42,9 @@ func CreateAddress(lat, lon float64, description string) (*models.Address, error
 
 // DeleteAddress deletes address
 func DeleteAddress(id int64) error {
-	return db.Delete(models.Address{ID: id}).Error
+	if err := db.Delete(models.Address{ID: id}).Error; err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
 }

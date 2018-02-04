@@ -59,6 +59,7 @@ func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 
 	if err != nil {
 		tx.Rollback()
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -70,6 +71,7 @@ func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 
 	if err := tx.Create(user).Error; err != nil {
 		tx.Rollback()
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -77,5 +79,10 @@ func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 }
 
 func deleteUser(id int64) error {
-	return db.Delete(models.User{ID: id}).Error
+	if err := db.Delete(models.User{ID: id}).Error; err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	return nil
 }
