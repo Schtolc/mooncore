@@ -68,16 +68,19 @@ var addressesInArea = &graphql.Field{
 			logrus.Error(err) // первая точка сверху слева
 			return nil, err   // вторая снизу и справа
 		}
+
 		lon1, err := strconv.ParseFloat(params.Args["lon1"].(string), 64)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
+
 		lat2, err := strconv.ParseFloat(params.Args["lat2"].(string), 64)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
+
 		lon2, err := strconv.ParseFloat(params.Args["lon2"].(string), 64)
 		if err != nil {
 			logrus.Error(err)

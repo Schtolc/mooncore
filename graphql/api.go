@@ -60,7 +60,7 @@ func executeQuery(query string, variables map[string]interface{}, c echo.Context
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        context.WithValue(c.Request().Context(), rest.UserKey, c.Get(rest.UserKey)),
+		Context:        context.WithValue(c.Request().Context(), utils.GraphQLContextUserKey(rest.UserKey), c.Get(rest.UserKey)),
 	})
 }
 
@@ -71,6 +71,7 @@ func API(context echo.Context) error {
 		logrus.Error(err)
 		return utils.SendResponse(context, http.StatusBadRequest, err.Error())
 	}
+
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		logrus.Error(err)

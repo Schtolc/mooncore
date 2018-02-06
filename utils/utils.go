@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-// HashPassword hashes pasword
+// GraphQLContextUserKey is a type for user in graphql context
+type GraphQLContextUserKey string
+
+// HashPassword hashes password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
