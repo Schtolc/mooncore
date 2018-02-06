@@ -2,13 +2,15 @@ package main
 
 import (
 	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/Schtolc/mooncore/handlers"
+	"github.com/Schtolc/mooncore/graphql"
+	"github.com/Schtolc/mooncore/rest"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"os"
 )
 
-// InitServer inits echo server: sets access logs and handlers
+// InitServer inits echo server: sets access logs and graphql
 func InitServer(config *dependencies.Config) (e *echo.Echo) {
 	_ = os.Mkdir(config.Server.UploadStorage, 0777)
 
@@ -23,21 +25,18 @@ func InitServer(config *dependencies.Config) (e *echo.Echo) {
 				c.Response().Header().Set(echo.HeaderAccessControlAllowOrigin, "*")
 				return next(c)
 			}
-		})
+		},
+		middleware.JWTWithConfig(utils.GetJwtConfig()),
+		rest.LoadUser)
 
-	group.POST("/sign_up", handlers.SignUp)
-	group.POST("/sign_in", handlers.SignIn)
-	group.POST("/upload", handlers.UploadImage)
-	group.POST("/graphql", handlers.API)
-	group.OPTIONS("/graphql", handlers.Headers)
+	group.POST("/upload", rest.UploadImage)
+	group.POST("/graphql", graphql.API)
+	group.OPTIONS("/graphql", rest.Headers)
 
-	group.GET("/ping", handlers.Ping)
-	group.GET("/ping_db", handlers.PingDb)
+	group.GET("/ping", rest.Ping)
+	group.GET("/ping_db", rest.PingDb)
 
-	AuthGroup := group.Group("")
-	AuthGroup.Use(middleware.JWTWithConfig(handlers.GetJwtConfig()))
-	AuthGroup.Use(handlers.LoadUser)
-	AuthGroup.POST("/auth_ping", handlers.PingAuth)
+	group.POST("/auth_ping", rest.PingAuth)
 
 	return server
 }

@@ -1,8 +1,9 @@
-package handlers
+package rest
 
 import (
+	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -34,7 +35,7 @@ func UploadImage(c echo.Context) error {
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		logrus.Error(err)
-		return sendResponse(c, http.StatusBadRequest, err.Error())
+		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
 	defer file.Close()
 
@@ -43,18 +44,21 @@ func UploadImage(c echo.Context) error {
 	f, err := os.OpenFile(dependencies.ConfigInstance().Server.UploadStorage+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		logrus.Error(err)
-		return internalServerError(c)
+		return utils.InternalServerError(c)
 	}
 	defer f.Close()
-	io.Copy(f, file)
+	_, err = io.Copy(f, file)
 
-	photo := &models.Photo{
-		Path: filename,
-	}
-	if dbc := dependencies.DBInstance().Create(photo); dbc.Error != nil {
-		logrus.Println(dbc.Error)
-		return internalServerError(c)
+	if err != nil {
+		logrus.Error(err)
+		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	return sendResponse(c, http.StatusOK, photo)
+	photo, err := dao.CreatePhoto(filename, nil)
+	if err != nil {
+		logrus.Println(err)
+		return utils.InternalServerError(c)
+	}
+
+	return utils.SendResponse(c, http.StatusOK, photo)
 }
