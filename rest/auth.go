@@ -10,9 +10,6 @@ import (
 	"net/http"
 )
 
-// UserKey is a context key for current logged user object
-const UserKey = "user"
-
 // Headers for option request
 func Headers(c echo.Context) error {
 	return utils.SendResponse(c, http.StatusOK, "")
@@ -21,7 +18,7 @@ func Headers(c echo.Context) error {
 // LoadUser is a middleware for load authorized user to context
 func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get(UserKey)
+		user := c.Get(utils.UserKey)
 		if user == nil {
 			return next(c)
 		}
@@ -33,7 +30,7 @@ func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 			return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
 		}
 
-		c.Set(UserKey, user)
+		c.Set(utils.UserKey, user)
 		return next(c)
 	}
 }

@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"github.com/Schtolc/mooncore/dao"
-	"github.com/Schtolc/mooncore/rest"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -106,6 +106,6 @@ var viewer = &graphql.Field{
 	Type:        UserObject,
 	Description: "current logged user",
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		return p.Context.Value(rest.UserKey), nil
+		return p.Context.Value(utils.GraphQLContextUserKey), nil
 	},
 }

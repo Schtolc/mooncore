@@ -10,8 +10,14 @@ import (
 	"time"
 )
 
-// GraphQLContextUserKey is a type for user in graphql context
-type GraphQLContextUserKey string
+// UserKey is a context key for current logged user object
+const UserKey = "user"
+
+// GraphQLContextKey is a type for keys in graphql context
+type GraphQLContextKey string
+
+// GraphQLContextUserKey is a key for user in graphql context
+const GraphQLContextUserKey = GraphQLContextKey(UserKey)
 
 // HashPassword hashes password
 func HashPassword(password string) (string, error) {

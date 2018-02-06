@@ -18,7 +18,7 @@ func Ping(c echo.Context) error {
 
 // PingAuth is a handler for checking authorization works
 func PingAuth(c echo.Context) error {
-	user := c.Get(UserKey).(*models.User)
+	user := c.Get(utils.UserKey).(*models.User)
 	return utils.SendResponse(c, http.StatusOK, user.Email)
 }
 

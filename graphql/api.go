@@ -3,7 +3,6 @@ package graphql
 import (
 	"context"
 	"encoding/json"
-	"github.com/Schtolc/mooncore/rest"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo"
@@ -60,7 +59,7 @@ func executeQuery(query string, variables map[string]interface{}, c echo.Context
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        context.WithValue(c.Request().Context(), utils.GraphQLContextUserKey(rest.UserKey), c.Get(rest.UserKey)),
+		Context:        context.WithValue(c.Request().Context(), utils.GraphQLContextUserKey, c.Get(utils.UserKey)),
 	})
 }
 
