@@ -26,14 +26,9 @@ func listOf(param graphql.Type) *graphql.ArgumentConfig {
 var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
-		"createAddress": createAddress, // tested
-		"createMaster":  createMaster,  // tested
-		"createClient":  createClient,  // tested
-		"signIn":        signIn,        // tested
-		//"editMaster":    editMaster,
-		//"editClient":    editClient,
-		//"addService":    addService,
-		//"removeService": removeService,
+		"createMaster": createMaster, // tested
+		"createClient": createClient, // tested
+		"signIn":       signIn,       // tested
 	},
 })
 

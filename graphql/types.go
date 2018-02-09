@@ -119,9 +119,12 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"avatar": &graphql.Field{
-			Type: graphql.NewNonNull(PhotoObject),
+			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetPhotoByID(p.Source.(*models.Master).PhotoID)
+				if !p.Source.(*models.Master).PhotoID.Valid {
+					return nil, nil
+				}
+				return dao.GetPhotoByID(p.Source.(*models.Master).PhotoID.Int64)
 			},
 		},
 		"photos": &graphql.Field{

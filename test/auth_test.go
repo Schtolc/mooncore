@@ -32,7 +32,7 @@ func TestSignIn(t *testing.T) {
 	password := randString()
 	name := randString()
 
-	master, err := dao.CreateMaster("", email, password, name, address.ID, photo.ID)
+	master, err := dao.CreateMaster("", email, password, name, address.ID)
 
 	if err != nil {
 		t.Error("cannot create master")
