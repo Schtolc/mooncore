@@ -45,3 +45,15 @@ func DeletePhoto(id int64) error {
 	}
 	return nil
 }
+
+// MasterPhotos returns master photos
+func MasterPhotos(master *models.Master) ([]*models.Photo, error) {
+	var photos []*models.Photo
+
+	if err := db.Model(master).Association("photos").Find(&photos).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	return photos, nil
+}

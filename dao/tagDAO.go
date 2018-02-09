@@ -28,3 +28,15 @@ func CreateTag(name string) (*models.Tag, error) {
 
 	return tag, nil
 }
+
+// PhotoTags returns photo tag
+func PhotoTags(photo *models.Photo) ([]*models.Tag, error) {
+	var tags []*models.Tag
+
+	if err := db.Model(photo).Association("tags").Find(&tags).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	return tags, nil
+}

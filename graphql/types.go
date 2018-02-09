@@ -39,7 +39,7 @@ var PhotoObject = graphql.NewObject(graphql.ObjectConfig{
 		"tags": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(TagObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Photo).Tags, nil
+				return dao.PhotoTags(p.Source.(*models.Photo))
 			},
 		},
 	},
@@ -127,7 +127,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"photos": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(PhotoObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Master).Photos, nil // TODO write
+				return dao.MasterPhotos(p.Source.(*models.Master))
 			},
 		},
 		"stars": &graphql.Field{
@@ -136,13 +136,13 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"signs": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(SignObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Master).Signs, nil // TODO write
+				return dao.MasterSigns(p.Source.(*models.Master))
 			},
 		},
 		"services": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(ServiceObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Master).Services, nil // TODO write
+				return dao.MasterServices(p.Source.(*models.Master))
 			},
 		},
 	},
@@ -173,7 +173,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"favorites": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return p.Source.(*models.Client).Favorites, nil // TODO write
+				return dao.ClientFavorites(p.Source.(*models.Client))
 			},
 		},
 	},
