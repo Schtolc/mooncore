@@ -86,9 +86,21 @@ func MasterCount() (int64, error) {
 // Feed returns feed
 func Feed(offset, limit int) ([]*models.Master, error) {
 	var masters []*models.Master
-	if err := db.Limit(limit).Offset(offset).Find(&masters).Error; err != nil {
+	if err := db.Limit(limit).Offset(offset).Preload("Photos").Find(&masters).Error; err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 	return masters, nil
+}
+
+// MasterSigns returns master signs
+func MasterSigns(master *models.Master) ([]*models.Sign, error) {
+	var signs []*models.Sign
+
+	if err := db.Model(master).Association("signs").Find(&signs).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	return signs, nil
 }

@@ -88,7 +88,7 @@ type Service struct {
 	ID          int64      `json:"id"`
 	Name        string     `json:"name"`
 	Price       float64    `json:"price"`
-	MasterID    int64      `sql:"type:bigint, FOREIGN KEY (master_id) REFERENCES master(id)"`
+	MasterID    int64      `sql:"type:bigint, FOREIGN KEY (master_id) REFERENCES masters(id)"`
 	Master      Master     `json:"master"`
 	Description string     `sql:"type:text" json:"description"`
 	Photos      []Photo    `gorm:"many2many:service_photos;" json:"photos"`
