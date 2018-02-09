@@ -52,7 +52,7 @@ type Master struct {
 	User      User          `json:"user"`
 	AddressID int64         `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
 	Address   Address       `json:"address"`
-	PhotoID   int64         `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	PhotoID   sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 	Photo     Photo         `json:"photo"`
 	SalonID   sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (salon_id) REFERENCES salons(id)"`
 	Salon     *Salon        `json:"salon"`

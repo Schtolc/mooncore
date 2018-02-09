@@ -22,7 +22,7 @@ func GetMasterByID(id int64) (*models.Master, error) {
 }
 
 // CreateMaster creates new master
-func CreateMaster(username, email, password, name string, addressID, photoID int64) (*models.Master, error) {
+func CreateMaster(username, email, password, name string, addressID int64) (*models.Master, error) {
 	tx := db.Begin()
 
 	user, err := createUser(email, password, tx)
@@ -37,7 +37,6 @@ func CreateMaster(username, email, password, name string, addressID, photoID int
 		UserID:    user.ID,
 		Name:      name,
 		AddressID: addressID,
-		PhotoID:   photoID,
 	}
 
 	if err := tx.Create(master).Error; err != nil {
