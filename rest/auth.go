@@ -18,18 +18,18 @@ func Headers(c echo.Context) error {
 // LoadUser is a middleware for load authorized user to context
 func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get(utils.UserKey)
-		if user == nil {
-			return next(c)
+		userData := c.Get(utils.UserKey)
+		user := &models.User{}
+		if userData != nil {
+			email := userData.(*jwt.Token).Claims.(*models.JwtClaims).Email
+			user, err := dao.GetUserByEmail(email)
+			if err != nil && user == nil {
+				logrus.Info("User was not found in the database when checking token: ", email)
+				return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
+			}
+		} else {
+			user = models.AnonUser
 		}
-		email := user.(*jwt.Token).Claims.(*models.JwtClaims).Email
-
-		user, err := dao.GetUserByEmail(email)
-		if err != nil {
-			logrus.Info("User was not found in the database when checking token: ", email)
-			return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
-		}
-
 		c.Set(utils.UserKey, user)
 		return next(c)
 	}

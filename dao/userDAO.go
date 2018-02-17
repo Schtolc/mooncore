@@ -54,7 +54,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
+func createUser(email, password string, role int, tx *gorm.DB) (*models.User, error) {
 	passwordHash, err := utils.HashPassword(password)
 
 	if err != nil {
@@ -66,7 +66,7 @@ func createUser(email, password string, tx *gorm.DB) (*models.User, error) {
 	user := &models.User{
 		Email:        email,
 		PasswordHash: passwordHash,
-		Role:         0,
+		Role:         role,
 	}
 
 	if err := tx.Create(user).Error; err != nil {

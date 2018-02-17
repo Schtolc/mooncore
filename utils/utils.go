@@ -13,12 +13,6 @@ import (
 // UserKey is a context key for current logged user object
 const UserKey = "user"
 
-// GraphQLContextKey is a type for keys in graphql context
-type GraphQLContextKey string
-
-// GraphQLContextUserKey is a key for user in graphql context
-const GraphQLContextUserKey = GraphQLContextKey(UserKey)
-
 // HashPassword hashes password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)

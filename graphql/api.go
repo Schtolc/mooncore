@@ -49,12 +49,24 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Mutation: rootMutation,
 })
 
+// resolveMiddleware check access rights before resolving function
+func resolveMiddleware(next graphql.FieldResolveFn) graphql.FieldResolveFn {
+	return func(p graphql.ResolveParams) (interface{}, error) {
+		if _, err := CheckRights(p); err != nil {
+			return func(params graphql.ResolveParams) (interface{}, error) {
+				return nil, err
+			}(p)
+		}
+		return next(p)
+	}
+}
+
 func executeQuery(query string, variables map[string]interface{}, c echo.Context) *graphql.Result {
 	return graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        context.WithValue(c.Request().Context(), utils.GraphQLContextUserKey, c.Get(utils.UserKey)),
+		Context:        context.WithValue(context.Background(), utils.UserKey, c.Get(utils.UserKey)),
 	})
 }
 

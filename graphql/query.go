@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
@@ -14,13 +15,13 @@ var master = &graphql.Field{
 	Args: graphql.FieldConfigArgument{
 		"id": notNull(graphql.ID),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		return dao.GetMasterByID(id)
-	},
+	}),
 }
 
 var client = &graphql.Field{
@@ -29,13 +30,13 @@ var client = &graphql.Field{
 	Args: graphql.FieldConfigArgument{
 		"id": notNull(graphql.ID),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		return dao.GetClientByID(id)
-	},
+	}),
 }
 
 var address = &graphql.Field{
@@ -44,13 +45,13 @@ var address = &graphql.Field{
 	Args: graphql.FieldConfigArgument{
 		"id": notNull(graphql.ID),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		return dao.GetAddressByID(id)
-	},
+	}),
 }
 
 var addressesInArea = &graphql.Field{
@@ -62,7 +63,7 @@ var addressesInArea = &graphql.Field{
 		"lat2": notNull(graphql.String),
 		"lon2": notNull(graphql.String),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		lat1, err := strconv.ParseFloat(params.Args["lat1"].(string), 64)
 		if err != nil {
 			logrus.Error(err) // первая точка сверху слева
@@ -87,7 +88,7 @@ var addressesInArea = &graphql.Field{
 			return nil, err
 		}
 		return dao.GetAddressesInArea(lat1, lon1, lat2, lon2)
-	},
+	}),
 }
 
 var feed = &graphql.Field{
@@ -97,15 +98,15 @@ var feed = &graphql.Field{
 		"offset": notNull(graphql.Int),
 		"limit":  notNull(graphql.Int),
 	},
-	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(p graphql.ResolveParams) (interface{}, error) {
 		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
-	},
+	}),
 }
 
 var viewer = &graphql.Field{
 	Type:        UserObject,
 	Description: "current logged user",
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		return p.Context.Value(utils.GraphQLContextUserKey), nil
+		return p.Context.Value(utils.UserKey).(models.User), nil
 	},
 }

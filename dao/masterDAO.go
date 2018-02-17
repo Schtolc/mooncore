@@ -25,7 +25,7 @@ func GetMasterByID(id int64) (*models.Master, error) {
 func CreateMaster(username, email, password, name string, addressID int64) (*models.Master, error) {
 	tx := db.Begin()
 
-	user, err := createUser(email, password, tx)
+	user, err := createUser(email, password, models.Roles["Master"], tx)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err

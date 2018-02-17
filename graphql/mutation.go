@@ -20,10 +20,7 @@ var createMaster = &graphql.Field{
 		"description": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username, ok := params.Args["username"].(string)
-		if !ok {
-			username = ""
-		}
+		username := params.Args["username"].(string)
 
 		lat, err := strconv.ParseFloat(params.Args["lat"].(string), 64)
 		if err != nil {
@@ -63,10 +60,7 @@ var createClient = &graphql.Field{
 		"photo_id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username, ok := params.Args["username"].(string)
-		if !ok {
-			username = ""
-		}
+		username := params.Args["username"].(string)
 
 		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
 		if err != nil {
