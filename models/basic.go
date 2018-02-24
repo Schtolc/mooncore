@@ -11,6 +11,16 @@ type Address struct {
 	Lat         float64 `json:"lat"`
 	Lon         float64 `json:"lon"`
 	Description string  `json:"description"`
+	Line        string  `json:"line"`
+	Station     string  `json:"station"`
+	Color       string  `json:"color"`
+}
+
+// LineColor model
+type LineColor struct {
+	ID    int
+	Line  string
+	Color string
 }
 
 // Photo model

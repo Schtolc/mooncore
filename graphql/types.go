@@ -23,6 +23,15 @@ var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 		"description": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
 		},
+		"line": &graphql.Field{
+			Type: graphql.String,
+		},
+		"station": &graphql.Field{
+			Type: graphql.String,
+		},
+		"color": &graphql.Field{
+			Type: graphql.String,
+		},
 	},
 })
 
