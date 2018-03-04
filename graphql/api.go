@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo"
@@ -49,7 +50,8 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 // resolveMiddleware check access rights before resolving function
 func resolveMiddleware(right int, next graphql.FieldResolveFn) graphql.FieldResolveFn {
 	return func(p graphql.ResolveParams) (interface{}, error) {
-		if _, err := CheckRights(right, p); err != nil {
+		if result := CheckRights(right, p); !result {
+			err := errors.New("AccessDenied")
 			return func(params graphql.ResolveParams) (interface{}, error) {
 				return nil, err
 			}(p)
