@@ -7,6 +7,24 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+var AddressMetroObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "AddressMetroObject",
+	Fields: graphql.Fields{
+		"name": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"line": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"color": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"distance": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.Float),
+		},
+	},
+})
+
 // AddressObject is a graphql object for address
 var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Address",
@@ -23,14 +41,8 @@ var AddressObject = graphql.NewObject(graphql.ObjectConfig{
 		"description": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
 		},
-		"line": &graphql.Field{
-			Type: graphql.String,
-		},
-		"station": &graphql.Field{
-			Type: graphql.String,
-		},
-		"color": &graphql.Field{
-			Type: graphql.String,
+		"stations": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(AddressMetroObject))),
 		},
 	},
 })

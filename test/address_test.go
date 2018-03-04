@@ -11,11 +11,10 @@ import (
 func TestGetAddress(t *testing.T) {
 	e := expect(t)
 
-	lat := rand.Float64()
-	lon := rand.Float64()
-	desc := "description"
+	lat := rand.Float64() + 55
+	lon := rand.Float64() + 37
 
-	address, err := dao.CreateAddress(lat, lon, desc)
+	address, err := dao.CreateAddress(lat, lon)
 
 	if err != nil {
 		t.Error("address cannot be created")
@@ -30,7 +29,6 @@ func TestGetAddress(t *testing.T) {
 		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("address").Object()
 	resp.Value("lat").Equal(lat)
 	resp.Value("lon").Equal(lon)
-	resp.Value("description").Equal(desc)
 
 	if err := dao.DeleteAddress(address.ID); err != nil {
 		t.Error("address cannot be deleted")

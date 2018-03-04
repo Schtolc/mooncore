@@ -7,20 +7,38 @@ import (
 
 // Address model
 type Address struct {
-	ID          int64   `json:"id"`
-	Lat         float64 `json:"lat"`
-	Lon         float64 `json:"lon"`
-	Description string  `json:"description"`
-	Line        string  `json:"line"`
-	Station     string  `json:"station"`
-	Color       string  `json:"color"`
+	ID          int64          `json:"id"`
+	Lat         float64        `json:"lat"`
+	Lon         float64        `json:"lon"`
+	Description string         `json:"description"`
+	Stations    []AddressMetro `json:"stations"`
 }
 
-// LineColor model
-type LineColor struct {
-	ID    int
-	Line  string
-	Color string
+// AddressMetro model
+type AddressMetro struct {
+	ID        int64   `json:"id"`
+	AddressID int64   `json:"address_id"`
+	Name      string  `json:"name"`
+	Line      string  `json:"line"`
+	Color     string  `json:"color"`
+	Distance  float64 `json:"distance"`
+}
+
+// MetroLine model
+type MetroLine struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+// MetroStation model
+type MetroStation struct {
+	ID     int       `json:"id"`
+	LineID int       `json:"line_id"`
+	Line   MetroLine `json:"line"`
+	Name   string    `json:"name"`
+	Lat    float64   `json:"lat"`
+	Lon    float64   `json:"lon"`
 }
 
 // Photo model
@@ -70,7 +88,7 @@ type Master struct {
 	Services  []Service     `json:"services"`
 	Photos    []Photo       `gorm:"many2many:master_photos;" json:"photos"`
 	Signs     []Sign        `gorm:"many2many:master_signs;" json:"signs"`
-	Home      int           `sql:"type:int", json:"home_service"`
+	Home      int           `sql:"type:int" json:"home_service"`
 }
 
 // Client model

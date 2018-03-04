@@ -17,8 +17,8 @@ func TestCreateMaster(t *testing.T) {
 	password := randString()
 	name := randString()
 
-	lat := rand.Float64()
-	lon := rand.Float64()
+	lat := rand.Float64() + 55
+	lon := rand.Float64() + 37
 	description := randString()
 
 	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", name:\"%s\", lat:\"%f\", lon:\"%f\", description:\"%s\"", email, password, name, lat, lon, description)
@@ -60,7 +60,7 @@ func TestCreateMaster(t *testing.T) {
 func TestGetMaster(t *testing.T) {
 	e := expect(t)
 
-	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+	address, err := dao.CreateAddress(rand.Float64(), rand.Float64())
 
 	if err != nil {
 		t.Error("cannot create address")
@@ -116,7 +116,7 @@ func TestGetMaster(t *testing.T) {
 }
 
 func TestFeed(t *testing.T) {
-	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+	address, err := dao.CreateAddress(rand.Float64(), rand.Float64())
 
 	if err != nil {
 		t.Error("cannot create address")
