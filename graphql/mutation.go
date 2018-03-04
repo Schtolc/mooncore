@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -19,7 +20,7 @@ var createMaster = &graphql.Field{
 		"lon":         notNull(graphql.String),
 		"description": notNull(graphql.String),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		username, ok := params.Args["username"].(string)
 		if !ok {
 			username = ""
@@ -49,7 +50,7 @@ var createMaster = &graphql.Field{
 			params.Args["password"].(string),
 			params.Args["name"].(string),
 			address.ID)
-	},
+	}),
 }
 
 var createClient = &graphql.Field{
@@ -62,7 +63,7 @@ var createClient = &graphql.Field{
 		"name":     notNull(graphql.String),
 		"photo_id": notNull(graphql.ID),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		username, ok := params.Args["username"].(string)
 		if !ok {
 			username = ""
@@ -79,20 +80,19 @@ var createClient = &graphql.Field{
 			params.Args["password"].(string),
 			params.Args["name"].(string),
 			photoID)
-	},
+	}),
 }
 
 var signIn = &graphql.Field{
 	Type:        TokenObject, // nil if user not found
 	Description: "Sign in",
 	Args: graphql.FieldConfigArgument{
-		//"username": notNull(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		return dao.SignIn(
 			params.Args["email"].(string),
 			params.Args["password"].(string))
-	},
+	}),
 }

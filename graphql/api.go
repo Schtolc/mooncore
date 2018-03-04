@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo"
@@ -35,12 +36,9 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
-		"address":         address, // tested
-		"addressesInArea": addressesInArea,
-		"master":          master, //tested
-		"client":          client, // tested
-		"feed":            feed,   // tested
-		"viewer":          viewer, // tested
+		"master": master, //tested
+		"feed":   feed,   // tested
+		"viewer": viewer, // tested
 	},
 })
 
@@ -48,6 +46,19 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Query:    rootQuery,
 	Mutation: rootMutation,
 })
+
+// resolveMiddleware check access rights before resolving function
+func resolveMiddleware(right int, next graphql.FieldResolveFn) graphql.FieldResolveFn {
+	return func(p graphql.ResolveParams) (interface{}, error) {
+		if result := CheckRights(right, p); !result {
+			err := errors.New("AccessDenied")
+			return func(params graphql.ResolveParams) (interface{}, error) {
+				return nil, err
+			}(p)
+		}
+		return next(p)
+	}
+}
 
 func executeQuery(query string, variables map[string]interface{}, c echo.Context) *graphql.Result {
 	return graphql.Do(graphql.Params{

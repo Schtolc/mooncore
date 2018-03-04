@@ -87,14 +87,21 @@ func TestGetClient(t *testing.T) {
 
 	defer dao.DeleteClient(client.ID)
 
-	reqParams := fmt.Sprintf("id:\"%d\"", client.ID)
-	respParams := "id, user {id, username, email, role}, name, avatar {id, path, tags { id, name } }, favorites { id, name }"
+	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\"", email, password)
+	respParams := "token"
 
-	query := graphQLBody("query {client(%s){%s}}", reqParams, respParams)
-
-	root := e.POST(graphqlURL).
+	query := graphQLBody("mutation {signIn(%s){%s}}", reqParams, respParams)
+	token := e.POST(graphqlURL).
 		WithBytes(query).Expect().
-		Status(http.StatusOK).JSON().Object().Value("data").Object().Value("client").Object()
+		Status(http.StatusOK).JSON().Object().Value("data").
+		Object().Value("signIn").Object().ContainsKey("token").Value("token").String().Raw()
+
+	assert.NotEmpty(t, token, "empty token")
+
+	query = graphQLBody("query { viewer{... on Master {name}, ... on Client { user {id, username, email, role}, name, avatar {id, path, tags { id, name } }, favorites { id, name }}}}")
+
+	root := e.POST(graphqlURL).WithBytes(query).WithHeader("Authorization", "Bearer "+token).
+		Expect().Status(http.StatusOK).JSON().Object().Value("data").Object().Value("viewer").Object()
 
 	root.ContainsKey("name").Value("name").String().Equal(name)
 
@@ -107,7 +114,6 @@ func TestGetClient(t *testing.T) {
 	if err != nil {
 		t.Error("cannot parse avatar.id")
 	}
-
 	assert.Equal(t, photo.ID, photoID, "photo id in response differs")
 	responsePhoto.ContainsKey("path").Value("path").Equal(photo.Path)
 }
