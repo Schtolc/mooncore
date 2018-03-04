@@ -5,6 +5,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	// ClientRole for user model
+	ClientRole = 1 << iota // 00001 = 1
+	// MasterRole for user model
+	MasterRole = 1 << iota // 00010 = 2
+	// SalonRole for user model
+	SalonRole = 1 << iota // 00100 = 4
+	// AdminRole for user model
+	AdminRole = 1 << iota // 01000 = 8
+	// AnonRole for user model
+	AnonRole = (1 << iota) - 1
+)
+
 var (
 	// DefaultAddress for unknown address
 	DefaultAddress = &Address{
@@ -26,23 +39,10 @@ var (
 		ID:           1,
 		Email:        "asd",
 		PasswordHash: "asd",
-		Role:         1,
+		Role:         AnonRole,
 		Ctime:        1,
 		Atime:        1,
 	}
-)
-
-const (
-	// ClientRole for user model
-	ClientRole = 1 << iota // 00001 = 1
-	// MasterRole for user model
-	MasterRole = 1 << iota // 00010 = 2
-	// SalonRole for user model
-	SalonRole = 1 << iota // 00100 = 4
-	// AdminRole for user model
-	AdminRole = 1 << iota // 01000 = 8
-	// AnonRole for user model
-	AnonRole = (1 << iota) - 1
 )
 
 func createConstValues() {

@@ -2,14 +2,13 @@ package graphql
 
 import (
 	"github.com/Schtolc/mooncore/dao"
-
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"strconv"
 
 	"errors"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
-	"github.com/Schtolc/mooncore/utils"
 )
 
 var master = &graphql.Field{

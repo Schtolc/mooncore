@@ -27,7 +27,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
 		"createMaster": createMaster, // tested
-		"createClient": createClient, // tested // signup
+		"createClient": createClient, // tested
 		"signIn":       signIn,       // tested
 	},
 })
@@ -44,7 +44,6 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Query:    rootQuery,
 	Mutation: rootMutation,
-	Types:    []graphql.Type{UserType},
 })
 
 // resolveMiddleware check access rights before resolving function

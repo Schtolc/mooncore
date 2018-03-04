@@ -19,7 +19,7 @@ var createMaster = &graphql.Field{
 		"lon":         notNull(graphql.String),
 		"description": notNull(graphql.String),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		username, ok := params.Args["username"].(string)
 		if !ok {
 			username = ""
@@ -49,7 +49,7 @@ var createMaster = &graphql.Field{
 			params.Args["password"].(string),
 			params.Args["name"].(string),
 			address.ID)
-	},
+	}),
 }
 
 var createClient = &graphql.Field{
@@ -62,35 +62,36 @@ var createClient = &graphql.Field{
 		"name":     notNull(graphql.String),
 		"photo_id": notNull(graphql.ID),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		username, ok := params.Args["username"].(string)
 		if !ok {
 			username = ""
 		}
+
 		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
 		}
+
 		return dao.CreateClient(
 			username,
 			params.Args["email"].(string),
 			params.Args["password"].(string),
 			params.Args["name"].(string),
 			photoID)
-	},
+	}),
 }
 
 var signIn = &graphql.Field{
 	Type:        TokenObject, // nil if user not found
 	Description: "Sign in",
 	Args: graphql.FieldConfigArgument{
-		//"username": notNull(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
 	},
-	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
 		return dao.SignIn(
 			params.Args["email"].(string),
 			params.Args["password"].(string))
-	},
+	}),
 }

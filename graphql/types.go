@@ -1,7 +1,6 @@
 package graphql
 
 import (
-	"fmt"
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
@@ -150,7 +149,6 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
-		fmt.Println("IN MASTER")
 		_, ok := p.Value.(*models.Master)
 		return ok
 	},
@@ -186,7 +184,6 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
-		fmt.Println("IN CLIENT")
 		_, ok := p.Value.(*models.Client)
 		return ok
 	},
