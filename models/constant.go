@@ -37,8 +37,8 @@ var (
 	// AnonUser model
 	AnonUser = &User{
 		ID:           1,
-		Email:        "asd",
-		PasswordHash: "asd",
+		Email:        "anon_user_email",
+		PasswordHash: "anon_user_pass_hash",
 		Role:         AnonRole,
 		Ctime:        1,
 		Atime:        1,
