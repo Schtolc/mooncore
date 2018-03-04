@@ -10,7 +10,7 @@ import (
 var (
 	// MethodAccess for access rights
 	MethodAccess = map[string]int{
-		"master": models.AnonRole,
+		"master": models.AnonRole, // access for all users including anon
 		"feed":   models.AnonRole,
 		"viewer": models.AnonRole,
 

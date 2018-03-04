@@ -41,10 +41,26 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
+var schema, _ = graphql.NewSchema(checkSchemaAccessRights(graphql.SchemaConfig{
 	Query:    rootQuery,
 	Mutation: rootMutation,
-})
+}))
+
+func checkSchemaAccessRights(config graphql.SchemaConfig) graphql.SchemaConfig {
+	for k := range config.Query.Fields() {
+		_, ok := MethodAccess[k]
+		if !ok {
+			panic("access rights for query method " + k + " does not exist")
+		}
+	}
+	for k := range config.Mutation.Fields() {
+		_, ok := MethodAccess[k]
+		if !ok {
+			panic("access rights for mutation method " + k + "does not exist")
+		}
+	}
+	return config
+}
 
 // resolveMiddleware check access rights before resolving function
 func resolveMiddleware(next graphql.FieldResolveFn) graphql.FieldResolveFn {
