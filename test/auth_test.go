@@ -12,7 +12,7 @@ import (
 func TestSignIn(t *testing.T) {
 	e := expect(t)
 
-	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+	address, err := dao.CreateAddress(rand.Float64()+55, rand.Float64()+37)
 
 	if err != nil {
 		t.Error("cannot create address")

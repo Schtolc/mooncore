@@ -21,6 +21,9 @@ func initDatabase(config *Config) *gorm.DB {
 	db.AutoMigrate(
 		&models.Mock{},
 		&models.Address{},
+		&models.AddressMetro{},
+		&models.MetroLine{},
+		&models.MetroStation{},
 		&models.Tag{},
 		&models.Photo{},
 		&models.Sign{},

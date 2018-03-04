@@ -12,13 +12,12 @@ var createMaster = &graphql.Field{
 	Type:        MasterObject,
 	Description: "Create new master",
 	Args: graphql.FieldConfigArgument{
-		"username":    just(graphql.String),
-		"email":       notNull(graphql.String),
-		"password":    notNull(graphql.String),
-		"name":        notNull(graphql.String),
-		"lat":         notNull(graphql.String),
-		"lon":         notNull(graphql.String),
-		"description": notNull(graphql.String),
+		"username": just(graphql.String),
+		"email":    notNull(graphql.String),
+		"password": notNull(graphql.String),
+		"name":     notNull(graphql.String),
+		"lat":      notNull(graphql.String),
+		"lon":      notNull(graphql.String),
 	},
 	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		username, ok := params.Args["username"].(string)
@@ -38,7 +37,7 @@ var createMaster = &graphql.Field{
 			return nil, err
 		}
 
-		address, err := dao.CreateAddress(lat, lon, params.Args["description"].(string))
+		address, err := dao.CreateAddress(lat, lon)
 
 		if err != nil {
 			return nil, err

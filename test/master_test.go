@@ -17,12 +17,11 @@ func TestCreateMaster(t *testing.T) {
 	password := randString()
 	name := randString()
 
-	lat := rand.Float64()
-	lon := rand.Float64()
-	description := randString()
+	lat := rand.Float64() + 55
+	lon := rand.Float64() + 37
 
-	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", name:\"%s\", lat:\"%f\", lon:\"%f\", description:\"%s\"", email, password, name, lat, lon, description)
-	respParams := "id, user {id, username, email, role}, name, address {id, lat, lon, description}, avatar {id, path, tags { id, name } }, photos {id, path, tags { id, name } }, stars, signs {id, name, description, icon}, services {id, name, description, price }"
+	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", name:\"%s\", lat:\"%f\", lon:\"%f\"", email, password, name, lat, lon)
+	respParams := "id, user {id, username, email, role}, name, address {id, lat, lon}, avatar {id, path, tags { id, name } }, photos {id, path, tags { id, name } }, stars, signs {id, name, description, icon}, services {id, name, description, price }"
 
 	query := graphQLBody("mutation{createMaster(%s){%s}}", reqParams, respParams)
 
@@ -45,7 +44,6 @@ func TestCreateMaster(t *testing.T) {
 
 	responseAddress.ContainsKey("lat").Value("lat").Number().EqualDelta(lat, 0.0001)
 	responseAddress.ContainsKey("lon").Value("lon").Number().EqualDelta(lon, 0.0001)
-	responseAddress.ContainsKey("description").Value("description").Equal(description)
 
 	master, err := dao.GetMasterByID(id)
 	if err != nil {
@@ -60,7 +58,7 @@ func TestCreateMaster(t *testing.T) {
 func TestGetMaster(t *testing.T) {
 	e := expect(t)
 
-	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+	address, err := dao.CreateAddress(rand.Float64(), rand.Float64())
 
 	if err != nil {
 		t.Error("cannot create address")
@@ -116,7 +114,7 @@ func TestGetMaster(t *testing.T) {
 }
 
 func TestFeed(t *testing.T) {
-	address, err := dao.CreateAddress(rand.Float64(), rand.Float64(), randString())
+	address, err := dao.CreateAddress(rand.Float64(), rand.Float64())
 
 	if err != nil {
 		t.Error("cannot create address")
