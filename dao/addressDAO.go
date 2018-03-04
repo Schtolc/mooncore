@@ -121,7 +121,7 @@ func getMetro(lat, lon float64) ([]*models.AddressMetro, error) {
 			Name:     station.Name,
 			Line:     station.Line.Name,
 			Color:    station.Line.Color,
-			Distance: math.Sqrt(math.Pow(station.Lat-lat, 2) + math.Pow(math.Cos(math.Pi*station.Lat/180)*(station.Lon-lon), 2)),
+			Distance: math.Sqrt(math.Pow(station.Lat-lat, 2)+math.Pow(math.Cos(math.Pi*station.Lat/180)*(station.Lon-lon), 2)) * 100,
 		}
 	}
 
