@@ -17,7 +17,7 @@ var master = &graphql.Field{
 	Args: graphql.FieldConfigArgument{
 		"id": notNull(graphql.ID),
 	},
-	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		id, err := strconv.ParseInt(params.Args["id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
@@ -33,14 +33,14 @@ var feed = &graphql.Field{
 		"offset": notNull(graphql.Int),
 		"limit":  notNull(graphql.Int),
 	},
-	Resolve: resolveMiddleware(func(p graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(p graphql.ResolveParams) (interface{}, error) {
 		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
 	}),
 }
 
 var viewer = &graphql.Field{
 	Type: UserType,
-	Resolve: resolveMiddleware(func(params graphql.ResolveParams) (interface{}, error) {
+	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
 		user := params.Context.Value(utils.GraphQLContextUserKey).(*models.User)
 		if user.Role == models.MasterRole {
 			master := models.Master{}
