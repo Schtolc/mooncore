@@ -6,6 +6,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+// AddressMetroObject is a graphql object for AddressMetroObject
 var AddressMetroObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "AddressMetroObject",
 	Fields: graphql.Fields{
