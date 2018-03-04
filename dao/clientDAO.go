@@ -25,7 +25,7 @@ func GetClientByID(id int64) (*models.Client, error) {
 func CreateClient(username, email, password, name string, photoID int64) (*models.Client, error) {
 	tx := db.Begin()
 
-	user, err := createUser(email, password, models.Roles["Client"], tx)
+	user, err := createUser(email, password, models.ClientRole, tx)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err

@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	// "github.com/Schtolc/mooncore/dao"
+	"fmt"
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
@@ -149,6 +149,11 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 	},
+	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+		fmt.Println("IN MASTER")
+		_, ok := p.Value.(*models.Master)
+		return ok
+	},
 })
 
 // ClientObject is a graphql object for client
@@ -180,6 +185,11 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 	},
+	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+		fmt.Println("IN CLIENT")
+		_, ok := p.Value.(*models.Client)
+		return ok
+	},
 })
 
 // ServiceObject is a graphql object for service
@@ -198,6 +208,25 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 		"price": &graphql.Field{
 			Type: graphql.NewNonNull(graphql.Float),
 		},
+	},
+})
+
+// UserType contains ClientObject and MasterObject
+var UserType = graphql.NewUnion(graphql.UnionConfig{
+	Name: "UserType",
+	Types: []*graphql.Object{
+		ClientObject, MasterObject,
+	},
+	Description: "current logged user",
+	ResolveType: func(p graphql.ResolveTypeParams) *graphql.Object {
+		if _, ok := p.Value.(*models.Client); ok {
+			return ClientObject
+		}
+		if _, ok := p.Value.(*models.Master); ok {
+			return MasterObject
+		}
+
+		return nil
 	},
 })
 

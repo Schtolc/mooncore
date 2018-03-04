@@ -21,14 +21,7 @@ var (
 	Tags []Tag
 	// Signs array
 	Signs []Sign
-	// Roles for creating user
-	Roles = map[string]int{
-		"Client": 1,
-		"Master": 2,
-		"Salon":  3,
-		"Admin":  4,
-	}
-	// AnonUser
+	// AnonUser model
 	AnonUser = &User{
 		ID:           1,
 		Email:        "asd",
@@ -37,6 +30,19 @@ var (
 		Ctime:        1,
 		Atime:        1,
 	}
+)
+
+const (
+	// ClientRole for user model
+	ClientRole = 1 << iota // 00001 = 1
+	// MasterRole for user model
+	MasterRole = 1 << iota // 00010 = 2
+	// SalonRole for user model
+	SalonRole = 1 << iota // 00100 = 4
+	// AdminRole for user model
+	AdminRole = 1 << iota // 01000 = 8
+	// AnonRole for user model
+	AnonRole = (1 << iota) - 1
 )
 
 func createConstValues() {

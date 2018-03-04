@@ -33,18 +33,15 @@ func TestSignIn(t *testing.T) {
 	name := randString()
 
 	master, err := dao.CreateMaster("", email, password, name, address.ID)
-
 	if err != nil {
 		t.Error("cannot create master")
 	}
-
 	defer dao.DeleteMaster(master.ID)
 
 	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\"", email, password)
 	respParams := "token"
 
 	query := graphQLBody("mutation {signIn(%s){%s}}", reqParams, respParams)
-
 	token := e.POST(graphqlURL).
 		WithBytes(query).Expect().
 		Status(http.StatusOK).JSON().Object().Value("data").
@@ -52,13 +49,9 @@ func TestSignIn(t *testing.T) {
 
 	assert.NotEmpty(t, token, "empty token")
 
-	query = graphQLBody("query { viewer { id, username, email, role } }")
+	query = graphQLBody("query { viewer{... on Master {name}, ... on Client {name }}}")
 
 	root := e.POST(graphqlURL).WithBytes(query).WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusOK).JSON().Object().Value("data").Object().Value("viewer").Object()
-
-	root.ContainsKey("id")
-	root.ContainsKey("username")
-	root.ContainsKey("email").Value("email").String().Equal(email)
-	root.ContainsKey("role")
+	root.ContainsKey("name").Value("name").String().Equal(master.Name)
 }

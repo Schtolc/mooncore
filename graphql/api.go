@@ -27,7 +27,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
 		"createMaster": createMaster, // tested
-		"createClient": createClient, // tested
+		"createClient": createClient, // tested // signup
 		"signIn":       signIn,       // tested
 	},
 })
@@ -35,18 +35,16 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
-		"address":         address, // tested
-		"addressesInArea": addressesInArea,
-		"master":          master, //tested
-		"client":          client, // tested
-		"feed":            feed,   // tested
-		"viewer":          viewer, // tested
+		"master": master, //tested
+		"feed":   feed,   // tested
+		"viewer": viewer, // tested
 	},
 })
 
 var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Query:    rootQuery,
 	Mutation: rootMutation,
+	Types:    []graphql.Type{UserType},
 })
 
 // resolveMiddleware check access rights before resolving function
@@ -66,7 +64,7 @@ func executeQuery(query string, variables map[string]interface{}, c echo.Context
 		Schema:         schema,
 		RequestString:  query,
 		VariableValues: variables,
-		Context:        context.WithValue(context.Background(), utils.UserKey, c.Get(utils.UserKey)),
+		Context:        context.WithValue(c.Request().Context(), utils.GraphQLContextUserKey, c.Get(utils.UserKey)),
 	})
 }
 

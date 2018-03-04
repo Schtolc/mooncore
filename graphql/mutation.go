@@ -20,7 +20,10 @@ var createMaster = &graphql.Field{
 		"description": notNull(graphql.String),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username := params.Args["username"].(string)
+		username, ok := params.Args["username"].(string)
+		if !ok {
+			username = ""
+		}
 
 		lat, err := strconv.ParseFloat(params.Args["lat"].(string), 64)
 		if err != nil {
@@ -60,13 +63,14 @@ var createClient = &graphql.Field{
 		"photo_id": notNull(graphql.ID),
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username := params.Args["username"].(string)
-
+		username, ok := params.Args["username"].(string)
+		if !ok {
+			username = ""
+		}
 		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
 		if err != nil {
 			return nil, err
 		}
-
 		return dao.CreateClient(
 			username,
 			params.Args["email"].(string),

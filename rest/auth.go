@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
@@ -20,9 +21,10 @@ func LoadUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userData := c.Get(utils.UserKey)
 		user := &models.User{}
+		err := errors.New("asasdasd")
 		if userData != nil {
 			email := userData.(*jwt.Token).Claims.(*models.JwtClaims).Email
-			user, err := dao.GetUserByEmail(email)
+			user, err = dao.GetUserByEmail(email)
 			if err != nil && user == nil {
 				logrus.Info("User was not found in the database when checking token: ", email)
 				return utils.SendResponse(c, http.StatusBadRequest, "Bad token")
