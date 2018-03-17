@@ -26,17 +26,17 @@ var master = &graphql.Field{
 	}),
 }
 
-var feed = &graphql.Field{
-	Type:        graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
-	Description: "feed",
-	Args: graphql.FieldConfigArgument{
-		"offset": notNull(graphql.Int),
-		"limit":  notNull(graphql.Int),
-	},
-	Resolve: resolveMiddleware(models.AnonRole, func(p graphql.ResolveParams) (interface{}, error) {
-		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
-	}),
-}
+// var feed = &graphql.Field{
+// 	Type:        graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
+// 	Description: "feed",
+// 	Args: graphql.FieldConfigArgument{
+// 		"offset": notNull(graphql.Int),
+// 		"limit":  notNull(graphql.Int),
+// 	},
+// 	Resolve: resolveMiddleware(models.AnonRole, func(p graphql.ResolveParams) (interface{}, error) {
+// 		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
+// 	}),
+// }
 
 var viewer = &graphql.Field{
 	Type: UserType,

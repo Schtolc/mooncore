@@ -1,87 +1,51 @@
 package graphql
 
 import (
-	"github.com/Schtolc/mooncore/dao"
-	"github.com/Schtolc/mooncore/models"
 	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
-	"strconv"
+	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/utils"
+	"github.com/nbutton23/zxcvbn-go"
+	"errors"
+	"fmt"
 )
 
-var createMaster = &graphql.Field{
-	Type:        MasterObject,
-	Description: "Create new master",
+var signUp = &graphql.Field{
+	Type:        UserType,
+	Description: "Sign up",
 	Args: graphql.FieldConfigArgument{
-		"username": just(graphql.String),
 		"email":    notNull(graphql.String),
 		"password": notNull(graphql.String),
-		"name":     notNull(graphql.String),
-		"lat":      notNull(graphql.String),
-		"lon":      notNull(graphql.String),
+		"role":     notNull(graphql.Int),
 	},
 	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
-		username, ok := params.Args["username"].(string)
-		if !ok {
-			username = ""
-		}
-
-		lat, err := strconv.ParseFloat(params.Args["lat"].(string), 64)
+		password := params.Args["password"].(string)
+		email := params.Args["email"].(string)
+		role := params.Args["role"].(int)
+		result := zxcvbn.PasswordStrength(password, nil)
+		passwordHash, err := utils.HashPassword(password)
+		fmt.Println(result)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-
-		lon, err := strconv.ParseFloat(params.Args["lon"].(string), 64)
-		if err != nil {
-			logrus.Error(err)
-			return nil, err
+		if role == models.MasterRole {
+			master, err := dao.CreateMaster(email, passwordHash)
+			return master, err
+		} else if role == models.ClientRole {
+			client, err := dao.CreateClient(email, passwordHash)
+			return client, err
+		} else if role == models.SalonRole {
+			salon, err := dao.CreateSalon(email, passwordHash)
+			return salon, err
+		} else if role == models.AdminRole {
+			admin, err := dao.CreateAdmin(email, passwordHash)
+			return admin, err
 		}
-
-		address, err := dao.CreateAddress(lat, lon)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return dao.CreateMaster(
-			username,
-			params.Args["email"].(string),
-			params.Args["password"].(string),
-			params.Args["name"].(string),
-			address.ID)
+		return nil, errors.New("unknown role")
 	}),
 }
-
-var createClient = &graphql.Field{
-	Type:        ClientObject,
-	Description: "Create new client",
-	Args: graphql.FieldConfigArgument{
-		"username": just(graphql.String),
-		"email":    notNull(graphql.String),
-		"password": notNull(graphql.String),
-		"name":     notNull(graphql.String),
-		"photo_id": notNull(graphql.ID),
-	},
-	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
-		username, ok := params.Args["username"].(string)
-		if !ok {
-			username = ""
-		}
-
-		photoID, err := strconv.ParseInt(params.Args["photo_id"].(string), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-
-		return dao.CreateClient(
-			username,
-			params.Args["email"].(string),
-			params.Args["password"].(string),
-			params.Args["name"].(string),
-			photoID)
-	}),
-}
-
 var signIn = &graphql.Field{
 	Type:        TokenObject, // nil if user not found
 	Description: "Sign in",
@@ -90,8 +54,24 @@ var signIn = &graphql.Field{
 		"password": notNull(graphql.String),
 	},
 	Resolve: resolveMiddleware(models.AnonRole, func(params graphql.ResolveParams) (interface{}, error) {
-		return dao.SignIn(
-			params.Args["email"].(string),
-			params.Args["password"].(string))
+		password := params.Args["password"].(string)
+		email := params.Args["email"].(string)
+
+		user, err := dao.GetUser(&models.User{ Email: email })
+		if err != nil {
+			return nil, err
+		}
+		if !utils.CheckPasswordHash(password, user.PasswordHash) {
+			logrus.Info("Wrong password for user: ", email)
+			return nil, errors.New("wrong password")
+		}
+
+		tokenString, err := utils.CreateJwtToken(user)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+
+		return &models.Token{Token: tokenString}, nil
 	}),
 }

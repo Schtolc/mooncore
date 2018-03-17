@@ -136,7 +136,7 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 		"address": &graphql.Field{
 			Type: graphql.NewNonNull(AddressObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetAddressByID(p.Source.(*models.Master).AddressID)
+				return dao.GetAddressByID(p.Source.(*models.Master).AddressID.Int64)
 			},
 		},
 		"avatar": &graphql.Field{
@@ -176,6 +176,73 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
+// SalonObject is a graphql object for Salon
+var SalonObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Salon",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.ID),
+		},
+		"user": &graphql.Field{
+			Type: graphql.NewNonNull(UserObject),
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return dao.GetUserByID(p.Source.(*models.Salon).UserID)
+			},
+		},
+		"name": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"address": &graphql.Field{
+			Type: graphql.NewNonNull(AddressObject),
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return dao.GetAddressByID(p.Source.(*models.Salon).AddressID.Int64)
+			},
+		},
+		"avatar": &graphql.Field{
+			Type: PhotoObject,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if !p.Source.(*models.Salon).PhotoID.Valid {
+					return nil, nil
+				}
+				return dao.GetPhotoByID(p.Source.(*models.Salon).PhotoID.Int64)
+			},
+		},
+		// "photos": &graphql.Field{
+		// 	Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(PhotoObject))),
+		// 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		// 		return dao.SalonPhotos(p.Source.(*models.Salon))
+		// 	},
+		// },
+	},
+	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+		_, ok := p.Value.(*models.Salon)
+		return ok
+	},
+})
+
+// AdminObject is a graphql object for Admin
+var AdminObject = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Admin",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.ID),
+		},
+		"user": &graphql.Field{
+			Type: graphql.NewNonNull(UserObject),
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return dao.GetUserByID(p.Source.(*models.Admin).UserID)
+			},
+		},
+		"name": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+	},
+	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+		_, ok := p.Value.(*models.Admin)
+		return ok
+	},
+})
+
 // ClientObject is a graphql object for client
 var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Client",
@@ -195,7 +262,7 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 		"avatar": &graphql.Field{
 			Type: graphql.NewNonNull(PhotoObject),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return dao.GetPhotoByID(p.Source.(*models.Client).PhotoID)
+				return dao.GetPhotoByID(p.Source.(*models.Client).PhotoID.Int64)
 			},
 		},
 		"favorites": &graphql.Field{
@@ -234,7 +301,7 @@ var ServiceObject = graphql.NewObject(graphql.ObjectConfig{
 var UserType = graphql.NewUnion(graphql.UnionConfig{
 	Name: "UserType",
 	Types: []*graphql.Object{
-		ClientObject, MasterObject,
+		ClientObject, MasterObject, SalonObject, AdminObject,
 	},
 	Description: "current logged user",
 	ResolveType: func(p graphql.ResolveTypeParams) *graphql.Object {
@@ -243,6 +310,12 @@ var UserType = graphql.NewUnion(graphql.UnionConfig{
 		}
 		if _, ok := p.Value.(*models.Master); ok {
 			return MasterObject
+		}
+		if _, ok := p.Value.(*models.Salon); ok {
+			return SalonObject
+		}
+		if _, ok := p.Value.(*models.Admin); ok {
+			return AdminObject
 		}
 
 		return nil

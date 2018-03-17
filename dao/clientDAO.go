@@ -21,28 +21,28 @@ func GetClientByID(id int64) (*models.Client, error) {
 	return client, nil
 }
 
-// CreateClient creates new client
-func CreateClient(username, email, password, name string, photoID int64) (*models.Client, error) {
+// CreateClient creates new Client
+func CreateClient(email, passwordHash string) (*models.Client, error) {
 	tx := db.Begin()
-
-	user, err := createUser(email, password, models.ClientRole, tx)
-	if err != nil {
-		logrus.Error(err)
-		return nil, err
+	user := &models.User{
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         models.ClientRole,
 	}
-
-	client := &models.Client{
-		UserID:  user.ID,
-		Name:    name,
-		PhotoID: photoID,
-	}
-
-	if err := tx.Create(client).Error; err != nil {
+	if err := tx.Create(user).Error; err != nil {
 		tx.Rollback()
 		logrus.Error(err)
 		return nil, err
 	}
 
+	client := &models.Client{
+		UserID:    user.ID,
+	}
+	if err := tx.Create(client).Error; err != nil {
+		tx.Rollback()
+		logrus.Error(err)
+		return nil, err
+	}
 	tx.Commit()
 	return client, nil
 }
@@ -54,18 +54,18 @@ func DeleteClient(id int64) error {
 		logrus.Error(err)
 		return err
 	}
-
-	err = db.Delete(models.Client{ID: id}).Error
-	if err != nil {
+	tx := db.Begin()
+	if err = tx.Delete(models.Client{ID: client.ID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
 
-	err = deleteUser(client.UserID)
-	if err != nil {
+	if err := tx.Delete(models.User{ID: client.UserID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
-
+	tx.Commit()
 	return nil
 }

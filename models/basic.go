@@ -78,7 +78,7 @@ type Master struct {
 	Name      string        `json:"name"`
 	UserID    int64         `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
 	User      User          `json:"user"`
-	AddressID int64         `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	AddressID sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
 	Address   Address       `json:"address"`
 	PhotoID   sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 	Photo     Photo         `json:"photo"`
@@ -97,10 +97,17 @@ type Client struct {
 	Name      string   `json:"name"`
 	UserID    int64    `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
 	User      User     `json:"user"`
-	PhotoID   int64    `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	PhotoID   sql.NullInt64    `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
 	Photo     Photo    `json:"photo"`
 	Home      bool     `json:"home_service"`
 	Favorites []Master `gorm:"many2many:client_favorites;" json:"favorites"`
+}
+// Admin model
+type Admin struct {
+	ID        int64    `json:"id"`
+	Name      string   `json:"name"`
+	UserID    int64    `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
+	User      User     `json:"user"`
 }
 
 // Material model
@@ -136,12 +143,14 @@ type ServiceType struct {
 
 // Salon model
 type Salon struct {
-	ID        int64   `json:"id"`
-	Name      string  `json:"name"`
-	AddressID int64   `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
-	Address   Address `json:"address"`
-	PhotoID   int64   `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
-	Photo     Photo   `json:"photo"`
+	ID        int64    `json:"id"`
+	Name      string   `json:"name"`
+	UserID    int64    `sql:"type:bigint, FOREIGN KEY (user_id) REFERENCES users(id)"`
+	User      User     `json:"user"`
+	AddressID sql.NullInt64         `sql:"type:bigint, FOREIGN KEY (address_id) REFERENCES addresses(id)"`
+	Address   Address       `json:"address"`
+	PhotoID   sql.NullInt64 `sql:"type:bigint, FOREIGN KEY (photo_id) REFERENCES photos(id)"`
+	Photo     Photo         `json:"photo"`
 	Stars     int     `json:"stars"`
 }
 

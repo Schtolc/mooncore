@@ -22,29 +22,26 @@ func GetMasterByID(id int64) (*models.Master, error) {
 }
 
 // CreateMaster creates new master
-func CreateMaster(username, email, password, name string, addressID int64) (*models.Master, error) {
+func CreateMaster(email, passwordHash string) (*models.Master, error) {
 	tx := db.Begin()
-
-	user, err := createUser(email, password, models.MasterRole, tx)
-	if err != nil {
+	user := &models.User{
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         models.MasterRole,
+	}
+	if err := tx.Create(user).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return nil, err
 	}
-
-	// TODO check addressID & photoID
-
 	master := &models.Master{
 		UserID:    user.ID,
-		Name:      name,
-		AddressID: addressID,
 	}
-
 	if err := tx.Create(master).Error; err != nil {
 		tx.Rollback()
 		logrus.Error(err)
 		return nil, err
 	}
-
 	tx.Commit()
 	return master, nil
 }
@@ -56,19 +53,19 @@ func DeleteMaster(id int64) error {
 		logrus.Error(err)
 		return err
 	}
-
-	err = db.Delete(models.Master{ID: id}).Error
-	if err != nil {
+	tx := db.Begin()
+	if err = tx.Delete(models.Master{ID: master.ID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
 
-	err = deleteUser(master.UserID)
-	if err != nil {
+	if err := tx.Delete(models.User{ID: master.UserID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
-
+	tx.Commit()
 	return nil
 }
 
@@ -82,15 +79,7 @@ func MasterCount() (int64, error) {
 	return count, nil
 }
 
-// Feed returns feed
-func Feed(offset, limit int) ([]*models.Master, error) {
-	var masters []*models.Master
-	if err := db.Limit(limit).Offset(offset).Preload("Photos").Find(&masters).Error; err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
-	return masters, nil
-}
+
 
 // MasterSigns returns master signs
 func MasterSigns(master *models.Master) ([]*models.Sign, error) {
