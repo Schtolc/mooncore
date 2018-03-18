@@ -7,8 +7,8 @@ import (
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/nbutton23/zxcvbn-go"
+	"github.com/badoux/checkmail"
 	"errors"
-	"fmt"
 )
 
 var signUp = &graphql.Field{
@@ -23,9 +23,21 @@ var signUp = &graphql.Field{
 		password := params.Args["password"].(string)
 		email := params.Args["email"].(string)
 		role := params.Args["role"].(int)
+
+		if err := checkmail.ValidateFormat(email);err != nil {
+			logrus.Error("Wrong format for email")
+			return nil, err
+		}
+		// if err := checkmail.ValidateHost(email); err != nil {
+		// 	logrus.Error(err)
+		// 	return nil, err
+		// }
+
 		result := zxcvbn.PasswordStrength(password, nil)
+		if result.CrackTimeDisplay == "instant"{
+			return nil, errors.New("Weak password")
+		}
 		passwordHash, err := utils.HashPassword(password)
-		fmt.Println(result)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
