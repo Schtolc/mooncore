@@ -1,12 +1,12 @@
 package dao
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
-	"github.com/sirupsen/logrus"
 	"github.com/graphql-go/graphql"
-	"errors"
-	"database/sql"
+	"github.com/sirupsen/logrus"
 )
 
 // GetMasterByID returns master by id
@@ -24,15 +24,15 @@ func GetMasterByID(id int64) (*models.Master, error) {
 	master.User = *user
 	return master, nil
 }
-
-func GetMasterFromContext(p graphql.ResolveParams)(*models.Master, error) {
+// GetMasterFromContext get master from context
+func GetMasterFromContext(p graphql.ResolveParams) (*models.Master, error) {
 	user := p.Context.Value(utils.GraphQLContextUserKey)
 	if user == nil {
 		return nil, errors.New("no user")
 	}
 	userModel := user.(*models.User)
 	master := &models.Master{}
-	if err := db.Where("user_id=?",userModel.ID).First(master).Error; err != nil {
+	if err := db.Where("user_id=?", userModel.ID).First(master).Error; err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func CreateMaster(email, passwordHash string) (*models.Master, error) {
 		return nil, err
 	}
 	master := &models.Master{
-		UserID:    user.ID,
+		UserID: user.ID,
 	}
 	if err := tx.Create(master).Error; err != nil {
 		tx.Rollback()
@@ -109,6 +109,7 @@ func MasterSigns(master *models.Master) ([]*models.Sign, error) {
 	return signs, nil
 }
 
+// EditMaster update master parameters
 func EditMaster(master *models.Master, name, photoPath string, lat, lon float64) (*models.Master, error) {
 	tx := db.Begin()
 	photo := &models.Photo{
@@ -139,9 +140,9 @@ func EditMaster(master *models.Master, name, photoPath string, lat, lon float64)
 		logrus.Error(err)
 		house = "Not found"
 	}
-	address := &models.Address {
-		Lat: lat,
-		Lon: lon,
+	address := &models.Address{
+		Lat:         lat,
+		Lon:         lon,
 		Description: house,
 	}
 	if master.AddressID.Valid {
@@ -151,7 +152,7 @@ func EditMaster(master *models.Master, name, photoPath string, lat, lon float64)
 			logrus.Error(err)
 			return nil, err
 		}
-		if err := tx.Where("address_id=?",address.ID).Delete(models.AddressMetro{}).Error; err != nil {
+		if err := tx.Where("address_id=?", address.ID).Delete(models.AddressMetro{}).Error; err != nil {
 			tx.Rollback()
 			logrus.Error(err)
 			return nil, err

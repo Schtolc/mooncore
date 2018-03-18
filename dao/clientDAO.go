@@ -36,7 +36,7 @@ func CreateClient(email, passwordHash string) (*models.Client, error) {
 	}
 
 	client := &models.Client{
-		UserID:    user.ID,
+		UserID: user.ID,
 	}
 	if err := tx.Create(client).Error; err != nil {
 		tx.Rollback()

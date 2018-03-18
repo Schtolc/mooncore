@@ -1,14 +1,15 @@
 package test
 
 import (
+	"fmt"
 	"github.com/Schtolc/mooncore/dao"
 	"github.com/Schtolc/mooncore/models"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"testing"
 	"strconv"
-	"fmt"
+	"testing"
 )
+
 func TestSignUpClient(t *testing.T) {
 	e := expect(t)
 
@@ -174,5 +175,5 @@ func TestSignInSalon(t *testing.T) {
 
 	root := e.POST(graphqlURL).WithBytes(query).WithHeader("Authorization", "Bearer "+token).
 		Expect().Status(http.StatusOK).JSON().Object().Value("data").Object().Value("viewer").Object()
-		root.ContainsKey("id").Value("id").Equal(strconv.Itoa(int(salon.ID)))
+	root.ContainsKey("id").Value("id").Equal(strconv.Itoa(int(salon.ID)))
 }

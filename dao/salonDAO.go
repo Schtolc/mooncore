@@ -1,4 +1,4 @@
-package dao;
+package dao
 
 import (
 	"github.com/Schtolc/mooncore/models"
@@ -35,7 +35,7 @@ func CreateSalon(email, passwordHash string) (*models.Salon, error) {
 		return nil, err
 	}
 	salon := &models.Salon{
-		UserID:    user.ID,
+		UserID: user.ID,
 	}
 	if err := tx.Create(salon).Error; err != nil {
 		tx.Rollback()

@@ -1,14 +1,14 @@
 package graphql
 
 import (
-	"github.com/graphql-go/graphql"
-	"github.com/sirupsen/logrus"
-	"github.com/Schtolc/mooncore/models"
-	"github.com/Schtolc/mooncore/dao"
-	"github.com/Schtolc/mooncore/utils"
-	"github.com/nbutton23/zxcvbn-go"
-	"github.com/badoux/checkmail"
 	"errors"
+	"github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
+	"github.com/badoux/checkmail"
+	"github.com/graphql-go/graphql"
+	"github.com/nbutton23/zxcvbn-go"
+	"github.com/sirupsen/logrus"
 	"strconv"
 )
 
@@ -25,7 +25,7 @@ var signUp = &graphql.Field{
 		email := params.Args["email"].(string)
 		role := params.Args["role"].(int)
 
-		if err := checkmail.ValidateFormat(email);err != nil {
+		if err := checkmail.ValidateFormat(email); err != nil {
 			logrus.Error("Wrong format for email")
 			return nil, err
 		}
@@ -35,7 +35,7 @@ var signUp = &graphql.Field{
 		// }
 
 		result := zxcvbn.PasswordStrength(password, nil)
-		if result.CrackTimeDisplay == "instant"{
+		if result.CrackTimeDisplay == "instant" {
 			return nil, errors.New("Weak password")
 		}
 		passwordHash, err := utils.HashPassword(password)
@@ -70,7 +70,7 @@ var signIn = &graphql.Field{
 		password := params.Args["password"].(string)
 		email := params.Args["email"].(string)
 
-		user, err := dao.GetUser(&models.User{ Email: email })
+		user, err := dao.GetUser(&models.User{Email: email})
 		if err != nil {
 			return nil, err
 		}
@@ -89,15 +89,14 @@ var signIn = &graphql.Field{
 	}),
 }
 
-
 var editMaster = &graphql.Field{
 	Type:        MasterObject, // nil if user not found
 	Description: "edit Master",
 	Args: graphql.FieldConfigArgument{
 		"name":  notNull(graphql.String),
 		"photo": notNull(graphql.String),
-		"lat": notNull(graphql.String),
-		"lon": notNull(graphql.String),
+		"lat":   notNull(graphql.String),
+		"lon":   notNull(graphql.String),
 	},
 	Resolve: resolveMiddleware(models.MasterRole, func(params graphql.ResolveParams) (interface{}, error) {
 		master, err := dao.GetMasterFromContext(params)
@@ -117,7 +116,7 @@ var editMaster = &graphql.Field{
 			logrus.Error(err)
 			return nil, err
 		}
-		newMaster, err := dao.EditMaster(master, name, photo, lat, lon);
+		newMaster, err := dao.EditMaster(master, name, photo, lat, lon)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
@@ -125,4 +124,3 @@ var editMaster = &graphql.Field{
 		return newMaster, nil
 	}),
 }
-

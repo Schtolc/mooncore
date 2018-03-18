@@ -58,7 +58,7 @@ func MasterPhotos(master *models.Master) ([]*models.Photo, error) {
 // UpdatePhoto  update photo
 func UpdatePhoto(id int64, path string, tags []int64) (*models.Photo, error) {
 	photo := &models.Photo{
-		ID: id,
+		ID:   id,
 		Path: path,
 		Tags: []models.Tag{},
 	}
@@ -69,5 +69,5 @@ func UpdatePhoto(id int64, path string, tags []int64) (*models.Photo, error) {
 	if err := db.Model(photo).Update(photo).Error; err != nil {
 		return nil, err
 	}
-	return photo, nil;
+	return photo, nil
 }

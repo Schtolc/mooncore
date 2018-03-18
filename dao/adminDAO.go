@@ -1,4 +1,4 @@
-package dao;
+package dao
 
 import (
 	"github.com/Schtolc/mooncore/models"
@@ -35,7 +35,7 @@ func CreateAdmin(email, passwordHash string) (*models.Admin, error) {
 		return nil, err
 	}
 	admin := &models.Admin{
-		UserID:    user.ID,
+		UserID: user.ID,
 	}
 	if err := tx.Create(admin).Error; err != nil {
 		tx.Rollback()

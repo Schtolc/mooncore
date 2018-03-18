@@ -1,13 +1,13 @@
 package graphql
 
 import (
+	"errors"
 	"github.com/Schtolc/mooncore/dao"
+	"github.com/Schtolc/mooncore/dependencies"
+	"github.com/Schtolc/mooncore/models"
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"strconv"
-	"errors"
-	"github.com/Schtolc/mooncore/dependencies"
-	"github.com/Schtolc/mooncore/models"
 )
 
 var master = &graphql.Field{
@@ -25,17 +25,17 @@ var master = &graphql.Field{
 	}),
 }
 
-// var feed = &graphql.Field{
-// 	Type:        graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
-// 	Description: "feed",
-// 	Args: graphql.FieldConfigArgument{
-// 		"offset": notNull(graphql.Int),
-// 		"limit":  notNull(graphql.Int),
-// 	},
-// 	Resolve: resolveMiddleware(models.AnonRole, func(p graphql.ResolveParams) (interface{}, error) {
-// 		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
-// 	}),
-// }
+var feed = &graphql.Field{
+	Type:        graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(MasterObject))),
+	Description: "feed",
+	Args: graphql.FieldConfigArgument{
+		"offset": notNull(graphql.Int),
+		"limit":  notNull(graphql.Int),
+	},
+	Resolve: resolveMiddleware(models.AnonRole, func(p graphql.ResolveParams) (interface{}, error) {
+		return dao.Feed(p.Args["offset"].(int), p.Args["limit"].(int))
+	}),
+}
 
 var viewer = &graphql.Field{
 	Type: UserType,
@@ -53,10 +53,9 @@ var viewer = &graphql.Field{
 			salon := models.Salon{}
 			db.Where("user_id = ?", user.ID).First(&salon)
 			return &salon, nil
-		} else {
-			err := errors.New("this Role is not available to viewer")
-			return nil, err
 		}
+		err := errors.New("this Role is not available to viewer")
+		return nil, err	
 	}),
 }
 

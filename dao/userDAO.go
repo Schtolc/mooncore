@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 // GetUser from database
 func GetUser(userParams *models.User) (*models.User, error) {
 	user := &models.User{}
@@ -39,4 +38,3 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 	return user, nil
 }
-

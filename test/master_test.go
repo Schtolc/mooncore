@@ -1,12 +1,14 @@
 package test
+
 import (
-	"testing"
 	"fmt"
 	"github.com/Schtolc/mooncore/dao"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"testing"
 )
+
 func TestEditMaster(t *testing.T) {
 	e := expect(t)
 
@@ -29,8 +31,8 @@ func TestEditMaster(t *testing.T) {
 
 	name := randString()
 	photo := randString()
-	latString := fmt.Sprintf("%f",rand.Float64())
-	lonString := fmt.Sprintf("%f",rand.Float64())
+	latString := fmt.Sprintf("%f", rand.Float64())
+	lonString := fmt.Sprintf("%f", rand.Float64())
 	lat, _ := strconv.ParseFloat(latString, 64)
 	lon, _ := strconv.ParseFloat(lonString, 64)
 	reqParams := fmt.Sprintf("name:\"%s\", photo:\"%s\", lat:\"%s\", lon:\"%s\"", name, photo, latString, lonString)
