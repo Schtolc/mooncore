@@ -5,7 +5,6 @@ import (
 	"github.com/Schtolc/mooncore/utils"
 	"github.com/graphql-go/graphql"
 	"strconv"
-
 	"errors"
 	"github.com/Schtolc/mooncore/dependencies"
 	"github.com/Schtolc/mooncore/models"
@@ -48,8 +47,12 @@ var viewer = &graphql.Field{
 			return &master, nil
 		} else if user.Role == models.ClientRole {
 			client := models.Client{}
-			db.First(&client).Where(client.UserID == user.ID)
+			db.Where("user_id = ?", user.ID).First(&client)
 			return &client, nil
+		} else if user.Role == models.SalonRole {
+			salon := models.Salon{}
+			db.Where("user_id = ?", user.ID).First(&salon)
+			return &salon, nil
 		} else {
 			err := errors.New("this Role is not available to viewer")
 			return nil, err

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Schtolc/mooncore/dependencies"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/gavv/httpexpect"
 	"math/rand"
 	"net/http"
@@ -19,6 +20,17 @@ var (
 
 type graphQLQuery struct {
 	Query string `json:"query"`
+}
+
+func getEmail() string {
+	result := randString() + "@mail.ru"
+	return result
+}
+
+func getPassword() (string, string) {
+	password := randString()
+	passwordHash, _ := utils.HashPassword(password)
+	return password, passwordHash
 }
 
 func randString() string {
