@@ -54,7 +54,7 @@ func UploadImage(c echo.Context) error {
 		return utils.SendResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	photo, err := dao.CreatePhoto(filename, nil, nil)
+	photo, err := dao.CreatePhoto(filename, nil)
 	if err != nil {
 		logrus.Println(err)
 		return utils.InternalServerError(c)

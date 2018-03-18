@@ -3,7 +3,6 @@ package dao
 import (
 	"github.com/Schtolc/mooncore/models"
 	"github.com/sirupsen/logrus"
-	"github.com/jinzhu/gorm"
 )
 
 // GetPhotoByID returns photo by id
@@ -19,23 +18,19 @@ func GetPhotoByID(id int64) (*models.Photo, error) {
 }
 
 // CreatePhoto creates new photo
-func CreatePhoto(path string, tags []int64, tx *gorm.DB) (*models.Photo, error) {
-	if tx == nil { tx = db }
+func CreatePhoto(path string, tags []int64) (*models.Photo, error) {
 	photo := &models.Photo{
 		Path: path,
 		Tags: []models.Tag{},
 	}
-
-	if err := tx.Where("id in (?)", tags).Find(&photo.Tags).Error; err != nil {
+	if err := db.Where("id in (?)", tags).Find(&photo.Tags).Error; err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-
-	if err := tx.Create(photo).Error; err != nil {
+	if err := db.Create(photo).Error; err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-
 	return photo, nil
 }
 
@@ -61,19 +56,18 @@ func MasterPhotos(master *models.Master) ([]*models.Photo, error) {
 }
 
 // UpdatePhoto  update photo
-func UpdatePhoto(id int64, path string, tags []int64, tx *gorm.DB) error {
-	if tx == nil { tx = db }
+func UpdatePhoto(id int64, path string, tags []int64) (*models.Photo, error) {
 	photo := &models.Photo{
 		ID: id,
 		Path: path,
 		Tags: []models.Tag{},
 	}
-	if err := tx.Where("id in (?)", tags).Find(&photo.Tags).Error; err != nil {
+	if err := db.Where("id in (?)", tags).Find(&photo.Tags).Error; err != nil {
 		logrus.Error(err)
-		return err
+		return nil, err
 	}
-	if err := tx.Model(photo).Update(photo).Error; err != nil {
-		return err
+	if err := db.Model(photo).Update(photo).Error; err != nil {
+		return nil, err
 	}
-	return nil;
+	return photo, nil;
 }
