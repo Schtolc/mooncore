@@ -2,7 +2,11 @@ package dao
 
 import (
 	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/graphql-go/graphql"
+	"github.com/jinzhu/gorm"
+	"errors"
 )
 
 // GetMasterByID returns master by id
@@ -18,6 +22,20 @@ func GetMasterByID(id int64) (*models.Master, error) {
 		return nil, dbc.Error
 	}
 	master.User = *user
+	return master, nil
+}
+
+func GetMasterFromContext(p graphql.ResolveParams)(*models.Master, error) {
+	user := p.Context.Value(utils.GraphQLContextUserKey)
+	if user == nil {
+		return nil, errors.New("no user")
+	}
+	userModel := user.(*models.User)
+	master := &models.Master{}
+	if err := db.Where("user_id=?",userModel.ID).First(master).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 	return master, nil
 }
 
@@ -91,4 +109,13 @@ func MasterSigns(master *models.Master) ([]*models.Sign, error) {
 	}
 
 	return signs, nil
+}
+
+func UpdateMaster(master *models.Master, tx *gorm.DB) error {
+	if tx == nil { tx = db }
+	if err := tx.Model(&models.Master{}).Updates(master).Error; err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
 }

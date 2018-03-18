@@ -28,7 +28,8 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
 		"signUp": signUp, // tested
-		"signIn": signIn,       // tested
+		"signIn": signIn, // tested
+		"editMaster": editMaster, // tested
 	},
 })
 

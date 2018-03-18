@@ -5,6 +5,7 @@ import (
 	"github.com/Schtolc/mooncore/models"
 	"github.com/buger/jsonparser"
 	"github.com/sirupsen/logrus"
+	"github.com/jinzhu/gorm"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -33,40 +34,58 @@ func GetAddressesInArea(lat1, lon1, lat2, lon2 float64) ([]models.Address, error
 }
 
 // CreateAddress creates new address
-func CreateAddress(lat, lon float64) (*models.Address, error) {
+func CreateAddress(lat, lon float64, tx *gorm.DB) (*models.Address, error) {
 	house, err := getHouse(lat, lon)
 	if err != nil {
 		logrus.Error(err)
 		house = "Not found"
 	}
-
-	tr := db.Begin()
-
 	address := &models.Address{
 		Lat:         lat,
 		Lon:         lon,
 		Description: house,
 	}
-	if err := tr.Create(address).Error; err != nil {
+	if err := tx.Create(address).Error; err != nil {
 		logrus.Error(err)
-		tr.Rollback()
 		return nil, err
 	}
-
 	metro, err := getMetro(lat, lon)
 	for _, m := range metro {
 		m.AddressID = address.ID
 
-		if err := tr.Create(m).Error; err != nil {
+		if err := tx.Create(m).Error; err != nil {
 			logrus.Error(err)
-			tr.Rollback()
 			return nil, err
 		}
 	}
-
-	tr.Commit()
-
 	return address, nil
+}
+// UpdateAddress old address
+func UpdateAddress(id int64, lat, lon float64, tx *gorm.DB) error {
+	house, err := getHouse(lat, lon)
+	if err != nil {
+		logrus.Error(err)
+		house = "Not found"
+	}
+	address := &models.Address{
+		ID:          id,
+		Lat:         lat,
+		Lon:         lon,
+		Description: house,
+	}
+	if err := tx.Model(&models.Address{}).Update(address).Error; err != nil {
+		logrus.Error(err)
+		return err
+	}
+	metro, err := getMetro(lat, lon)
+	for _, m := range metro {
+		m.AddressID = address.ID
+		if err := tx.Model(&models.AddressMetro{}).Update(m).Error; err != nil {
+			logrus.Error(err)
+			return err
+		}
+	}
+	return nil
 }
 
 // DeleteAddress deletes address

@@ -9,6 +9,8 @@ import (
 	"github.com/nbutton23/zxcvbn-go"
 	"github.com/badoux/checkmail"
 	"errors"
+	"database/sql"
+	"strconv"
 )
 
 var signUp = &graphql.Field{
@@ -87,3 +89,81 @@ var signIn = &graphql.Field{
 		return &models.Token{Token: tokenString}, nil
 	}),
 }
+
+
+var editMaster = &graphql.Field{
+	Type:        MasterObject, // nil if user not found
+	Description: "edit Master",
+	Args: graphql.FieldConfigArgument{
+		"name":  notNull(graphql.String),
+		"photo": notNull(graphql.String),
+		"lat": notNull(graphql.String),
+		"lon": notNull(graphql.String),
+	},
+	Resolve: resolveMiddleware(models.MasterRole, func(params graphql.ResolveParams) (interface{}, error) {
+		master, err := dao.GetMasterFromContext(params)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		tx := db.Begin()
+		master.Name = params.Args["name"].(string)
+		if master.PhotoID.Valid {
+			if err := dao.UpdatePhoto(master.PhotoID.Int64, params.Args["photo"].(string), []int64{}, tx); err != nil {
+				tx.Rollback()
+				logrus.Error(err)
+				return nil, err
+			}
+		} else {
+			photo, err := dao.CreatePhoto(params.Args["photo"].(string), []int64{}, tx);
+			if err != nil {
+				tx.Rollback()
+				logrus.Error(err)
+				return nil, err
+			}
+			master.PhotoID = sql.NullInt64{
+				Int64: photo.ID,
+				Valid: true,
+			}
+		}
+		lat, err := strconv.ParseFloat(params.Args["lat"].(string), 64)
+		if err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+
+		lon, err := strconv.ParseFloat(params.Args["lon"].(string), 64)
+		if err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+		if master.AddressID.Valid {
+			if err := dao.UpdateAddress(master.AddressID.Int64, lat, lon, tx); err != nil {
+				tx.Rollback()
+				logrus.Error(err)
+				return nil, err
+			}
+		} else {
+			address, err := dao.CreateAddress(lat, lon, tx)
+			if err != nil {
+				tx.Rollback()
+				logrus.Error(err)
+				return nil, err
+			}
+			master.AddressID = sql.NullInt64{
+				Int64: address.ID,
+				Valid: true,
+			}
+		}
+		if err := dao.UpdateMaster(master, tx); err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+		tx.Commit()
+		return master, nil
+	}),
+}
+
