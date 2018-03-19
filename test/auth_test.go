@@ -14,7 +14,7 @@ func TestSignUpClient(t *testing.T) {
 	e := expect(t)
 
 	email := getEmail()
-	password := randString()
+	password := randString(70)
 
 	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", role: %d", email, password, models.ClientRole)
 	respParams := "... on Client{ id }"
@@ -40,7 +40,7 @@ func TestSignUpMaster(t *testing.T) {
 	e := expect(t)
 
 	email := getEmail()
-	password := randString()
+	password := randString(70)
 
 	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", role: %d", email, password, models.MasterRole)
 	respParams := "... on Master{ id }"
@@ -66,7 +66,7 @@ func TestSignUpSalon(t *testing.T) {
 	e := expect(t)
 
 	email := getEmail()
-	password := randString()
+	password := randString(70)
 
 	reqParams := fmt.Sprintf("email:\"%s\", password:\"%s\", role: %d", email, password, models.SalonRole)
 	respParams := "... on Salon{ id }"

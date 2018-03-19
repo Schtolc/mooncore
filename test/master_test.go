@@ -29,8 +29,8 @@ func TestEditMaster(t *testing.T) {
 		Status(http.StatusOK).JSON().Object().Value("data").
 		Object().Value("signIn").Object().ContainsKey("token").Value("token").String().Raw()
 
-	name := randString()
-	photo := randString()
+	name := randString(10)
+	photo := randString(10)
 	latString := fmt.Sprintf("%f", rand.Float64())
 	lonString := fmt.Sprintf("%f", rand.Float64())
 	lat, _ := strconv.ParseFloat(latString, 64)

@@ -23,20 +23,19 @@ type graphQLQuery struct {
 }
 
 func getEmail() string {
-	result := randString() + "@mail.ru"
+	result := randString(10) + "@mail.ru"
 	return result
 }
 
 func getPassword() (string, string) {
-	password := randString()
+	password := randString(60)
 	passwordHash, _ := utils.HashPassword(password)
 	return password, passwordHash
 }
 
-func randString() string {
+func randString(size int) string {
 	var result string
-	l := rand.Int() % 50
-	for i := 0; i < l; i++ {
+	for i := 0; i < size; i++ {
 		result += string(rand.Int()%('z'-'a') + 'a')
 	}
 	return result

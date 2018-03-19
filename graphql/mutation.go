@@ -36,7 +36,9 @@ var signUp = &graphql.Field{
 
 		result := zxcvbn.PasswordStrength(password, nil)
 		if result.CrackTimeDisplay == "instant" {
-			return nil, errors.New("Weak password")
+			err := errors.New("Weak password")
+			logrus.Error(err)
+			return nil, err
 		}
 		passwordHash, err := utils.HashPassword(password)
 		if err != nil {
