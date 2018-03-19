@@ -55,7 +55,7 @@ var viewer = &graphql.Field{
 			return &salon, nil
 		}
 		err := errors.New("this Role is not available to viewer")
-		return nil, err	
+		return nil, err
 	}),
 }
 

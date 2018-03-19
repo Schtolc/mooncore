@@ -24,6 +24,7 @@ func GetMasterByID(id int64) (*models.Master, error) {
 	master.User = *user
 	return master, nil
 }
+
 // GetMasterFromContext get master from context
 func GetMasterFromContext(p graphql.ResolveParams) (*models.Master, error) {
 	user := p.Context.Value(utils.GraphQLContextUserKey)
