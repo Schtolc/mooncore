@@ -7,17 +7,11 @@ import (
 
 // GetClientByID returns client by id
 func GetClientByID(id int64) (*models.Client, error) {
-	user := &models.User{}
 	client := &models.Client{}
-	if err := db.First(client, id).Error; err != nil {
-		logrus.Error(err)
-		return nil, nil
-	}
-	if err := db.First(user, client.UserID).Error; err != nil {
+	if err := db.Preload("User").First(client, id).Error; err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
-	client.User = *user
 	return client, nil
 }
 

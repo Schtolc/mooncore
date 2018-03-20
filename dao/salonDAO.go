@@ -7,17 +7,11 @@ import (
 
 // GetSalonByID returns Salon by id
 func GetSalonByID(id int64) (*models.Salon, error) {
-	user := &models.User{}
 	salon := &models.Salon{}
-	if dbc := db.First(salon, id); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, nil
+	if err := db.Preload("User").First(salon, id).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
 	}
-	if dbc := db.First(user, salon.UserID); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
-	}
-	salon.User = *user
 	return salon, nil
 }
 

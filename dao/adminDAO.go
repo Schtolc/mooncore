@@ -7,17 +7,11 @@ import (
 
 // GetAdminByID returns Admin by id
 func GetAdminByID(id int64) (*models.Admin, error) {
-	user := &models.User{}
 	admin := &models.Admin{}
-	if dbc := db.First(admin, id); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, nil
+	if err := db.Preload("User").First(admin, id).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
 	}
-	if dbc := db.First(user, admin.UserID); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
-	}
-	admin.User = *user
 	return admin, nil
 }
 

@@ -131,11 +131,14 @@ var MasterObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"name": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
+			Type: graphql.String,
 		},
 		"address": &graphql.Field{
-			Type: graphql.NewNonNull(AddressObject),
+			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if !p.Source.(*models.Master).AddressID.Valid {
+					return nil, nil
+				}
 				return dao.GetAddressByID(p.Source.(*models.Master).AddressID.Int64)
 			},
 		},
@@ -190,11 +193,14 @@ var SalonObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"name": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
+			Type: graphql.String,
 		},
 		"address": &graphql.Field{
-			Type: graphql.NewNonNull(AddressObject),
+			Type: AddressObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if !p.Source.(*models.Salon).AddressID.Valid {
+					return nil, nil
+				}
 				return dao.GetAddressByID(p.Source.(*models.Salon).AddressID.Int64)
 			},
 		},
@@ -234,7 +240,7 @@ var AdminObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"name": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
+			Type: graphql.String,
 		},
 	},
 	IsTypeOf: func(p graphql.IsTypeOfParams) bool {
@@ -257,11 +263,14 @@ var ClientObject = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"name": &graphql.Field{
-			Type: graphql.NewNonNull(graphql.String),
+			Type: graphql.String,
 		},
 		"avatar": &graphql.Field{
-			Type: graphql.NewNonNull(PhotoObject),
+			Type: PhotoObject,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if !p.Source.(*models.Client).PhotoID.Valid {
+					return nil, nil
+				}
 				return dao.GetPhotoByID(p.Source.(*models.Client).PhotoID.Int64)
 			},
 		},

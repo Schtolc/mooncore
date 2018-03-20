@@ -11,17 +11,11 @@ import (
 
 // GetMasterByID returns master by id
 func GetMasterByID(id int64) (*models.Master, error) {
-	user := &models.User{}
 	master := &models.Master{}
-	if dbc := db.First(master, id); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, nil
+	if err := db.Preload("User").First(master, id).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
 	}
-	if dbc := db.First(user, master.UserID); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
-	}
-	master.User = *user
 	return master, nil
 }
 
