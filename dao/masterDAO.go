@@ -1,50 +1,60 @@
 package dao
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/Schtolc/mooncore/models"
+	"github.com/Schtolc/mooncore/utils"
+	"github.com/graphql-go/graphql"
 	"github.com/sirupsen/logrus"
 )
 
 // GetMasterByID returns master by id
 func GetMasterByID(id int64) (*models.Master, error) {
-	user := &models.User{}
 	master := &models.Master{}
-	if dbc := db.First(master, id); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, nil
+	if err := db.Preload("User").First(master, id).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
 	}
-	if dbc := db.First(user, master.UserID); dbc.Error != nil {
-		logrus.Error(dbc.Error)
-		return nil, dbc.Error
+	return master, nil
+}
+
+// GetMasterFromContext get master from context
+func GetMasterFromContext(p graphql.ResolveParams) (*models.Master, error) {
+	user := p.Context.Value(utils.GraphQLContextUserKey)
+	if user == nil {
+		return nil, errors.New("no user")
 	}
-	master.User = *user
+	userModel := user.(*models.User)
+	master := &models.Master{}
+	if err := db.Where("user_id=?", userModel.ID).First(master).Error; err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 	return master, nil
 }
 
 // CreateMaster creates new master
-func CreateMaster(username, email, password, name string, addressID int64) (*models.Master, error) {
+func CreateMaster(email, passwordHash string) (*models.Master, error) {
 	tx := db.Begin()
-
-	user, err := createUser(email, password, models.MasterRole, tx)
-	if err != nil {
+	user := &models.User{
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         models.MasterRole,
+	}
+	if err := tx.Create(user).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return nil, err
 	}
-
-	// TODO check addressID & photoID
-
 	master := &models.Master{
-		UserID:    user.ID,
-		Name:      name,
-		AddressID: addressID,
+		UserID: user.ID,
 	}
-
 	if err := tx.Create(master).Error; err != nil {
 		tx.Rollback()
 		logrus.Error(err)
 		return nil, err
 	}
-
 	tx.Commit()
 	return master, nil
 }
@@ -56,19 +66,19 @@ func DeleteMaster(id int64) error {
 		logrus.Error(err)
 		return err
 	}
-
-	err = db.Delete(models.Master{ID: id}).Error
-	if err != nil {
+	tx := db.Begin()
+	if err = tx.Delete(models.Master{ID: master.ID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
 
-	err = deleteUser(master.UserID)
-	if err != nil {
+	if err := tx.Delete(models.User{ID: master.UserID}).Error; err != nil {
+		tx.Rollback()
 		logrus.Error(err)
 		return err
 	}
-
+	tx.Commit()
 	return nil
 }
 
@@ -82,16 +92,6 @@ func MasterCount() (int64, error) {
 	return count, nil
 }
 
-// Feed returns feed
-func Feed(offset, limit int) ([]*models.Master, error) {
-	var masters []*models.Master
-	if err := db.Limit(limit).Offset(offset).Preload("Photos").Find(&masters).Error; err != nil {
-		logrus.Error(err)
-		return nil, err
-	}
-	return masters, nil
-}
-
 // MasterSigns returns master signs
 func MasterSigns(master *models.Master) ([]*models.Sign, error) {
 	var signs []*models.Sign
@@ -102,4 +102,82 @@ func MasterSigns(master *models.Master) ([]*models.Sign, error) {
 	}
 
 	return signs, nil
+}
+
+// EditMaster update master parameters
+func EditMaster(master *models.Master, name, photoPath string, lat, lon float64) (*models.Master, error) {
+	tx := db.Begin()
+	photo := &models.Photo{
+		Path: photoPath,
+		Tags: []models.Tag{},
+	}
+	if master.PhotoID.Valid {
+		photo.ID = master.PhotoID.Int64
+		if err := tx.Model(photo).Update(photo).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+	} else {
+		if err := tx.Create(photo).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+		master.PhotoID = sql.NullInt64{
+			Int64: photo.ID,
+			Valid: true,
+		}
+	}
+
+	house, err := getHouse(lat, lon)
+	if err != nil {
+		logrus.Error(err)
+		house = "Not found"
+	}
+	address := &models.Address{
+		Lat:         lat,
+		Lon:         lon,
+		Description: house,
+	}
+	if master.AddressID.Valid {
+		address.ID = master.AddressID.Int64
+		if err := tx.Model(&models.Address{}).Update(address).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+		if err := tx.Where("address_id=?", address.ID).Delete(models.AddressMetro{}).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+	} else {
+		if err := tx.Create(address).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+		master.AddressID = sql.NullInt64{
+			Int64: address.ID,
+			Valid: true,
+		}
+	}
+	metroArr, err := getMetro(lat, lon)
+	for _, metro := range metroArr {
+		metro.AddressID = address.ID
+		if err := tx.Create(metro).Error; err != nil {
+			tx.Rollback()
+			logrus.Error(err)
+			return nil, err
+		}
+	}
+	master.Name = name
+	if err := tx.Model(&models.Master{}).Updates(master).Error; err != nil {
+		tx.Rollback()
+		logrus.Error(err)
+		return nil, err
+	}
+	tx.Commit()
+	return master, nil
 }

@@ -32,43 +32,6 @@ func GetAddressesInArea(lat1, lon1, lat2, lon2 float64) ([]models.Address, error
 	return addresses, nil
 }
 
-// CreateAddress creates new address
-func CreateAddress(lat, lon float64) (*models.Address, error) {
-	house, err := getHouse(lat, lon)
-	if err != nil {
-		logrus.Error(err)
-		house = "Not found"
-	}
-
-	tr := db.Begin()
-
-	address := &models.Address{
-		Lat:         lat,
-		Lon:         lon,
-		Description: house,
-	}
-	if err := tr.Create(address).Error; err != nil {
-		logrus.Error(err)
-		tr.Rollback()
-		return nil, err
-	}
-
-	metro, err := getMetro(lat, lon)
-	for _, m := range metro {
-		m.AddressID = address.ID
-
-		if err := tr.Create(m).Error; err != nil {
-			logrus.Error(err)
-			tr.Rollback()
-			return nil, err
-		}
-	}
-
-	tr.Commit()
-
-	return address, nil
-}
-
 // DeleteAddress deletes address
 func DeleteAddress(id int64) error {
 	if err := db.Delete(models.Address{ID: id}).Error; err != nil {
